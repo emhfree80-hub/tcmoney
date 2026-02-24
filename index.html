@@ -196,11 +196,12 @@
 
         <div class="salary-col">
             <h4>📉 應扣項目 (減項) <button class="btn-auto" onclick="autoCalcDeductions()">🤖 自動估算</button></h4>
+            
             <div class="form-group">
                 <label style="color:#1565C0;">申報投保基準：</label>
                 <input type="number" id="d_ins_base" value="45800">
             </div>
-            <p style="font-size: 11px; color: #888; margin: 0 0 10px 115px;">(依公司實際申報之投保薪資級距填寫)</p>
+            <p style="font-size: 11px; color: #888; margin: 0 0 10px 115px;">(按下自動估算，系統會自動查表帶入)</p>
 
             <div class="form-group"><label>所得稅款：</label><input type="number" id="d_tax" value="0"></div>
             <div class="form-group"><label>勞保費：</label><input type="number" id="d_labor" value="0"></div>
@@ -375,7 +376,7 @@
         }
     };
 
-    // 💡 內建勞保與健保(勞退)投保薪資級距表
+    // 💡 內建官方投保薪資級距表
     const laborBrackets = [27470, 27600, 28800, 30300, 31800, 33300, 34800, 36300, 38200, 40100, 42000, 43900, 45800];
     const healthPensionBrackets = [27470, 27600, 28800, 30300, 31800, 33300, 34800, 36300, 38200, 40100, 42000, 43900, 45800, 48200, 50600, 53000, 55400, 57800, 60800, 63800, 66800, 69800, 72800, 76500, 80200, 83900, 87600, 92100, 96600, 101100, 105600, 110100, 115500];
 
@@ -429,27 +430,105 @@
         if(currentVal) sel.value = currentVal;
     }
 
+    // 💡 全新進化：全自動查表估算系統
     function autoCalcDeductions() {
-        const base = parseInt(document.getElementById('s_base').value) || 0;
-        const declareBase = parseInt(document.getElementById('d_ins_base').value) || 0;
+        if(!confirm('💡 系統將根據您目前的「固定本薪」與「當月班表加班費」自動推算。\n\n建議您先產生月曆並填好當月加班後，再來按「自動估算」，抓出的級距會最準確喔！\n\n是否繼續？')) return;
         
-        if(declareBase === 0) return alert("請先填寫「申報投保基準」金額！");
+        const v_base = parseInt(document.getElementById('s_base').value) || 0;
+        const v_supervisor = parseInt(document.getElementById('s_supervisor').value) || 0;
+        const v_position = parseInt(document.getElementById('s_position').value) || 0;
+        const v_tcm = parseInt(document.getElementById('s_tcm').value) || 0;
+        const v_safety = parseInt(document.getElementById('s_safety').value) || 0;
+        const v_transport = parseInt(document.getElementById('s_transport').value) || 0;
+        const v_business = parseInt(document.getElementById('s_business').value) || 0;
+        const v_branch = parseInt(document.getElementById('s_branch').value) || 0;
+        const v_meal = parseInt(document.getElementById('s_meal').value) || 0;
+        const v_other_add = parseInt(document.getElementById('s_other_val').value) || 0;
         
-        // 💡 自動查詢級距並計算
-        let l_bracket = getLaborBracket(declareBase);
-        let hp_bracket = getHealthPensionBracket(declareBase);
+        const fixedSalaryBase = v_base + v_supervisor + v_position + v_tcm + v_safety + v_transport + v_business + v_branch + v_meal;
+        const hourlyRate = fixedSalaryBase / 240;
+
+        let totalShiftAllowance = 0;
+        let totalOtPay = 0;
+
+        const shiftType = document.getElementById('shiftType').value;
+        const prevMonthShiftDays = parseInt(document.getElementById('prevMonthShiftDays').value) || 0;
+        const s_ot_company_hours = parseFloat(document.getElementById('s_ot_company_hours').value) || 0;
+
+        let currentShiftRate = 0, prevShiftRate = 0;
+        let OT_multiplier_rest = 0, OT_multiplier_national = 0;
+
+        if (shiftType === 'normal') {
+            OT_multiplier_rest = 38 / 3;
+            OT_multiplier_national = 8;
+        } else {
+            currentShiftRate = shiftType === 'day' ? 100 : 200;
+            prevShiftRate = shiftType === 'day' ? 200 : 100;
+            OT_multiplier_rest = 18.04;
+            OT_multiplier_national = 8 + (4/3)*2;
+        }
+
+        let currentMonthShiftDays = 0;
+        const statutoryHolidays = parseDateString(document.getElementById('statutoryHolidays').value);
+        const year = parseInt(document.getElementById('year').value);
+        const month = parseInt(document.getElementById('month').value);
+        const internalHolidays = taiwanHolidays[year]?.[month] || {};
+        const userExemptMap = parseHolidayMap(document.getElementById('exemptDays').value);
+
+        // 掃描月曆上的加班與輪班狀況 (排除業主款項)
+        const cells = document.querySelectorAll('.cal-cell[data-day]');
+        cells.forEach(cell => {
+            let day = parseInt(cell.getAttribute('data-day'));
+            let isWorkDay = cell.getAttribute('data-type') === 'work';
+            let action = cell.querySelector('.action-select').value;
+            let isShiftRange = (day >= 1 && day <= 20);
+            let isStatutory = statutoryHolidays.includes(day);
+            let isExempt = userExemptMap.hasOwnProperty(day) || !!internalHolidays[day];
+
+            if (isWorkDay) {
+                let isAttended = true;
+                if (["事假", "病假", "生理假", "換休假", "公假", "特休假", "婚假", "喪假"].includes(action)) {
+                    isAttended = false;
+                }
+                if (isAttended && isShiftRange && shiftType !== 'normal') currentMonthShiftDays++;
+            } else {
+                if (action === "帆宣換休") {
+                    if (isShiftRange && shiftType !== 'normal') currentMonthShiftDays++;
+                } else if (action === "帆宣換錢") {
+                    if (isExempt || isStatutory) {
+                        totalOtPay += hourlyRate * OT_multiplier_national;
+                    } else {
+                        totalOtPay += hourlyRate * OT_multiplier_rest;
+                    }
+                    if (isShiftRange && shiftType !== 'normal') currentMonthShiftDays++;
+                }
+            }
+        });
+
+        if (shiftType !== 'normal') {
+            totalShiftAllowance = (prevMonthShiftDays * prevShiftRate) + (currentMonthShiftDays * currentShiftRate);
+        }
+
+        totalOtPay += (s_ot_company_hours * hourlyRate * 1.34);
         
-        // 勞保：級距 * 12.5% * 20%
+        // 算出預估當月應發總額 (不含 KPI 與業主加班)
+        let estimatedGross = fixedSalaryBase + v_other_add + totalShiftAllowance + totalOtPay;
+
+        // 查表得級距
+        let l_bracket = getLaborBracket(estimatedGross);
+        let hp_bracket = getHealthPensionBracket(estimatedGross);
+
+        // 將健保/勞退級距填入 UI (勞保最高只到45800，通常填較高者)
+        document.getElementById('d_ins_base').value = hp_bracket; 
+
+        // 自動扣款計算
         document.getElementById('d_labor').value = Math.round(l_bracket * 0.125 * 0.2);
-        // 健保：級距 * 5.17% * 30%
         document.getElementById('d_health').value = Math.round(hp_bracket * 0.0517 * 0.3);
-        // 勞退：級距 * 自提%
         const pRate = parseFloat(document.getElementById('pension_rate').value) || 0;
         document.getElementById('d_pension').value = Math.round(hp_bracket * (pRate / 100));
-        // 福利金：本薪 * 0.5%
-        document.getElementById('d_welfare').value = Math.round(base * 0.005);
-        
-        alert(`自動估算完成！\n\n已為您套用官方級距表：\n📍 勞保判定級距：${l_bracket.toLocaleString()} 元\n📍 健保/勞退判定級距：${hp_bracket.toLocaleString()} 元`);
+        document.getElementById('d_welfare').value = Math.round(v_base * 0.005);
+
+        alert(`✅ 自動估算完成！\n\n系統推算本月應發總額約為：${Math.round(estimatedGross).toLocaleString()} 元\n(已自動排除業主款項)\n\n已為您帶入官方對應級距：\n📍 勞保判定級距：${l_bracket.toLocaleString()} 元\n📍 健保/勞退判定級距：${hp_bracket.toLocaleString()} 元\n\n(註：HR通常採近三個月平均申報，若帶出數字與您實際薪資單不同，可手動微調申報投保基準)`);
     }
 
     function updateRecordDropdown() {
@@ -490,7 +569,7 @@
             s_ot_company_hours: document.getElementById('s_ot_company_hours').value, 
             s_ot_owner_hours: document.getElementById('s_ot_owner_hours').value,     
             
-            d_ins_base: document.getElementById('d_ins_base').value, // 儲存投保基準
+            d_ins_base: document.getElementById('d_ins_base').value, 
             d_tax: document.getElementById('d_tax').value, d_labor: document.getElementById('d_labor').value,
             d_health: document.getElementById('d_health').value, d_supp: document.getElementById('d_supp').value,
             d_welfare: document.getElementById('d_welfare').value, d_dorm: document.getElementById('d_dorm').value,
