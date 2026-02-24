@@ -182,6 +182,10 @@
             <div class="form-group"><label>分公司薪資：</label><input type="number" id="s_branch" value="0"></div>
             <div class="form-group"><label>伙食津貼：</label><input type="number" id="s_meal" value="3000"></div>
             <div class="form-group"><input type="text" id="s_other_name" class="remark" value="其它加項"><input type="number" id="s_other_val" value="0"></div>
+            
+            <div class="form-group"><label>零星帆加(時)：</label><input type="number" id="s_ot_company_hours" value="0" step="0.5" placeholder="0"></div>
+            <div class="form-group"><label>零星業加(時)：</label><input type="number" id="s_ot_owner_hours" value="0" step="0.5" placeholder="0"></div>
+            
             <div class="divider"></div>
             <div class="form-group"><label>勤務津貼：</label><span class="readonly-text">常日班不計，輪班自動計</span></div>
         </div>
@@ -199,6 +203,9 @@
                 <input type="number" id="d_pension" value="0">
             </div>
             <div class="form-group"><input type="text" id="d_other_name" class="remark" value="其它扣項"><input type="number" id="d_other_val" value="0"></div>
+            
+            <div class="form-group"><label>請假(小時)：</label><input type="number" id="d_leave_hours" value="0" step="0.5" placeholder="0"></div>
+            
             <div class="divider"></div>
             <div class="form-group"><input type="text" id="d_subtotal_name" class="remark" value="代扣小計(選填)"><input type="number" id="d_subtotal_val" value="0" placeholder="0"></div>
         </div>
@@ -222,8 +229,8 @@
                 </div>
                 <div class="divider"></div>
                 <div class="form-group"><label class="long">年份 / 月份：</label>
-                    <input type="number" id="year" value="2026" style="width: 60px; text-align:center;"> / 
-                    <input type="number" id="month" value="2" min="1" max="12" style="width: 40px; text-align:center;">
+                    <input type="number" id="year" value="2026" style="width: 60px; text-align:center;" onchange="updateHolidays()"> / 
+                    <input type="number" id="month" value="2" min="1" max="12" style="width: 40px; text-align:center;" onchange="updateHolidays()">
                 </div>
                 
                 <div class="form-group" style="align-items: flex-start; display: flex;" id="cycle-setting-group">
@@ -268,16 +275,21 @@
 
             <div class="grid-layout" style="margin-bottom: 0; margin-top: 15px;">
                 <div>
-                    <div class="summary-item">各項固定加給總計：<span id="resFixed">0</span> 元</div>
+                    <div class="summary-item">各項固定加給總計：<span id="resFixed">0</span> 元
+                        <div id="resFixedDetail" style="font-size: 12px; color: #78909C; margin-top: 4px;"></div>
+                    </div>
                     <div class="summary-item">其它加項：<span id="resOtherAdd">0</span> 元</div>
                     <div class="summary-item">勤務津貼 (輪班)：<span id="resShift">0</span> 元</div>
                     <div class="summary-item" style="color: var(--color-ot); font-weight: bold;">帆宣加班費：+ <span id="resOtPay">0</span> 元</div>
                     <div class="divider"></div>
-                    <div class="summary-item" style="color: var(--color-leave); font-weight: bold;">各項代扣總計：- <span id="resDeduct">0</span> 元</div>
+                    <div class="summary-item" style="color: var(--color-leave); font-weight: bold;">各項代扣總計：- <span id="resDeduct">0</span> 元
+                        <div id="resDeductDetail" style="font-size: 12px; color: #E57373; margin-top: 4px; font-weight: normal;"></div>
+                    </div>
                     <div class="summary-item" style="color: var(--color-leave); font-weight: bold;">請假扣薪：- <span id="resLeave">0</span> 元</div>
                 </div>
                 <div>
-                    <div class="summary-item">新增換休假：<strong id="resCompLeave">0</strong> 天</div>
+                    <div class="summary-item">當月新增換休假：<strong id="resCompLeave">0</strong> 天</div>
+                    <div class="summary-item">當月使用換休假：<strong id="resUsedCompLeave" style="color: #E65100;">0</strong> 天</div>
                     <div class="summary-item" style="font-size: 13px; color: #777;">
                         輪班天數：<span id="resShiftDaysDetail"></span>
                     </div>
@@ -285,7 +297,7 @@
                         本月實領薪資：<strong style="font-size: 28px; color: #2E7D32;" id="resTotal">0</strong> 元
                     </div>
                     <div class="summary-item" style="margin-top: 15px; font-size: 14px; background: #E3F2FD; padding: 10px; border-radius: 4px; border: 1px solid #90CAF9;">
-                        <strong style="color: var(--color-owner);">業主加班費 (時薪626扣10% / 2個月後發放)：<br> <span id="resOwnerOt" style="font-size: 18px;">0</span> 元</strong>
+                        <strong style="color: var(--color-owner);">業主加班費 (時薪626及零星574 / 扣10%後發放)：<br> <span id="resOwnerOt" style="font-size: 18px;">0</span> 元</strong>
                     </div>
                 </div>
             </div>
@@ -417,7 +429,6 @@
         Object.keys(records).sort().reverse().forEach(key => {
             const opt = document.createElement('option');
             opt.value = key; 
-            // 處理新舊版本的 Key 顯示名稱
             opt.textContent = key.includes('_') ? key.replace('_', ' ') + ' 班表' : '未命名 ' + key + ' 班表';
             selector.appendChild(opt);
         });
@@ -435,7 +446,6 @@
         const month = document.getElementById('month').value;
         if(!year || !month) return alert("請輸入年份與月份！");
         
-        // 💡 存檔 Key 加入姓名
         const key = `${userName}_${year}-${month.toString().padStart(2, '0')}`;
         const data = {
             userName, year, month,
@@ -445,12 +455,17 @@
             s_business: document.getElementById('s_business').value, s_branch: document.getElementById('s_branch').value,
             s_meal: document.getElementById('s_meal').value, s_other_name: document.getElementById('s_other_name').value,
             s_other_val: document.getElementById('s_other_val').value,
+            s_ot_company_hours: document.getElementById('s_ot_company_hours').value, // 儲存零星帆加
+            s_ot_owner_hours: document.getElementById('s_ot_owner_hours').value,     // 儲存零星業加
+            
             d_tax: document.getElementById('d_tax').value, d_labor: document.getElementById('d_labor').value,
             d_health: document.getElementById('d_health').value, d_supp: document.getElementById('d_supp').value,
             d_welfare: document.getElementById('d_welfare').value, d_dorm: document.getElementById('d_dorm').value,
             pension_rate: document.getElementById('pension_rate').value, d_pension: document.getElementById('d_pension').value,
             d_other_name: document.getElementById('d_other_name').value, d_other_val: document.getElementById('d_other_val').value,
             d_subtotal_name: document.getElementById('d_subtotal_name').value, d_subtotal_val: document.getElementById('d_subtotal_val').value,
+            d_leave_hours: document.getElementById('d_leave_hours').value, // 儲存請假小時
+            
             shiftType: document.getElementById('shiftType').value, prevMonthShiftDays: document.getElementById('prevMonthShiftDays').value,
             workDays: document.getElementById('workDays').value, offDays: document.getElementById('offDays').value,
             statutoryHolidays: document.getElementById('statutoryHolidays').value, exemptDays: document.getElementById('exemptDays').value,
@@ -478,7 +493,6 @@
             if(el && typeof data[k] !== 'object') el.value = data[k];
         });
 
-        // 恢復姓名
         if (data.userName) document.getElementById('userName').value = data.userName;
 
         handleShiftChange();
@@ -503,6 +517,11 @@
             document.getElementById('statutoryHolidays').value = ""; 
             document.getElementById('exemptDays').value = ""; 
             
+            // 清空零星時數
+            document.getElementById('s_ot_company_hours').value = "0";
+            document.getElementById('s_ot_owner_hours').value = "0";
+            document.getElementById('d_leave_hours').value = "0";
+            
             document.getElementById('prevMonthShiftDays').value = "0"; document.getElementById('calendar-container').innerHTML = "";
             document.getElementById('summaryPanel').style.display = "none"; document.getElementById('btnCalc').style.display = "none";
             document.getElementById('btnExportCal').style.display = "none";
@@ -513,7 +532,6 @@
         }
     }
 
-    // 💡 新增：單獨匯出月曆的函數
     function exportCalendarImage() {
         let userName = document.getElementById('userName').value.trim() || '未命名';
         const container = document.getElementById('calendar-container');
@@ -602,49 +620,10 @@
         const shiftSelect = document.getElementById('shiftType');
         let shiftText = shiftSelect.options[shiftSelect.selectedIndex].text.split(' ')[0];
         
-        // 💡 標題加入使用者姓名
         const titleDiv = document.createElement('div');
         titleDiv.id = 'export-title';
         titleDiv.innerHTML = `<h2 style="text-align: center; color: #3F51B5; margin-bottom: 20px; font-size: 26px; border-bottom: 2px solid #E8EAF6; padding-bottom: 10px;">👤 ${userName} - 📅 ${year} 年 ${month} 月 班表與薪資結算 (${shiftText})</h2>`;
         container.insertBefore(titleDiv, container.firstChild);
-
-        const addItems = [
-            {id: 's_base', name: '本薪'}, {id: 's_supervisor', name: '主管'},
-            {id: 's_position', name: '職務'}, {id: 's_tcm', name: 'TCM'},
-            {id: 's_safety', name: '安全'}, {id: 's_transport', name: '交通'},
-            {id: 's_business', name: '業務'}, {id: 's_branch', name: '分公司'},
-            {id: 's_meal', name: '伙食'}, {id: 's_other_val', name: '其它'}
-        ];
-        let addDetails = [];
-        addItems.forEach(item => {
-            const val = parseInt(document.getElementById(item.id).value) || 0;
-            if (val > 0) addDetails.push(`${item.name}:${val.toLocaleString()}`);
-        });
-        const addDetailDiv = document.createElement('div');
-        addDetailDiv.style.fontSize = '12px';
-        addDetailDiv.style.color = '#78909C';
-        addDetailDiv.style.marginTop = '4px';
-        addDetailDiv.innerText = `(明細: ${addDetails.join(' + ')})`;
-        document.getElementById('resFixed').parentNode.appendChild(addDetailDiv);
-
-        const dedItems = [
-            {id: 'd_tax', name: '所得稅'}, {id: 'd_labor', name: '勞保'},
-            {id: 'd_health', name: '健保'}, {id: 'd_supp', name: '補充保費'},
-            {id: 'd_welfare', name: '福利金'}, {id: 'd_dorm', name: '宿舍'},
-            {id: 'd_pension', name: '勞退自提'}, {id: 'd_other_val', name: '其它'},
-            {id: 'd_subtotal_val', name: '代扣小計'}
-        ];
-        let dedDetails = [];
-        dedItems.forEach(item => {
-            const val = parseInt(document.getElementById(item.id).value) || 0;
-            if (val > 0) dedDetails.push(`${item.name}:${val.toLocaleString()}`);
-        });
-        const dedDetailDiv = document.createElement('div');
-        dedDetailDiv.style.fontSize = '12px';
-        dedDetailDiv.style.color = '#E57373';
-        dedDetailDiv.style.marginTop = '4px';
-        dedDetailDiv.innerText = `(明細: ${dedDetails.join(' + ')})`;
-        document.getElementById('resDeduct').parentNode.appendChild(dedDetailDiv);
 
         const originalWidth = container.style.width;
         const originalPadding = container.style.padding;
@@ -660,8 +639,6 @@
                 item.span.remove(); 
             });
             titleDiv.remove(); 
-            addDetailDiv.remove(); 
-            dedDetailDiv.remove(); 
             
             container.style.width = originalWidth; 
             container.style.padding = originalPadding;
@@ -670,7 +647,6 @@
             const d = new Date();
             const dateStr = `${d.getFullYear()}${(d.getMonth()+1).toString().padStart(2,'0')}${d.getDate().toString().padStart(2,'0')}`;
             const link = document.createElement('a');
-            // 💡 下載檔名加入使用者姓名
             link.download = `${userName}-${year}-${month.padStart(2, '0')}-薪資結算-${dateStr}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
@@ -822,7 +798,7 @@
         html += '</div>';
         document.getElementById('calendar-container').innerHTML = html;
         document.getElementById('btnCalc').style.display = 'block';
-        document.getElementById('btnExportCal').style.display = 'block'; // 💡 顯示單獨儲存班表按鈕
+        document.getElementById('btnExportCal').style.display = 'block'; 
         document.getElementById('summaryPanel').style.display = 'none';
         
         calculateSalary();
@@ -844,11 +820,14 @@
         const dailyRate = fixedSalaryBase / 30;
         const hourlyRate = fixedSalaryBase / 240;
 
+        // 💡 取得新增的零星時數
+        const s_ot_company_hours = parseFloat(document.getElementById('s_ot_company_hours').value) || 0;
+        const s_ot_owner_hours = parseFloat(document.getElementById('s_ot_owner_hours').value) || 0;
+        const d_leave_hours = parseFloat(document.getElementById('d_leave_hours').value) || 0;
+
         const year = parseInt(document.getElementById('year').value);
         const month = parseInt(document.getElementById('month').value);
-        
         const statutoryHolidays = parseDateString(document.getElementById('statutoryHolidays').value);
-        
         const internalHolidays = taiwanHolidays[year]?.[month] || {};
         const userExemptMap = parseHolidayMap(document.getElementById('exemptDays').value);
 
@@ -878,7 +857,6 @@
             prevShiftRate = shiftType === 'day' ? 200 : 100;
             OT_multiplier_rest = 18.04; 
             OT_multiplier_national = 8 + (4/3)*2; 
-            
             currShiftName = shiftType === 'day' ? "(日班)" : "(夜班)";
             prevShiftName = shiftType === 'day' ? "(夜班)" : "(日班)";
         }
@@ -886,7 +864,7 @@
         document.getElementById('rate_rest').innerText = Math.round(hourlyRate * OT_multiplier_rest).toLocaleString();
         document.getElementById('rate_national').innerText = Math.round(hourlyRate * OT_multiplier_national).toLocaleString();
 
-        let totalLeaveDeduction = 0, totalOtPay = 0, ownerOtPay = 0, compLeaveCount = 0, currentMonthShiftDays = 0; 
+        let totalLeaveDeduction = 0, totalOtPay = 0, ownerOtPay = 0, compLeaveCount = 0, usedCompLeaveCount = 0, currentMonthShiftDays = 0; 
         const cells = document.querySelectorAll('.cal-cell[data-day]');
         
         cells.forEach(cell => {
@@ -902,7 +880,10 @@
                 let isAttended = true;
                 if (action === "事假") { totalLeaveDeduction += dailyRate; isAttended = false; }
                 else if (action === "病假" || action === "生理假") { totalLeaveDeduction += (dailyRate * 0.5); isAttended = false; }
-                else if (['換休假', '公假', '特休假', '婚假', '喪假'].includes(action)) { isAttended = false; }
+                else if (['換休假', '公假', '特休假', '婚假', '喪假'].includes(action)) { 
+                    isAttended = false; 
+                    if (action === "換休假") usedCompLeaveCount++; // 💡 統計使用掉的換休假
+                }
                 
                 if (isAttended && isShiftRange && shiftType !== 'normal') currentMonthShiftDays++;
             } else {
@@ -928,6 +909,11 @@
             totalShiftAllowance = (prevMonthShiftDays * prevShiftRate) + (currentMonthShiftDays * currentShiftRate);
         }
 
+        // 💡 加入零星請假扣款與零星加班計算
+        totalLeaveDeduction += (d_leave_hours * hourlyRate);
+        totalOtPay += (s_ot_company_hours * hourlyRate * 1.34); 
+        ownerOtPay += (s_ot_owner_hours * 574 * 0.9);
+
         let finalSalary = fixedSalaryBase + v_other_add + totalShiftAllowance + totalOtPay - totalDeductions - totalLeaveDeduction;
 
         document.getElementById('resFixed').innerText = Math.round(fixedSalaryBase).toLocaleString();
@@ -937,6 +923,7 @@
         document.getElementById('resDeduct').innerText = Math.round(totalDeductions).toLocaleString();
         document.getElementById('resLeave').innerText = Math.round(totalLeaveDeduction).toLocaleString();
         document.getElementById('resCompLeave').innerText = compLeaveCount;
+        document.getElementById('resUsedCompLeave').innerText = usedCompLeaveCount; // 💡 顯示使用換休假
         
         if(shiftType === 'normal'){
             document.getElementById('resShiftDaysDetail').innerHTML = `常日班無輪班津貼`;
@@ -946,6 +933,35 @@
         
         document.getElementById('resTotal').innerText = Math.round(finalSalary).toLocaleString();
         document.getElementById('resOwnerOt').innerText = Math.round(ownerOtPay).toLocaleString();
+
+        // 💡 動態產生面板上的加給與代扣明細
+        const addItems = [
+            {id: 's_base', name: '本薪'}, {id: 's_supervisor', name: '主管'},
+            {id: 's_position', name: '職務'}, {id: 's_tcm', name: 'TCM'},
+            {id: 's_safety', name: '安全'}, {id: 's_transport', name: '交通'},
+            {id: 's_business', name: '業務'}, {id: 's_branch', name: '分公司'},
+            {id: 's_meal', name: '伙食'}, {id: 's_other_val', name: '其它'}
+        ];
+        let addDetails = [];
+        addItems.forEach(item => {
+            const val = parseInt(document.getElementById(item.id).value) || 0;
+            if (val > 0) addDetails.push(`${item.name}:${val.toLocaleString()}`);
+        });
+        document.getElementById('resFixedDetail').innerText = addDetails.length > 0 ? `(明細: ${addDetails.join(' + ')})` : '';
+
+        const dedItems = [
+            {id: 'd_tax', name: '所得稅'}, {id: 'd_labor', name: '勞保'},
+            {id: 'd_health', name: '健保'}, {id: 'd_supp', name: '補充保費'},
+            {id: 'd_welfare', name: '福利金'}, {id: 'd_dorm', name: '宿舍'},
+            {id: 'd_pension', name: '勞退自提'}, {id: 'd_other_val', name: '其它'},
+            {id: 'd_subtotal_val', name: '代扣小計'}
+        ];
+        let dedDetails = [];
+        dedItems.forEach(item => {
+            const val = parseInt(document.getElementById(item.id).value) || 0;
+            if (val > 0) dedDetails.push(`${item.name}:${val.toLocaleString()}`);
+        });
+        document.getElementById('resDeductDetail').innerText = dedDetails.length > 0 ? `(明細: ${dedDetails.join(' + ')})` : '';
 
         document.getElementById('summaryPanel').style.display = 'block';
         document.querySelector('.btn-export').style.display = 'block';
