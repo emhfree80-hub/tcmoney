@@ -61,12 +61,13 @@
         .form-group label { font-weight: 500; color: var(--text-primary); }
         .form-group.col-layout { flex-direction: column; align-items: flex-start; gap: 8px; border-bottom: none;}
 
-        input[type="text"], input[type="number"], select { 
+        input[type="text"], input[type="number"], input[type="date"], select { 
             background-color: var(--bg-body); border: 1px solid transparent; 
             border-radius: 8px; padding: 8px 12px; font-size: 15px; 
             color: var(--text-primary); outline: none; transition: all 0.2s; text-align: right;
+            font-family: inherit;
         }
-        input[type="text"] { text-align: left; }
+        input[type="text"], input[type="date"] { text-align: left; }
         select { text-align: left; cursor: pointer; appearance: none; -webkit-appearance: none; padding-right: 30px; 
                  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2214%22%20height%3D%2214%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238E8E93%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E");
                  background-repeat: no-repeat; background-position: right 10px center; }
@@ -141,7 +142,6 @@
         .wallet-amount { font-size: 46px; font-weight: 700; margin: 0; letter-spacing: -1px; color: var(--apple-blue);}
         .wallet-sub { background: #FFFFFF; display: inline-block; padding: 8px 16px; border-radius: 20px; font-size: 13px; margin-top: 15px; font-weight: 600; color: var(--text-primary); border: 1px solid var(--divider); box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
 
-        /* 💡 恢復並美化加班費率提示框 */
         .rate-hint-box {
             background: #F2F8FF; border: 1px solid #D1E5FF; border-radius: 12px;
             padding: 15px; margin-bottom: 20px; font-size: 13px; color: #005BB5; line-height: 1.6;
@@ -254,8 +254,8 @@
                     <div class="form-group">
                         <label>年份 / 月份</label>
                         <div>
-                            <input type="number" id="year" value="2026" style="width: 50px; text-align:center;" onchange="updateHolidays()"> / 
-                            <input type="number" id="month" value="2" min="1" max="12" style="width: 40px; text-align:center;" onchange="updateHolidays()">
+                            <input type="number" id="year" value="2026" style="width: 50px; text-align:center;" onchange="updateMonthLabels()"> / 
+                            <input type="number" id="month" value="2" min="1" max="12" style="width: 40px; text-align:center;" onchange="updateMonthLabels()">
                         </div>
                     </div>
                     
@@ -273,13 +273,21 @@
                         </div>
                     </div>
 
-                    <div class="form-group"><label>上月21號~月底出勤天數</label><input type="number" id="prevMonthShiftDays" value="0" style="width: 60px;"></div>
+                    <div class="form-group">
+                        <label class="long" style="line-height: 1.3;">
+                            <span id="prevMonthText" style="color:var(--text-primary);">1月21日~1月底之間出勤</span><br>
+                            <span style="color:var(--text-secondary); font-weight: normal; font-size: 11px;">(常日/業加不計)</span>
+                        </label>
+                        <div style="display:flex; align-items:center; gap:5px;">
+                            <input type="number" id="prevMonthShiftDays" value="0" style="width: 45px;"> 天
+                        </div>
+                    </div>
                     
                     <div class="form-group" id="cycle-setting-group">
-                        <label>做幾休幾</label>
-                        <div>
-                            <input type="number" id="workDays" style="width: 35px; text-align:center;" value="2" onchange="generateCycleDropdown()"> / 
-                            <input type="number" id="offDays" style="width: 35px; text-align:center;" value="2" onchange="generateCycleDropdown()">
+                        <label>輪班週期</label>
+                        <div style="display:flex; align-items:center; gap:5px; font-weight:500;">
+                            做 <input type="number" id="workDays" style="width: 35px; text-align:center;" value="2" onchange="generateCycleDropdown()"> 天 / 
+                            休 <input type="number" id="offDays" style="width: 35px; text-align:center;" value="2" onchange="generateCycleDropdown()"> 天
                         </div>
                     </div>
                     <div class="form-group" id="cycle-start-container">
@@ -290,7 +298,7 @@
 
                 <div>
                     <div class="form-group col-layout" style="background: #FAFAFC; padding: 12px; border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--divider);">
-                        <label style="color: var(--apple-red); font-weight: 600; font-size: 14px;">🛑 法規與免出勤設定</label>
+                        <label style="color: var(--apple-red); font-weight: 600; font-size: 14px;">🛑 額外休假設定 (變形工時/廠慶)</label>
                         <div style="display:flex; justify-content:space-between; width:100%; align-items: center; margin-top:5px;">
                             <span style="font-size:13px; color:var(--text-primary);">例假日 (逗號分隔)</span>
                             <input type="text" id="statutoryHolidays" placeholder="例: 5,12,19" style="width: 120px; background: #fff;">
@@ -299,7 +307,7 @@
                             <span style="font-size:13px; color:var(--text-primary);">免出勤日 (變形工時)</span>
                             <input type="text" id="exemptDays" placeholder="例: 1,15" style="width: 120px; background: #fff;">
                         </div>
-                        <p style="font-size: 11px; color: var(--text-secondary); margin: 5px 0 0 0; line-height:1.4;">(系統已內建國定假日，此處僅需填寫公司排定之變形免出勤日或自訂例假)</p>
+                        <p style="font-size: 11px; color: var(--text-secondary); margin: 5px 0 0 0; line-height:1.4;">(系統已內建國定假日，此處僅需填寫公司排定之變形免出勤或自訂例假)</p>
                     </div>
 
                     <div class="form-group"><label>零星帆宣加班 (時)</label><input type="number" id="s_ot_company_hours" value="0" step="0.5"></div>
@@ -384,6 +392,49 @@
             <button class="action-btn export-hide" onclick="exportImage()">📸 儲存完整薪資報表圖片</button>
         </div>
     </div>
+    
+    <div class="export-hide" style="margin-top: 40px; padding-top: 20px; border-top: 2px dashed var(--divider);">
+        <h3 style="color: var(--text-secondary); font-size: 16px; text-align: center; margin-bottom: 20px;">🧰 園區生存百寶箱</h3>
+        
+        <details class="ios-details">
+            <summary>💡 我今年特休有幾天？</summary>
+            <div class="details-content">
+                <div class="form-group">
+                    <label>請輸入您的到職日：</label>
+                    <input type="date" id="hireDate" onchange="calculateAnnualLeave()">
+                </div>
+                <div id="leaveResult" style="margin-top: 10px; font-weight: bold; color: var(--apple-blue); background: var(--work-bg); padding: 10px; border-radius: 8px;"></div>
+                
+                <hr style="border:0; border-top:1px dashed var(--divider); margin:15px 0;">
+                <p style="font-size: 14px; font-weight: bold; color: var(--text-primary); margin-top: 0;">📅 勞基法特休天數對照表：</p>
+                <ul style="font-size: 14px; color: var(--text-secondary); padding-left: 20px; line-height: 1.8; margin-bottom: 0;">
+                    <li>滿 6 個月，未滿 1 年：<strong>3 天</strong></li>
+                    <li>滿 1 年，未滿 2 年：<strong>7 天</strong></li>
+                    <li>滿 2 年，未滿 3 年：<strong>10 天</strong></li>
+                    <li>滿 3 年，未滿 5 年：<strong>14 天</strong></li>
+                    <li>滿 5 年，未滿 10 年：<strong>15 天</strong></li>
+                    <li>滿 10 年以上：每滿 1 年加 1 天，最多 30 天</li>
+                </ul>
+            </div>
+        </details>
+
+        <details class="ios-details">
+            <summary>💡 想離職嗎？點我看離職預告期</summary>
+            <div class="details-content">
+                <p style="font-size: 14px; font-weight: bold; color: var(--text-primary); margin-top: 0;">📅 勞基法離職預告期對照表：</p>
+                <ul style="font-size: 14px; color: var(--text-secondary); padding-left: 20px; line-height: 1.8; margin-bottom: 0;">
+                    <li>工作未滿 3 個月：<strong class="txt-green">免預告</strong> (隨時可提離職)</li>
+                    <li>工作滿 3 個月，未滿 1 年：需於 <strong class="txt-orange">10 天前</strong> 預告</li>
+                    <li>工作滿 1 年，未滿 3 年：需於 <strong class="txt-orange">20 天前</strong> 預告</li>
+                    <li>工作滿 3 年以上：需於 <strong class="txt-red">30 天前</strong> 預告</li>
+                </ul>
+                <div style="background: var(--bg-body); padding: 10px; border-radius: 8px; margin-top: 15px; font-size: 12px; color: #8E8E93;">
+                    * 預告期之計算，包含例假日、國定假日等休息日。以雇主收到離職預告之「次日」起算。
+                </div>
+            </div>
+        </details>
+    </div>
+
 </div>
 
 <button class="fab-feedback" onclick="openFeedback()" id="ignore-in-export-fab">💬 意見回饋</button>
@@ -428,9 +479,63 @@
         const today = new Date();
         document.getElementById('year').value = today.getFullYear();
         document.getElementById('month').value = today.getMonth() + 1;
+        updateMonthLabels(); // 初始化上月文字
         updateRecordDropdown();
         handleShiftChange();
     };
+
+    // 💡 智慧連動：更新上月出勤文字
+    function updateMonthLabels() {
+        let m = parseInt(document.getElementById('month').value);
+        if (isNaN(m)) return;
+        let prevM = m - 1;
+        if (prevM === 0) prevM = 12;
+        document.getElementById('prevMonthText').innerText = `${prevM}月21日~${prevM}月底之間出勤`;
+    }
+
+    function updateHolidays() {
+        updateMonthLabels(); // 切換年月時同步更新文字
+        document.getElementById('calendar-container').innerHTML = '';
+        document.getElementById('summaryPanel').style.display = 'none';
+        document.getElementById('btnExportCal').style.display = 'none';
+    }
+
+    // 💡 百寶箱：計算特休器
+    function calculateAnnualLeave() {
+        const hireDateStr = document.getElementById('hireDate').value;
+        const resultEl = document.getElementById('leaveResult');
+        if(!hireDateStr) {
+            resultEl.innerText = '';
+            return;
+        }
+        const hireDate = new Date(hireDateStr);
+        const today = new Date();
+        
+        let years = today.getFullYear() - hireDate.getFullYear();
+        let months = today.getMonth() - hireDate.getMonth();
+        if (months < 0 || (months === 0 && today.getDate() < hireDate.getDate())) {
+            years--;
+            months += 12;
+        }
+        if (today.getDate() < hireDate.getDate()) {
+            months--;
+        }
+        if (months < 0) {
+            months += 12; 
+        }
+
+        let totalMonths = years * 12 + months;
+        let leaveDays = 0;
+
+        if (totalMonths >= 6 && totalMonths < 12) leaveDays = 3;
+        else if (years >= 1 && years < 2) leaveDays = 7;
+        else if (years >= 2 && years < 3) leaveDays = 10;
+        else if (years >= 3 && years < 5) leaveDays = 14;
+        else if (years >= 5 && years < 10) leaveDays = 15;
+        else if (years >= 10) leaveDays = Math.min(15 + (years - 9), 30);
+
+        resultEl.innerText = `👉 以今日計算，您的年資為 ${years} 年 ${months} 個月，目前享有 ${leaveDays} 天特休。`;
+    }
 
     function getShiftValue() {
         const checked = document.querySelector('input[name="shiftType"]:checked');
@@ -587,7 +692,9 @@
             prevMonthShiftDays: document.getElementById('prevMonthShiftDays').value,
             workDays: document.getElementById('workDays').value, offDays: document.getElementById('offDays').value,
             statutoryHolidays: document.getElementById('statutoryHolidays').value, exemptDays: document.getElementById('exemptDays').value,
-            cycleStartOffset: document.getElementById('cycleStartOffset').value, cellActions: {}
+            cycleStartOffset: document.getElementById('cycleStartOffset').value, 
+            hireDate: document.getElementById('hireDate').value, // 💡 儲存特休到職日
+            cellActions: {}
         };
         const cells = document.querySelectorAll('.cal-cell[data-day]');
         cells.forEach(cell => data.cellActions[cell.getAttribute('data-day')] = cell.querySelector('.action-select').value);
@@ -609,12 +716,14 @@
         });
 
         if (data.userName) document.getElementById('userName').value = data.userName;
+        if (data.hireDate) { document.getElementById('hireDate').value = data.hireDate; calculateAnnualLeave(); }
         
         if (data.shiftType) {
             let rb = document.querySelector(`input[name="shiftType"][value="${data.shiftType}"]`);
             if(rb) rb.checked = true;
         }
 
+        updateMonthLabels(); // 同步上月文字
         handleShiftChange();
         if (data.cycleStartOffset) document.getElementById('cycleStartOffset').value = data.cycleStartOffset;
 
@@ -634,6 +743,8 @@
             let y = parseInt(document.getElementById('year').value);
             if(m > 12) { m = 1; y++; }
             document.getElementById('year').value = y; document.getElementById('month').value = m;
+            updateMonthLabels(); // 同步上月文字
+            
             document.getElementById('statutoryHolidays').value = ""; document.getElementById('exemptDays').value = ""; 
             document.getElementById('s_kpi_bonus').value = "0"; document.getElementById('s_ot_company_hours').value = "0";
             document.getElementById('s_ot_owner_hours').value = "0"; document.getElementById('d_leave_deduct_hours').value = "0";
@@ -893,7 +1004,6 @@
             prevShiftName = shiftType === 'day' ? "夜班" : "日班";
         }
 
-        // 💡 恢復計算加班費率顯示
         document.getElementById('rate_rest').innerText = Math.round(hourlyRate * OT_multiplier_rest).toLocaleString();
         document.getElementById('rate_national').innerText = Math.round(hourlyRate * OT_multiplier_national).toLocaleString();
 
