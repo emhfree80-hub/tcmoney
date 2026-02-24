@@ -47,6 +47,10 @@
         button.action-btn { background-color: var(--primary); color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; font-size: 14px; font-weight: bold; transition: background-color 0.2s; }
         button.action-btn:hover { background-color: #37474F; }
         
+        #cycle-inputs-container { margin-top: 15px; padding: 15px; background: #fff; border: 2px dashed #90A4AE; border-radius: 4px; display: none; }
+        .cycle-row { margin-bottom: 8px; font-size: 14px; }
+        .cycle-row span { display: inline-block; width: 60px; color: #546E7A; font-weight: bold; }
+
         .calendar { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid var(--border); border-left: 1px solid var(--border); margin-top: 20px; }
         .cal-header { background: #ECEFF1; color: var(--primary); text-align: center; padding: 10px 0; font-size: 15px; font-weight: bold; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
         .cal-cell { min-height: 95px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 8px; display: flex; flex-direction: column; background-color: var(--off-bg); transition: background-color 0.3s ease; }
@@ -158,8 +162,8 @@
                 </div>
                 <div class="divider"></div>
                 <div class="form-group"><label class="long">年份 / 月份：</label>
-                    <input type="number" id="year" value="2026" style="width: 60px; text-align:center;"> / 
-                    <input type="number" id="month" value="2" min="1" max="12" style="width: 40px; text-align:center;">
+                    <input type="number" id="year" value="2026" style="width: 60px; text-align:center;" onchange="updateHolidays()"> / 
+                    <input type="number" id="month" value="2" min="1" max="12" style="width: 40px; text-align:center;" onchange="updateHolidays()">
                 </div>
                 
                 <div class="form-group" style="align-items: flex-start; display: flex;" id="cycle-setting-group">
@@ -181,6 +185,7 @@
                 <h3 style="margin-top:0;">🛑 法規假別設定</h3>
                 <div class="form-group"><label class="long">例假日 (逗號分隔)：</label><input type="text" class="normal-text" style="width:160px;" id="statutoryHolidays" placeholder="例: 5,12,19"></div>
                 <div class="form-group"><label class="long">國定/免出勤：</label><input type="text" class="normal-text" style="width:160px;" id="exemptDays" placeholder="例: 1-元旦, 16-初一"></div>
+                <p style="font-size: 11px; color: #888; margin: 4px 0 0 0;">(切換年月時，系統會自動帶入台灣國定假日)</p>
             </div>
         </div>
 
@@ -229,15 +234,63 @@
 </div>
 
 <script>
+    // 💡 內建台灣 2025-2027 國定假日資料庫 (包含農曆過年與補假)
+    const holidayData = {
+        2025: { 
+            1: "1-元旦, 25-除夕, 26-初一, 27-初二, 28-初三, 29-初四", 
+            2: "28-和平紀念日", 4: "4-兒童節, 5-清明節", 
+            5: "1-勞動節, 31-端午節", 10: "6-中秋節, 10-國慶日" 
+        },
+        2026: { 
+            1: "1-元旦", 
+            2: "16-除夕, 17-初一, 18-初二, 19-初三, 20-初四, 28-和平紀念日", 
+            4: "3-兒童節, 4-兒童節, 5-清明節, 6-清明節", 
+            5: "1-勞動節", 6: "19-端午節", 9: "25-中秋節", 10: "10-國慶日" 
+        },
+        2027: { 
+            1: "1-元旦", 
+            2: "5-除夕, 6-初一, 7-初二, 8-初三, 9-初四, 28-和平紀念日", 
+            4: "4-兒童節, 5-清明節", 5: "1-勞動節", 
+            6: "9-端午節", 9: "15-中秋節", 10: "10-國慶日" 
+        }
+    };
+
+    function getHolidaysString(year, month) {
+        if (holidayData[year] && holidayData[year][month]) {
+            return holidayData[year][month];
+        }
+        // 如果不在內庫年份中，提供通用國曆預設值
+        let h = [];
+        if (month === 1) h.push("1-元旦");
+        if (month === 2) h.push("28-和平紀念日");
+        if (month === 5) h.push("1-勞動節");
+        if (month === 10) h.push("10-國慶日");
+        return h.join(", ");
+    }
+
+    // 💡 當切換年月時，自動帶入國定假日
+    function updateHolidays() {
+        const y = parseInt(document.getElementById('year').value);
+        const m = parseInt(document.getElementById('month').value);
+        document.getElementById('exemptDays').value = getHolidaysString(y, m);
+        // 切換月份後清空當前的月曆以防誤會
+        document.getElementById('calendar-container').innerHTML = '';
+        document.getElementById('summaryPanel').style.display = 'none';
+    }
+
     window.onload = () => {
         const today = new Date();
         document.getElementById('year').value = today.getFullYear();
         document.getElementById('month').value = today.getMonth() + 1;
         updateRecordDropdown();
-        handleShiftChange(); // 初始化介面
+        handleShiftChange();
+        
+        // 初始載入時若格子為空，則自動帶入假日
+        if (!document.getElementById('exemptDays').value) {
+            updateHolidays();
+        }
     };
 
-    // 💡 處理班別切換 (隱藏/顯示循環設定)
     function handleShiftChange() {
         const shift = document.getElementById('shiftType').value;
         const cycleGroup = document.getElementById('cycle-setting-group');
@@ -253,11 +306,13 @@
         }
     }
 
-    // 💡 動態產生「1號狀態」下拉選單
     function generateCycleDropdown() {
         const w = parseInt(document.getElementById('workDays').value) || 0;
         const o = parseInt(document.getElementById('offDays').value) || 0;
         const sel = document.getElementById('cycleStartOffset');
+        
+        // 保留當前選擇的值，以免重繪時被洗掉
+        const currentVal = sel.value;
         sel.innerHTML = '';
         
         for(let i=1; i<=w; i++) {
@@ -266,6 +321,9 @@
         for(let i=1; i<=o; i++) {
             sel.innerHTML += `<option value="O${i-1}">休假 第 ${i} 天</option>`;
         }
+        
+        // 嘗試恢復之前選的值
+        if(currentVal) sel.value = currentVal;
     }
 
     function autoCalcDeductions() {
@@ -325,7 +383,7 @@
             shiftType: document.getElementById('shiftType').value, prevMonthShiftDays: document.getElementById('prevMonthShiftDays').value,
             workDays: document.getElementById('workDays').value, offDays: document.getElementById('offDays').value,
             statutoryHolidays: document.getElementById('statutoryHolidays').value, exemptDays: document.getElementById('exemptDays').value,
-            cycleStartOffset: document.getElementById('cycleStartOffset').value, // 儲存新的週期狀態
+            cycleStartOffset: document.getElementById('cycleStartOffset').value,
             cellActions: {}
         };
         const cells = document.querySelectorAll('.cal-cell[data-day]');
@@ -349,7 +407,7 @@
             if(el && typeof data[k] !== 'object') el.value = data[k];
         });
 
-        handleShiftChange(); // 更新介面顯示狀態
+        handleShiftChange();
         if (data.cycleStartOffset) document.getElementById('cycleStartOffset').value = data.cycleStartOffset;
 
         try {
@@ -368,7 +426,11 @@
             let y = parseInt(document.getElementById('year').value);
             if(m > 12) { m = 1; y++; }
             document.getElementById('year').value = y; document.getElementById('month').value = m;
-            document.getElementById('statutoryHolidays').value = ""; document.getElementById('exemptDays').value = "";
+            document.getElementById('statutoryHolidays').value = ""; 
+            
+            // 💡 建立新月份時自動帶入假日
+            updateHolidays();
+            
             document.getElementById('prevMonthShiftDays').value = "0"; document.getElementById('calendar-container').innerHTML = "";
             document.getElementById('summaryPanel').style.display = "none"; document.getElementById('btnCalc').style.display = "none";
             const s = document.getElementById('shiftType');
@@ -518,7 +580,6 @@
         else cell.classList.remove('active-work');
     }
 
-    // 💡 全新的月曆生成邏輯
     function generateCalendar() {
         const year = parseInt(document.getElementById('year').value);
         const month = parseInt(document.getElementById('month').value);
@@ -534,7 +595,6 @@
         let cycleLength = 0;
         let startOffset = 0;
 
-        // 輪班制的演算法設定
         if (shiftType !== 'normal') {
             const w = parseInt(document.getElementById('workDays').value) || 0;
             const o = parseInt(document.getElementById('offDays').value) || 0;
@@ -544,7 +604,7 @@
             for(let i=0; i<w; i++) sequence.push('work');
             for(let i=0; i<o; i++) sequence.push('off');
             
-            const offsetVal = document.getElementById('cycleStartOffset').value; // e.g. "W0", "O1"
+            const offsetVal = document.getElementById('cycleStartOffset').value; 
             if (!offsetVal) return alert('請選擇1號的狀態！');
             
             if(offsetVal.startsWith('W')) {
@@ -571,13 +631,10 @@
             let isExempt = exemptMap.hasOwnProperty(day);
             let exemptName = isExempt ? (exemptMap[day] || '免出勤日') : '';
 
-            // 決定這天原本是「該上班」還是「該休假」
             let dayType = 'work';
             if (shiftType === 'normal') {
-                // 常日班直接抓行事曆 (六日排休)
                 dayType = isWeekend ? 'off' : 'work';
             } else {
-                // 輪班制套用數學公式推算
                 let mod = (day - 1 + startOffset) % cycleLength;
                 dayType = sequence[mod]; 
             }
@@ -663,15 +720,22 @@
         
         let currentShiftRate = 0, prevShiftRate = 0;
         let OT_multiplier_rest = 0, OT_multiplier_national = 0;
+        
+        // 💡 判斷當月與上月的班別名稱，用於文字顯示
+        let prevShiftName = "", currShiftName = "";
 
         if (shiftType === 'normal') { 
             OT_multiplier_rest = 38 / 3; 
             OT_multiplier_national = 8;  
         } else { 
             currentShiftRate = shiftType === 'day' ? 100 : 200;
+            // 上月費率自動反向計算
             prevShiftRate = shiftType === 'day' ? 200 : 100;
             OT_multiplier_rest = 18.04; 
             OT_multiplier_national = 8 + (4/3)*2; 
+            
+            currShiftName = shiftType === 'day' ? "(日班)" : "(夜班)";
+            prevShiftName = shiftType === 'day' ? "(夜班)" : "(日班)";
         }
 
         document.getElementById('rate_rest').innerText = Math.round(hourlyRate * OT_multiplier_rest).toLocaleString();
@@ -729,10 +793,11 @@
         document.getElementById('resLeave').innerText = Math.round(totalLeaveDeduction).toLocaleString();
         document.getElementById('resCompLeave').innerText = compLeaveCount;
         
+        // 💡 加入 (日班) / (夜班) 標示
         if(shiftType === 'normal'){
             document.getElementById('resShiftDaysDetail').innerHTML = `常日班無輪班津貼`;
         } else {
-            document.getElementById('resShiftDaysDetail').innerHTML = `上月 x${prevMonthShiftDays}天 / 本月 x${currentMonthShiftDays}天`;
+            document.getElementById('resShiftDaysDetail').innerHTML = `上月 x${prevMonthShiftDays}天<span style="color:#2196F3; font-weight:bold;">${prevShiftName}</span> / 本月 x${currentMonthShiftDays}天<span style="color:#2196F3; font-weight:bold;">${currShiftName}</span>`;
         }
         
         document.getElementById('resTotal').innerText = Math.round(finalSalary).toLocaleString();
