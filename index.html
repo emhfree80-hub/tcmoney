@@ -74,7 +74,6 @@
 
         .remark { width: 90px !important; background: transparent !important; border: 1px dashed var(--divider) !important; color: var(--text-secondary) !important;}
 
-        /* 🍎 新增：iOS 分段按鈕 (Segmented Control) */
         .segmented-control {
             display: flex; background-color: #E5E5EA; border-radius: 8px; padding: 3px; width: 100%; box-sizing: border-box;
         }
@@ -133,7 +132,6 @@
             background-color: rgba(0,0,0,0.03); border-radius: 6px; color: var(--text-primary); text-align: left;
         }
 
-        /* 🍎 修改：淡雅的結算英雄區塊 */
         .wallet-card {
             background: #F4F7FB; border: 1px solid #D1D8E0;
             border-radius: 20px; padding: 30px 20px; text-align: center;
@@ -142,6 +140,12 @@
         .wallet-title { font-size: 15px; color: var(--text-secondary); margin: 0 0 5px 0; font-weight: 600;}
         .wallet-amount { font-size: 46px; font-weight: 700; margin: 0; letter-spacing: -1px; color: var(--apple-blue);}
         .wallet-sub { background: #FFFFFF; display: inline-block; padding: 8px 16px; border-radius: 20px; font-size: 13px; margin-top: 15px; font-weight: 600; color: var(--text-primary); border: 1px solid var(--divider); box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
+
+        /* 💡 恢復並美化加班費率提示框 */
+        .rate-hint-box {
+            background: #F2F8FF; border: 1px solid #D1E5FF; border-radius: 12px;
+            padding: 15px; margin-bottom: 20px; font-size: 13px; color: #005BB5; line-height: 1.6;
+        }
 
         .summary-list { font-size: 15px; line-height: 1.8; }
         .summary-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--divider); }
@@ -323,6 +327,18 @@
                 </div>
             </div>
 
+            <div class="rate-hint-box">
+                <strong style="display:block; margin-bottom:6px;">💡 當前班別加班費率 (系統自動對應)</strong>
+                <div style="display:flex; justify-content: space-between; margin-bottom:4px;">
+                    <span>一般休假日加班：</span>
+                    <strong><span id="rate_rest">0</span> 元/天</strong>
+                </div>
+                <div style="display:flex; justify-content: space-between;">
+                    <span>國定與免出勤日：</span>
+                    <strong><span id="rate_national">0</span> 元/天</strong>
+                </div>
+            </div>
+
             <div class="ios-card" style="padding: 20px 25px;">
                 <h3 style="font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid var(--divider); padding-bottom: 10px;">薪資結算明細</h3>
                 <div class="summary-list">
@@ -416,7 +432,6 @@
         handleShiftChange();
     };
 
-    // 💡 取得當前班別的值 (對應新的 Radio 按鈕)
     function getShiftValue() {
         const checked = document.querySelector('input[name="shiftType"]:checked');
         return checked ? checked.value : 'night';
@@ -568,7 +583,7 @@
             d_subtotal_val: document.getElementById('d_subtotal_val').value, d_leave_deduct_hours: document.getElementById('d_leave_deduct_hours').value,
             d_leave_comp_hours: document.getElementById('d_leave_comp_hours').value,
             
-            shiftType: getShiftValue(), // 💡 儲存選中的 Radio
+            shiftType: getShiftValue(), 
             prevMonthShiftDays: document.getElementById('prevMonthShiftDays').value,
             workDays: document.getElementById('workDays').value, offDays: document.getElementById('offDays').value,
             statutoryHolidays: document.getElementById('statutoryHolidays').value, exemptDays: document.getElementById('exemptDays').value,
@@ -595,7 +610,6 @@
 
         if (data.userName) document.getElementById('userName').value = data.userName;
         
-        // 💡 恢復 Radio 選擇狀態
         if (data.shiftType) {
             let rb = document.querySelector(`input[name="shiftType"][value="${data.shiftType}"]`);
             if(rb) rb.checked = true;
@@ -627,7 +641,6 @@
             document.getElementById('calendar-container').innerHTML = ""; document.getElementById('summaryPanel').style.display = "none"; 
             document.getElementById('btnCalc').style.display = "none"; document.getElementById('btnExportCal').style.display = "none";
             
-            // 💡 新建時預設為夜輪班
             document.getElementById('shift_night').checked = true;
             handleShiftChange();
             document.getElementById('recordSelector').value = "";
@@ -880,6 +893,7 @@
             prevShiftName = shiftType === 'day' ? "夜班" : "日班";
         }
 
+        // 💡 恢復計算加班費率顯示
         document.getElementById('rate_rest').innerText = Math.round(hourlyRate * OT_multiplier_rest).toLocaleString();
         document.getElementById('rate_national').innerText = Math.round(hourlyRate * OT_multiplier_national).toLocaleString();
 
@@ -949,7 +963,6 @@
 
         document.getElementById('resDeductDetail').innerText = dedDetails.length > 0 ? `(${dedDetails.join(' + ')})` : '';
         
-        // 💡 修改：勤務津貼明細附註日班/夜班費率
         document.getElementById('resShiftDetail').innerText = shiftType === 'normal' ? 
             `(常日班無輪班津貼)` : 
             `(上月 x${prevMonthShiftDays}天(${prevShiftName}) + 本月 x${currentMonthShiftDays}天(${currShiftName}) / 日班100 夜班200)`;
