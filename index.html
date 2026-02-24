@@ -22,7 +22,7 @@
         body { font-family: "Microsoft JhengHei", Arial, sans-serif; background-color: #F4F6F8; margin: 0; padding: 20px; color: var(--text-main); }
         .container { max-width: 1100px; margin: auto; background: white; padding: 20px 30px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); position: relative; }
         
-        .file-manager { background: #E8EAF6; padding: 10px 15px; border-radius: 6px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; border: 1px solid #C5CAE9; }
+        .file-manager { background: #E8EAF6; padding: 12px 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #C5CAE9; }
         .file-manager select { padding: 6px; border-radius: 4px; border: 1px solid #9FA8DA; background: #fff; font-weight: bold; }
         .btn-file { background: #3F51B5; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 13px; cursor: pointer; font-weight: bold; }
         .btn-file:hover { background: #303F9F; }
@@ -31,6 +31,16 @@
         .btn-auto { background: #FF9800; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; float: right; margin-top: -3px; }
         
         h1, h2, h3 { color: var(--primary); font-weight: 600; }
+        
+        .privacy-notice {
+            background-color: #E8F5E9; border: 1px solid #A5D6A7; color: #2E7D32;
+            padding: 12px; border-radius: 6px; font-size: 13.5px; margin-bottom: 20px; line-height: 1.6;
+        }
+        .export-hint {
+            font-size: 13.5px; color: #546E7A; margin-top: 20px; margin-bottom: 8px; text-align: center;
+            background: #ECEFF1; padding: 10px; border-radius: 4px; border: 1px dashed #B0BEC5;
+        }
+
         .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
         .salary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #FAFAFA; padding: 15px; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 20px; }
         .salary-col h4 { margin-top: 0; color: #546E7A; border-bottom: 2px solid #CFD8DC; padding-bottom: 5px; }
@@ -71,13 +81,12 @@
         .summary-item { font-size: 15px; margin-bottom: 8px; color: #555; }
         .summary-item strong { color: var(--text-main); font-size: 16px; }
         .btn-calc { width: 100%; font-size: 16px; padding: 12px; margin-top: 20px; background-color: #37474F; }
-        .btn-export { width: 100%; font-size: 16px; padding: 12px; margin-top: 10px; background-color: #E65100; }
+        .btn-export { width: 100%; font-size: 16px; padding: 12px; margin-top: 5px; background-color: #E65100; }
         .btn-export:hover { background-color: #EF6C00; }
         .divider { border-top: 1px dashed #CFD8DC; margin: 15px 0; }
         
         .rate-box { background: #E8F5E9; border: 1px solid #A5D6A7; padding: 10px; border-radius: 4px; margin-top: 15px; font-size: 13px; color: #2E7D32; }
 
-        /* --- 回饋系統專用樣式 --- */
         .fab-feedback {
             position: fixed; bottom: 20px; right: 20px;
             background-color: #FF5722; color: white;
@@ -115,12 +124,10 @@
         }
         .btn-go-form:hover { background-color: #303F9F; }
 
-        /* --- 手機版專用 RWD 佈局 --- */
         @media (max-width: 768px) {
             body { padding: 10px; padding-bottom: 70px; }
             .container { padding: 15px 15px; }
             h1 { font-size: 20px; }
-            .file-manager { padding: 8px; justify-content: space-between; }
             .grid-layout, .salary-grid { grid-template-columns: 1fr; gap: 10px; }
             .form-group { flex-wrap: wrap; margin-bottom: 12px; }
             .form-group label, .form-group label.long { width: 100%; margin-bottom: 4px; font-size: 14px; }
@@ -131,6 +138,7 @@
             .status-text { font-size: 10px; margin-bottom: 2px; }
             select.action-select { font-size: 11px; padding: 0; }
             .fab-feedback { bottom: 15px; right: 15px; padding: 10px 16px; font-size: 14px; }
+            .privacy-notice, .export-hint { font-size: 12px; }
         }
     </style>
 </head>
@@ -139,14 +147,27 @@
 <div class="container" id="app-container">
     
     <div class="file-manager" id="ignore-in-export">
-        <span style="font-weight: bold; color: #3F51B5;">📁 班表紀錄：</span>
-        <select id="recordSelector"><option value="">-- 選擇歷史月份 --</option></select>
-        <button class="btn-file" onclick="loadRecord()">📥 讀取</button>
-        <button class="btn-file btn-save" onclick="saveRecord()">💾 儲存當月進度</button>
-        <button class="btn-file" style="background:#546E7A;" onclick="newRecord()">📝 建立新月份</button>
+        <div style="display: flex; flex-wrap: wrap; gap: 15px; width: 100%; align-items: center;">
+            <div style="display:flex; align-items:center; gap:5px;">
+                <label style="font-weight:bold; color:#E65100;">👤 姓名：</label>
+                <input type="text" id="userName" placeholder="請輸入姓名" style="width: 120px; padding:6px; border-radius:4px; border:1px solid #B0BEC5; font-weight:bold; font-size: 14px;">
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap: wrap;">
+                <span style="font-weight: bold; color: #3F51B5; margin-left: 10px;">📁 紀錄：</span>
+                <select id="recordSelector" style="max-width: 180px;"><option value="">-- 選擇歷史紀錄 --</option></select>
+                <button class="btn-file" onclick="loadRecord()">📥 讀取</button>
+                <button class="btn-file btn-save" onclick="saveRecord()">💾 儲存進度</button>
+                <button class="btn-file" style="background:#546E7A;" onclick="newRecord()">📝 新建</button>
+            </div>
+        </div>
     </div>
 
     <h1>薪資設定</h1>
+
+    <div class="privacy-notice" id="ignore-in-export-privacy">
+        <strong>🔒 資料安全與隱私承諾：</strong> 本工具為完全離線的單機版網頁。您輸入的所有薪資與班表資料，皆<strong>僅儲存於您目前使用的這台設備瀏覽器中</strong> (LocalStorage)，不會上傳至任何雲端伺服器，開發者也無法獲取您的資料，請安心使用。<br>
+        <span style="color: #D32F2F; font-size: 12px; font-weight: bold;">⚠️ 注意：公用電腦因多人使用，存檔前務必確認上方「姓名」欄位已填寫，以免覆蓋他人紀錄。</span>
+    </div>
 
     <div class="salary-grid" id="ignore-salary-grid">
         <div class="salary-col">
@@ -217,7 +238,6 @@
                     <select id="cycleStartOffset" class="normal-text" style="width: 140px; font-weight: bold; border-color:#3F51B5;">
                         </select>
                 </div>
-                
             </div>
 
             <div class="section">
@@ -232,6 +252,8 @@
         <button class="action-btn export-hide" id="btn-gen-cal" onclick="generateCalendar()" style="width: 100%; font-size: 16px; padding: 12px; margin-top:15px; background-color:#3F51B5;">📊 產生月曆班表</button>
 
         <div id="calendar-container"></div>
+        
+        <button class="action-btn btn-export export-hide" onclick="exportCalendarImage()" style="display: none; background-color: #00897B; margin-top: 15px;" id="btnExportCal">📸 單獨儲存班表圖片 (僅月曆)</button>
 
         <button class="action-btn btn-calc export-hide" onclick="calculateSalary()" style="display: none;" id="btnCalc">💰 計算當月薪資</button>
 
@@ -268,7 +290,10 @@
                 </div>
             </div>
             
-            <button class="action-btn btn-export export-hide" onclick="exportImage()">📸 儲存為圖片報表 (僅匯出排班與結算)</button>
+            <div class="export-hint export-hide">
+                💡 <strong>強烈建議備份：</strong> 因公用電腦資料易遺失，算完薪資後，請務必點擊下方按鈕將結果<strong>「儲存為圖片」</strong>，作為最保險的核對憑證喔！
+            </div>
+            <button class="action-btn btn-export export-hide" onclick="exportImage()">📸 儲存完整薪資報表圖片 (含班表與結算)</button>
         </div>
     </div>
 </div>
@@ -285,7 +310,6 @@
             ✨ <b>許願想要新增的功能</b><br>
             ❓ <b>其他遇到的問題或建議</b>
         </p>
-        
         <a href="https://forms.gle/ZdqL4eXy2gAyJwBb6" target="_blank" class="btn-go-form" onclick="closeFeedback()">👉 前往填寫表單</a>
     </div>
 </div>
@@ -294,8 +318,6 @@
     function openFeedback() { document.getElementById('feedbackModal').style.display = 'flex'; }
     function closeFeedback() { document.getElementById('feedbackModal').style.display = 'none'; }
 
-    // 💡 內建系統級「台灣國定假日資料庫 (2025~2027)」
-    // 將補假與正日精準區分，避免名稱重複
     const taiwanHolidays = {
         2025: { 
             1: { 1: "元旦", 27: "除夕(補假)", 28: "除夕", 29: "初一", 30: "初二", 31: "初三" }, 
@@ -390,23 +412,33 @@
 
     function updateRecordDropdown() {
         const selector = document.getElementById('recordSelector');
-        selector.innerHTML = '<option value="">-- 選擇歷史月份 --</option>';
+        selector.innerHTML = '<option value="">-- 選擇歷史紀錄 --</option>';
         const records = JSON.parse(localStorage.getItem('shiftAppRecords') || '{}');
         Object.keys(records).sort().reverse().forEach(key => {
             const opt = document.createElement('option');
-            opt.value = key; opt.textContent = key + " 班表";
+            opt.value = key; 
+            // 處理新舊版本的 Key 顯示名稱
+            opt.textContent = key.includes('_') ? key.replace('_', ' ') + ' 班表' : '未命名 ' + key + ' 班表';
             selector.appendChild(opt);
         });
     }
 
     function saveRecord() {
+        let userName = document.getElementById('userName').value.trim();
+        if(!userName) {
+            alert("請先輸入上方「姓名」欄位，以防公用電腦存檔互相覆蓋！");
+            document.getElementById('userName').focus();
+            return;
+        }
+
         const year = document.getElementById('year').value;
         const month = document.getElementById('month').value;
         if(!year || !month) return alert("請輸入年份與月份！");
         
-        const key = `${year}-${month.toString().padStart(2, '0')}`;
+        // 💡 存檔 Key 加入姓名
+        const key = `${userName}_${year}-${month.toString().padStart(2, '0')}`;
         const data = {
-            year, month,
+            userName, year, month,
             s_base: document.getElementById('s_base').value, s_supervisor: document.getElementById('s_supervisor').value,
             s_position: document.getElementById('s_position').value, s_tcm: document.getElementById('s_tcm').value,
             s_safety: document.getElementById('s_safety').value, s_transport: document.getElementById('s_transport').value,
@@ -431,13 +463,13 @@
         let records = JSON.parse(localStorage.getItem('shiftAppRecords') || '{}');
         records[key] = data;
         localStorage.setItem('shiftAppRecords', JSON.stringify(records));
-        alert(`已成功儲存 ${key} 的進度！`);
+        alert(`已成功儲存 ${userName} ${year}-${month} 的進度！`);
         updateRecordDropdown(); document.getElementById('recordSelector').value = key;
     }
 
     function loadRecord() {
         const key = document.getElementById('recordSelector').value;
-        if(!key) return alert("請先選擇月份！");
+        if(!key) return alert("請先選擇紀錄！");
         const data = JSON.parse(localStorage.getItem('shiftAppRecords') || '{}')[key];
         if(!data) return;
 
@@ -445,6 +477,9 @@
             const el = document.getElementById(k);
             if(el && typeof data[k] !== 'object') el.value = data[k];
         });
+
+        // 恢復姓名
+        if (data.userName) document.getElementById('userName').value = data.userName;
 
         handleShiftChange();
         if (data.cycleStartOffset) document.getElementById('cycleStartOffset').value = data.cycleStartOffset;
@@ -470,6 +505,7 @@
             
             document.getElementById('prevMonthShiftDays').value = "0"; document.getElementById('calendar-container').innerHTML = "";
             document.getElementById('summaryPanel').style.display = "none"; document.getElementById('btnCalc').style.display = "none";
+            document.getElementById('btnExportCal').style.display = "none";
             const s = document.getElementById('shiftType');
             if(s.value !== 'normal') s.value = s.value === 'day' ? 'night' : 'day';
             handleShiftChange();
@@ -477,11 +513,71 @@
         }
     }
 
+    // 💡 新增：單獨匯出月曆的函數
+    function exportCalendarImage() {
+        let userName = document.getElementById('userName').value.trim() || '未命名';
+        const container = document.getElementById('calendar-container');
+        if(!container.innerHTML) return alert('請先產生班表！');
+
+        const selects = container.querySelectorAll('.action-select');
+        const textSpans = []; 
+        
+        selects.forEach(s => {
+            s.style.display = 'none'; 
+            const span = document.createElement('div');
+            span.innerText = s.options[s.selectedIndex].text; 
+            span.style.color = s.style.color || 'var(--text-main)';
+            span.style.fontSize = '12px';
+            span.style.fontWeight = 'bold';
+            span.style.textAlign = 'center';
+            span.style.marginTop = 'auto';
+            span.style.padding = '4px 0';
+            s.parentNode.appendChild(span);
+            textSpans.push({ select: s, span: span });
+        });
+
+        const year = document.getElementById('year').value;
+        const month = document.getElementById('month').value;
+        const shiftSelect = document.getElementById('shiftType');
+        let shiftText = shiftSelect.options[shiftSelect.selectedIndex].text.split(' ')[0];
+        
+        const titleDiv = document.createElement('div');
+        titleDiv.id = 'export-cal-title';
+        titleDiv.innerHTML = `<h2 style="text-align: center; color: #3F51B5; margin-bottom: 15px; font-size: 24px; border-bottom: 2px solid #E8EAF6; padding-bottom: 10px;">👤 ${userName} - 📅 ${year} 年 ${month} 月 班表 (${shiftText})</h2>`;
+        container.insertBefore(titleDiv, container.firstChild);
+
+        const originalWidth = container.style.width;
+        const originalPadding = container.style.padding;
+        const originalBg = container.style.background;
+        container.style.width = '1000px';
+        container.style.padding = '20px';
+        container.style.background = 'white';
+
+        html2canvas(container, { scale: 2, windowWidth: 1200, backgroundColor: '#ffffff' }).then(canvas => {
+            textSpans.forEach(item => {
+                item.select.style.display = ''; 
+                item.span.remove(); 
+            });
+            titleDiv.remove(); 
+            
+            container.style.width = originalWidth; 
+            container.style.padding = originalPadding;
+            container.style.background = originalBg;
+            
+            const d = new Date();
+            const dateStr = `${d.getFullYear()}${(d.getMonth()+1).toString().padStart(2,'0')}${d.getDate().toString().padStart(2,'0')}`;
+            const link = document.createElement('a');
+            link.download = `${userName}-${year}-${month.padStart(2, '0')}-班表-${dateStr}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    }
+
     function exportImage() {
+        let userName = document.getElementById('userName').value.trim() || '未命名';
         const container = document.getElementById('export-zone');
         
-        // 加入 ignore-in-export-fab，隱藏右下角回饋按鈕
-        const hides = document.querySelectorAll('.export-hide, #ignore-grid-layout, #ignore-in-export-fab');
+        const hides = document.querySelectorAll('.export-hide, #ignore-grid-layout, #ignore-in-export-fab, #ignore-in-export-privacy');
         hides.forEach(el => el.style.display = 'none');
         
         const selects = document.querySelectorAll('.action-select');
@@ -506,9 +602,10 @@
         const shiftSelect = document.getElementById('shiftType');
         let shiftText = shiftSelect.options[shiftSelect.selectedIndex].text.split(' ')[0];
         
+        // 💡 標題加入使用者姓名
         const titleDiv = document.createElement('div');
         titleDiv.id = 'export-title';
-        titleDiv.innerHTML = `<h2 style="text-align: center; color: #3F51B5; margin-bottom: 20px; font-size: 26px; border-bottom: 2px solid #E8EAF6; padding-bottom: 10px;">📅 ${year} 年 ${month} 月 班表與薪資結算 (${shiftText})</h2>`;
+        titleDiv.innerHTML = `<h2 style="text-align: center; color: #3F51B5; margin-bottom: 20px; font-size: 26px; border-bottom: 2px solid #E8EAF6; padding-bottom: 10px;">👤 ${userName} - 📅 ${year} 年 ${month} 月 班表與薪資結算 (${shiftText})</h2>`;
         container.insertBefore(titleDiv, container.firstChild);
 
         const addItems = [
@@ -573,7 +670,8 @@
             const d = new Date();
             const dateStr = `${d.getFullYear()}${(d.getMonth()+1).toString().padStart(2,'0')}${d.getDate().toString().padStart(2,'0')}`;
             const link = document.createElement('a');
-            link.download = `${year}-${month.padStart(2, '0')}-${dateStr}.png`;
+            // 💡 下載檔名加入使用者姓名
+            link.download = `${userName}-${year}-${month.padStart(2, '0')}-薪資結算-${dateStr}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
         });
@@ -625,7 +723,6 @@
         
         const statutoryHolidays = parseDateString(document.getElementById('statutoryHolidays').value);
         
-        // 💡 取得背景隱藏的「系統國定假日」與「使用者自訂免出勤日」
         const internalHolidays = taiwanHolidays[year]?.[month] || {};
         const userExemptMap = parseHolidayMap(document.getElementById('exemptDays').value);
 
@@ -669,13 +766,11 @@
             let dayOfWeek = (firstDayOfWeek + day - 1) % 7;
             let isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
             
-            // 判斷放假邏輯
             let isStatutory = statutoryHolidays.includes(day);
             let isInternalHoliday = !!internalHolidays[day];
             let isUserExempt = userExemptMap.hasOwnProperty(day);
             let isExempt = isInternalHoliday || isUserExempt;
             
-            // 決定顯示名稱：優先顯示使用者自訂，再來是系統內建，最後才是預設字眼
             let exemptName = userExemptMap[day] || internalHolidays[day] || '免出勤日';
 
             let dayType = 'work';
@@ -727,6 +822,7 @@
         html += '</div>';
         document.getElementById('calendar-container').innerHTML = html;
         document.getElementById('btnCalc').style.display = 'block';
+        document.getElementById('btnExportCal').style.display = 'block'; // 💡 顯示單獨儲存班表按鈕
         document.getElementById('summaryPanel').style.display = 'none';
         
         calculateSalary();
@@ -753,7 +849,6 @@
         
         const statutoryHolidays = parseDateString(document.getElementById('statutoryHolidays').value);
         
-        // 💡 薪資計算時也要將「系統假」與「自訂假」一起納入免出勤加班費率的判斷
         const internalHolidays = taiwanHolidays[year]?.[month] || {};
         const userExemptMap = parseHolidayMap(document.getElementById('exemptDays').value);
 
@@ -854,6 +949,7 @@
 
         document.getElementById('summaryPanel').style.display = 'block';
         document.querySelector('.btn-export').style.display = 'block';
+        document.querySelector('.export-hint').style.display = 'block'; 
         document.getElementById('summaryPanel').scrollIntoView({ behavior: 'smooth' });
     }
 </script>
