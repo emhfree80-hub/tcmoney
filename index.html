@@ -15,7 +15,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
-        /* 🍎 Apple HIG 系統變數 */
         :root {
             --bg-body: #F2F2F7;
             --bg-card: #FFFFFF;
@@ -28,7 +27,7 @@
             --apple-orange: #FF9500;
             --divider: #E5E5EA;
             /* 💡 增加辨識度：調深上班日的藍色底色 */
-            --work-bg: #D0E6F8; 
+            --work-bg: #D4EBF9; 
         }
 
         body { 
@@ -122,7 +121,7 @@
 
         .calendar { display: grid; grid-template-columns: repeat(7, 1fr); border-radius: 12px; overflow: hidden; background: var(--divider); gap: 1px; margin-top: 20px; border: 1px solid var(--divider);}
         .cal-header { background: var(--bg-card); color: var(--text-secondary); text-align: center; padding: 12px 0; font-size: 13px; font-weight: 600; }
-        .cal-cell { min-height: 90px; padding: 8px; display: flex; flex-direction: column; background-color: var(--bg-card); }
+        .cal-cell { min-height: 90px; padding: 8px; display: flex; flex-direction: column; background-color: var(--bg-card); transition: background-color 0.2s;}
         .cal-cell.active-work { background-color: var(--work-bg); }
         .cal-cell.empty { background-color: #FAFAFC; }
         
@@ -140,7 +139,8 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03); margin-bottom: 25px;
         }
         .wallet-title { font-size: 15px; color: var(--text-secondary); margin: 0 0 5px 0; font-weight: 600;}
-        .wallet-amount { font-size: 46px; font-weight: 700; margin: 0; letter-spacing: -1px; color: var(--apple-blue);}
+        /* 💡 強制 $ 與數字同行 */
+        .wallet-amount { font-size: 46px; font-weight: 700; margin: 0; letter-spacing: -1px; color: var(--apple-blue); white-space: nowrap;}
         .wallet-sub { background: #FFFFFF; display: inline-block; padding: 8px 16px; border-radius: 20px; font-size: 13px; margin-top: 15px; font-weight: 600; color: var(--text-primary); border: 1px solid var(--divider); box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
 
         .rate-hint-box {
@@ -152,8 +152,8 @@
         .summary-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--divider); }
         .summary-row:last-child { border-bottom: none; }
         .sum-label { color: var(--text-secondary); }
-        /* 💡 確保 $ 符號與數字在手機上不換行 */
-        .sum-val { font-weight: 600; text-align: right; white-space: nowrap; }
+        /* 💡 強制 $ 與數字同行 */
+        .sum-val { font-weight: 600; text-align: right; white-space: nowrap;}
         .sum-detail { font-size: 12px; color: #A1A1A6; display: block; font-weight: 400;}
 
         .privacy-notice, .export-hint {
@@ -187,17 +187,16 @@
             .date-num { font-size: 16px; margin-bottom: 2px; }
             .status-text { font-size: 10px; margin-bottom: 2px; }
             select.action-select { font-size: 11px; padding: 2px 4px; background-position: right 2px center; background-size: 10px;}
-            .wallet-amount { font-size: 38px; white-space: nowrap; }
+            .wallet-amount { font-size: 36px; white-space: nowrap; }
         }
     </style>
 </head>
 <body>
-
 <div class="container" id="app-container">
     
     <div class="file-manager" id="ignore-in-export">
         <label style="font-weight:600; color:var(--text-secondary); font-size:14px;">👤 姓名：</label>
-        <input type="text" id="userName" placeholder="填寫姓名防覆蓋" style="width: 100px; background:var(--bg-body); padding:6px 10px;">
+        <input type="text" id="userName" placeholder="填寫防覆蓋" style="width: 100px; background:var(--bg-body); padding:6px 10px;">
         <div style="width: 1px; height: 20px; background: var(--divider); margin: 0 5px;"></div>
         <select id="recordSelector" style="max-width: 150px; background-color: var(--bg-body); border: none; font-weight: 600;"><option value="">選擇歷史紀錄</option></select>
         <button class="btn-file" onclick="loadRecord()">讀取</button>
@@ -396,7 +395,7 @@
     </div>
     
     <div class="export-hide" style="margin-top: 40px; padding-top: 20px; border-top: 2px dashed var(--divider);">
-        <h3 style="color: var(--text-secondary); font-size: 16px; text-align: center; margin-bottom: 20px;">🧰 TCM超好用資訊</h3>
+        <h3 style="color: var(--text-secondary); font-size: 16px; text-align: center; margin-bottom: 20px;">🧰 TCM 超好用資訊</h3>
         
         <details class="ios-details">
             <summary>💡 我今年特休有幾天？</summary>
@@ -454,7 +453,6 @@
         <a href="https://forms.gle/ZdqL4eXy2gAyJwBb6" target="_blank" class="action-btn" style="text-decoration:none;" onclick="closeFeedback()">填寫表單</a>
     </div>
 </div>
-
 <script>
     function openFeedback() { document.getElementById('feedbackModal').style.display = 'flex'; }
     function closeFeedback() { document.getElementById('feedbackModal').style.display = 'none'; }
@@ -504,25 +502,16 @@
     function calculateAnnualLeave() {
         const hireDateStr = document.getElementById('hireDate').value;
         const resultEl = document.getElementById('leaveResult');
-        if(!hireDateStr) {
-            resultEl.innerText = '';
-            return;
-        }
+        if(!hireDateStr) { resultEl.innerText = ''; return; }
+        
         const hireDate = new Date(hireDateStr);
         const today = new Date();
         
         let years = today.getFullYear() - hireDate.getFullYear();
         let months = today.getMonth() - hireDate.getMonth();
-        if (months < 0 || (months === 0 && today.getDate() < hireDate.getDate())) {
-            years--;
-            months += 12;
-        }
-        if (today.getDate() < hireDate.getDate()) {
-            months--;
-        }
-        if (months < 0) {
-            months += 12; 
-        }
+        if (months < 0 || (months === 0 && today.getDate() < hireDate.getDate())) { years--; months += 12; }
+        if (today.getDate() < hireDate.getDate()) months--;
+        if (months < 0) months += 12; 
 
         let totalMonths = years * 12 + months;
         let leaveDays = 0;
@@ -621,10 +610,10 @@
             let isExempt = userExemptMap.hasOwnProperty(day) || !!internalHolidays[day];
 
             if (isWorkDay) {
-                let isAttended = !(["事假", "病假", "生理假", "換休假", "公假", "特休假", "婚假", "喪假"].includes(action));
+                let isAttended = !(["事假", "病假", "生理假", "換休假", "公假", "特休假", "婚假", "喪假", "國定假日休假"].includes(action));
                 if (isAttended && isShiftRange && shiftType !== 'normal') currentMonthShiftDays++;
             } else {
-                if (action === "帆宣換休") {
+                if (action === "帆宣換休" || action === "國定假日出勤") {
                     if (isShiftRange && shiftType !== 'normal') currentMonthShiftDays++;
                 } else if (action === "帆宣換錢") {
                     if (isExempt || isStatutory) totalOtPay += hourlyRate * OT_multiplier_national;
@@ -841,17 +830,22 @@
         return map;
     }
 
+    // 💡 邏輯升級：依據選單更新儲存格顏色
     function updateCellState(selectObj) {
         const val = selectObj.value; const cell = selectObj.closest('.cal-cell'); const baseType = cell.getAttribute('data-type'); 
 
         if (['事假', '病假', '生理假'].includes(val)) selectObj.style.color = 'var(--apple-red)';
-        else if (['換休假', '公假', '特休假', '婚假', '喪假'].includes(val)) selectObj.style.color = 'var(--apple-orange)';
-        else if (['帆宣換休', '帆宣換錢', '業主10', '業主8'].includes(val)) selectObj.style.color = 'var(--apple-green)';
+        else if (['換休假', '公假', '特休假', '婚假', '喪假', '國定假日休假'].includes(val)) selectObj.style.color = 'var(--apple-orange)';
+        else if (['帆宣換休', '帆宣換錢', '業主10', '業主8', '國定假日出勤'].includes(val)) selectObj.style.color = 'var(--apple-green)';
         else selectObj.style.color = 'var(--text-primary)';
 
         let isActuallyWorking = false;
-        if (baseType === 'work') { isActuallyWorking = !(['事假', '病假', '生理假', '換休假', '公假', '特休假', '婚假', '喪假'].includes(val)); } 
-        else { isActuallyWorking = ['帆宣換休', '帆宣換錢', '業主10', '業主8'].includes(val); }
+        if (baseType === 'work') { 
+            isActuallyWorking = !(['事假', '病假', '生理假', '換休假', '公假', '特休假', '婚假', '喪假', '國定假日休假'].includes(val)); 
+        } 
+        else { 
+            isActuallyWorking = ['帆宣換休', '帆宣換錢', '業主10', '業主8', '國定假日出勤'].includes(val); 
+        }
 
         if (isActuallyWorking) cell.classList.add('active-work'); else cell.classList.remove('active-work');
     }
@@ -901,9 +895,10 @@
             let isInternalHoliday = !!internalHolidays[day];
             let isUserExempt = userExemptMap.hasOwnProperty(day);
             let isExempt = isInternalHoliday || isUserExempt;
+            
             let exemptName = userExemptMap[day] || internalHolidays[day] || '免出勤日';
 
-            // 💡 神級判斷邏輯：如果常日班遇到國定假日，強制轉為排休狀態
+            // 💡 神級判斷邏輯：如果常日班遇到國定假日，強制轉為排休狀態，但不改掉紅字名稱
             let dayType = 'work';
             if (shiftType === 'normal') {
                 dayType = (isWeekend || isStatutory || isExempt) ? 'off' : 'work';
@@ -915,45 +910,76 @@
             let bgClass = dayType === 'work' ? 'active-work' : '';
             let statusTextHtml = '';
 
-            // 💡 國定假日的精準顯示邏輯
-            if (shiftType === 'normal' && (isStatutory || isExempt) && !isWeekend) {
-                statusTextHtml = '<div class="status-text txt-red">國定假日休假</div>';
-            } else if (shiftType !== 'normal' && dayType === 'work' && (isStatutory || isExempt)) {
-                statusTextHtml = '<div class="status-text txt-red">國定假日出勤</div>';
-            } else if (isStatutory) {
+            // 💡 保留原有名稱的紅字邏輯
+            if (isStatutory) {
                 statusTextHtml = '<div class="status-text txt-red">例假日</div>';
             } else if (isExempt) {
                 statusTextHtml = `<div class="status-text txt-red">${exemptName}</div>`;
             } else if (dayType === 'work') {
-                statusTextHtml = '<div class="status-text" style="color:var(--text-secondary);">應出勤</div>';
+                statusTextHtml = '<div class="status-text" style="color:var(--apple-blue);">應出勤</div>';
             } else {
                 statusTextHtml = '<div class="status-text" style="color:var(--text-secondary);">排休</div>';
             }
 
             let dateNumColor = (isWeekend || isStatutory || isExempt) ? 'color: var(--apple-red);' : 'color: var(--text-primary);';
 
-            let selectHtml = '';
+            let selectHtml = `<select class="action-select" id="action-${day}" onchange="updateCellState(this)">`;
+            
+            // 💡 國定假日選項自動帶入邏輯
             if (dayType === 'work') {
-                selectHtml = `<select class="action-select" id="action-${day}" onchange="updateCellState(this)">
-                    <option value="">正常出勤</option><option value="特休假">特休假(不扣薪)</option>
-                    <option value="換休假">換休假(不扣薪)</option><option value="公假">公假(不扣薪)</option>
-                    <option value="婚假">婚假(不扣薪)</option><option value="喪假">喪假(不扣薪)</option>
-                    <option value="事假">事假(全扣)</option><option value="病假">病假(半薪)</option>
-                    <option value="生理假">生理假(半薪)</option>
-                </select>`;
+                let defaultAction = "正常出勤";
+                if (isStatutory || isExempt) {
+                    if (shiftType === 'normal') defaultAction = "國定假日休假";
+                    else defaultAction = "國定假日出勤";
+                }
+                const workOptions = [
+                    {val: "正常出勤", label: "正常出勤"},
+                    {val: "國定假日出勤", label: "國定假日出勤(換休)"},
+                    {val: "國定假日休假", label: "國定假日休假(不扣薪)"},
+                    {val: "特休假", label: "特休假(不扣薪)"},
+                    {val: "換休假", label: "換休假(不扣薪)"},
+                    {val: "公假", label: "公假(不扣薪)"},
+                    {val: "婚假", label: "婚假(不扣薪)"},
+                    {val: "喪假", label: "喪假(不扣薪)"},
+                    {val: "事假", label: "事假(全扣)"},
+                    {val: "病假", label: "病假(半薪)"},
+                    {val: "生理假", label: "生理假(半薪)"}
+                ];
+                workOptions.forEach(opt => {
+                    let sel = (opt.val === defaultAction) ? "selected" : "";
+                    selectHtml += `<option value="${opt.val}" ${sel}>${opt.label}</option>`;
+                });
             } else {
-                selectHtml = `<select class="action-select" id="action-${day}" onchange="updateCellState(this)">
-                    <option value="">無加班</option><option value="帆宣換休">帆宣加班(換休)</option>
-                    <option value="帆宣換錢">帆宣加班(換錢)</option><option value="業主10">業主加班(10hr)</option>
-                    <option value="業主8">業主加班(8hr)</option>
-                </select>`;
+                // 如果是常日班的假日，或是輪班的排休日
+                let defaultAction = "";
+                if (shiftType === 'normal' && (isStatutory || isExempt) && !isWeekend) {
+                    defaultAction = "國定假日休假";
+                }
+                const offOptions = [
+                    {val: "", label: "無加班"},
+                    {val: "國定假日休假", label: "國定假日休假(不扣薪)"},
+                    {val: "帆宣換休", label: "帆宣加班(換休)"},
+                    {val: "帆宣換錢", label: "帆宣加班(換錢)"},
+                    {val: "業主10", label: "業主加班(10hr)"},
+                    {val: "業主8", label: "業主加班(8hr)"}
+                ];
+                offOptions.forEach(opt => {
+                    let sel = (opt.val === defaultAction) ? "selected" : "";
+                    selectHtml += `<option value="${opt.val}" ${sel}>${opt.label}</option>`;
+                });
             }
+            selectHtml += `</select>`;
+
             html += `<div class="cal-cell ${bgClass}" data-type="${dayType}" data-day="${day}">
                         <div class="date-num" style="${dateNumColor}">${day}</div>${statusTextHtml}${selectHtml}
                      </div>`;
         }
         html += '</div>';
         document.getElementById('calendar-container').innerHTML = html;
+        
+        // 初始渲染時立刻套用一次底色判定
+        document.querySelectorAll('.action-select').forEach(sel => updateCellState(sel));
+
         document.getElementById('btnCalc').style.display = 'block';
         document.getElementById('btnExportCal').style.display = 'block'; 
         document.getElementById('summaryPanel').style.display = 'none';
@@ -1039,19 +1065,19 @@
                 let isAttended = true;
                 if (action === "事假") { totalLeaveDeduction += dailyRate; isAttended = false; }
                 else if (action === "病假" || action === "生理假") { totalLeaveDeduction += (dailyRate * 0.5); isAttended = false; }
-                else if (['換休假', '公假', '特休假', '婚假', '喪假'].includes(action)) { 
+                else if (['換休假', '公假', '特休假', '婚假', '喪假', '國定假日休假'].includes(action)) { 
                     isAttended = false; if(action === "換休假") compLeaveUsedHours += hoursPerDay; 
                 }
                 
                 if (isAttended && isShiftRange && shiftType !== 'normal') currentMonthShiftDays++;
 
                 // 💡 輪班遇到國定假日且正常出勤，自動增加換休時數
-                if (isAttended && shiftType !== 'normal' && (isStatutory || isExempt)) {
+                if (action === "國定假日出勤") {
                     compLeaveAddHours += hoursPerDay;
                 }
 
             } else {
-                if (action === "帆宣換休") { 
+                if (action === "帆宣換休" || action === "國定假日出勤") { 
                     compLeaveAddHours += hoursPerDay; if (isShiftRange && shiftType !== 'normal') currentMonthShiftDays++; 
                 } else if (action === "帆宣換錢") { 
                     if (isExempt || isStatutory) { totalOtPay += hourlyRate * OT_multiplier_national; ot_national_days++; } 
