@@ -77,9 +77,47 @@
         
         .rate-box { background: #E8F5E9; border: 1px solid #A5D6A7; padding: 10px; border-radius: 4px; margin-top: 15px; font-size: 13px; color: #2E7D32; }
 
+        /* --- 回饋系統專用樣式 --- */
+        .fab-feedback {
+            position: fixed; bottom: 20px; right: 20px;
+            background-color: #FF5722; color: white;
+            border: none; border-radius: 50px;
+            padding: 12px 20px; font-size: 15px; font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            cursor: pointer; z-index: 1000;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        .fab-feedback:hover { background-color: #E64A19; transform: scale(1.05); }
+        
+        .feedback-modal-overlay {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 1001;
+            align-items: center; justify-content: center;
+        }
+        .feedback-modal {
+            background: white; padding: 25px; border-radius: 8px;
+            width: 90%; max-width: 400px; text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .feedback-modal h3 { margin-top: 0; color: #FF5722; }
+        .feedback-modal p { font-size: 14px; color: #555; line-height: 1.5; margin-bottom: 20px; }
+        .feedback-modal .btn-close {
+            position: absolute; top: 10px; right: 15px;
+            background: none; border: none; font-size: 20px;
+            color: #999; cursor: pointer;
+        }
+        .btn-go-form {
+            display: inline-block; background-color: #3F51B5; color: white;
+            padding: 10px 20px; text-decoration: none; border-radius: 4px;
+            font-weight: bold; font-size: 14px;
+        }
+        .btn-go-form:hover { background-color: #303F9F; }
+
         /* --- 手機版專用 RWD 佈局 --- */
         @media (max-width: 768px) {
-            body { padding: 10px; }
+            body { padding: 10px; padding-bottom: 70px; }
             .container { padding: 15px 15px; }
             h1 { font-size: 20px; }
             .file-manager { padding: 8px; justify-content: space-between; }
@@ -92,6 +130,7 @@
             .date-num { font-size: 15px; margin-bottom: 2px; }
             .status-text { font-size: 10px; margin-bottom: 2px; }
             select.action-select { font-size: 11px; padding: 0; }
+            .fab-feedback { bottom: 15px; right: 15px; padding: 10px 16px; font-size: 14px; }
         }
     </style>
 </head>
@@ -162,8 +201,8 @@
                 </div>
                 <div class="divider"></div>
                 <div class="form-group"><label class="long">年份 / 月份：</label>
-                    <input type="number" id="year" value="2026" style="width: 60px; text-align:center;" onchange="updateHolidays()"> / 
-                    <input type="number" id="month" value="2" min="1" max="12" style="width: 40px; text-align:center;" onchange="updateHolidays()">
+                    <input type="number" id="year" value="2026" style="width: 60px; text-align:center;"> / 
+                    <input type="number" id="month" value="2" min="1" max="12" style="width: 40px; text-align:center;">
                 </div>
                 
                 <div class="form-group" style="align-items: flex-start; display: flex;" id="cycle-setting-group">
@@ -184,8 +223,9 @@
             <div class="section">
                 <h3 style="margin-top:0;">🛑 法規假別設定</h3>
                 <div class="form-group"><label class="long">例假日 (逗號分隔)：</label><input type="text" class="normal-text" style="width:160px;" id="statutoryHolidays" placeholder="例: 5,12,19"></div>
-                <div class="form-group"><label class="long">國定/免出勤：</label><input type="text" class="normal-text" style="width:160px;" id="exemptDays" placeholder="例: 1-元旦, 16-初一"></div>
-                <p style="font-size: 11px; color: #888; margin: 4px 0 0 0;">(切換年月時，系統會自動帶入台灣國定假日)</p>
+                
+                <div class="form-group"><label class="long">額外免出勤日：</label><input type="text" class="normal-text" style="width:160px;" id="exemptDays" placeholder="例: 15-公司廠慶"></div>
+                <p style="font-size: 11px; color: #888; margin: 4px 0 0 0;">(系統已內建台灣國定假日與補假，此處僅需填寫額外的免出勤日)</p>
             </div>
         </div>
 
@@ -233,50 +273,51 @@
     </div>
 </div>
 
+<button class="fab-feedback" onclick="openFeedback()" id="ignore-in-export-fab">💬 意見回饋</button>
+
+<div class="feedback-modal-overlay" id="feedbackModal">
+    <div class="feedback-modal">
+        <button class="btn-close" onclick="closeFeedback()">×</button>
+        <h3>💬 幫助我們變得更好</h3>
+        <p>如果你在使用過程中發現 Bug，或是覺得有哪些地方可以改進，歡迎透過表單告訴我們！</p>
+        
+        <a href="這裡請貼上你的Google表單連結" target="_blank" class="btn-go-form" onclick="closeFeedback()">👉 前往填寫回饋</a>
+    </div>
+</div>
+
 <script>
-    // 💡 內建台灣 2025-2027 國定假日資料庫 (包含農曆過年與補假)
-    const holidayData = {
+    function openFeedback() { document.getElementById('feedbackModal').style.display = 'flex'; }
+    function closeFeedback() { document.getElementById('feedbackModal').style.display = 'none'; }
+
+    // 💡 內建系統級「台灣國定假日資料庫 (2025~2027)」
+    // 將補假與正日精準區分，避免名稱重複
+    const taiwanHolidays = {
         2025: { 
-            1: "1-元旦, 25-除夕, 26-初一, 27-初二, 28-初三, 29-初四", 
-            2: "28-和平紀念日", 4: "4-兒童節, 5-清明節", 
-            5: "1-勞動節, 31-端午節", 10: "6-中秋節, 10-國慶日" 
+            1: { 1: "元旦", 27: "除夕(補假)", 28: "除夕", 29: "初一", 30: "初二", 31: "初三" }, 
+            2: { 28: "和平紀念日" }, 
+            4: { 3: "兒童節(補假)", 4: "兒童節", 5: "清明節" }, 
+            5: { 1: "勞動節", 31: "端午節" }, 
+            10: { 6: "中秋節", 10: "國慶日" } 
         },
         2026: { 
-            1: "1-元旦", 
-            2: "16-除夕, 17-初一, 18-初二, 19-初三, 20-初四, 28-和平紀念日", 
-            4: "3-兒童節, 4-兒童節, 5-清明節, 6-清明節", 
-            5: "1-勞動節", 6: "19-端午節", 9: "25-中秋節", 10: "10-國慶日" 
+            1: { 1: "元旦" }, 
+            2: { 16: "除夕", 17: "初一", 18: "初二", 19: "初三", 20: "初四(補假)", 28: "和平紀念日" }, 
+            4: { 3: "兒童節(補假)", 4: "兒童節", 5: "清明節", 6: "清明節(補假)" }, 
+            5: { 1: "勞動節" }, 
+            6: { 19: "端午節" }, 
+            9: { 25: "中秋節" }, 
+            10: { 10: "國慶日" } 
         },
         2027: { 
-            1: "1-元旦", 
-            2: "5-除夕, 6-初一, 7-初二, 8-初三, 9-初四, 28-和平紀念日", 
-            4: "4-兒童節, 5-清明節", 5: "1-勞動節", 
-            6: "9-端午節", 9: "15-中秋節", 10: "10-國慶日" 
+            1: { 1: "元旦" }, 
+            2: { 5: "除夕", 6: "初一", 7: "初二", 8: "初三", 9: "初四(補假)", 28: "和平紀念日" }, 
+            4: { 4: "兒童節", 5: "清明節" }, 
+            5: { 1: "勞動節" }, 
+            6: { 9: "端午節" }, 
+            9: { 15: "中秋節" }, 
+            10: { 10: "國慶日" } 
         }
     };
-
-    function getHolidaysString(year, month) {
-        if (holidayData[year] && holidayData[year][month]) {
-            return holidayData[year][month];
-        }
-        // 如果不在內庫年份中，提供通用國曆預設值
-        let h = [];
-        if (month === 1) h.push("1-元旦");
-        if (month === 2) h.push("28-和平紀念日");
-        if (month === 5) h.push("1-勞動節");
-        if (month === 10) h.push("10-國慶日");
-        return h.join(", ");
-    }
-
-    // 💡 當切換年月時，自動帶入國定假日
-    function updateHolidays() {
-        const y = parseInt(document.getElementById('year').value);
-        const m = parseInt(document.getElementById('month').value);
-        document.getElementById('exemptDays').value = getHolidaysString(y, m);
-        // 切換月份後清空當前的月曆以防誤會
-        document.getElementById('calendar-container').innerHTML = '';
-        document.getElementById('summaryPanel').style.display = 'none';
-    }
 
     window.onload = () => {
         const today = new Date();
@@ -284,11 +325,6 @@
         document.getElementById('month').value = today.getMonth() + 1;
         updateRecordDropdown();
         handleShiftChange();
-        
-        // 初始載入時若格子為空，則自動帶入假日
-        if (!document.getElementById('exemptDays').value) {
-            updateHolidays();
-        }
     };
 
     function handleShiftChange() {
@@ -311,7 +347,6 @@
         const o = parseInt(document.getElementById('offDays').value) || 0;
         const sel = document.getElementById('cycleStartOffset');
         
-        // 保留當前選擇的值，以免重繪時被洗掉
         const currentVal = sel.value;
         sel.innerHTML = '';
         
@@ -322,7 +357,6 @@
             sel.innerHTML += `<option value="O${i-1}">休假 第 ${i} 天</option>`;
         }
         
-        // 嘗試恢復之前選的值
         if(currentVal) sel.value = currentVal;
     }
 
@@ -427,9 +461,7 @@
             if(m > 12) { m = 1; y++; }
             document.getElementById('year').value = y; document.getElementById('month').value = m;
             document.getElementById('statutoryHolidays').value = ""; 
-            
-            // 💡 建立新月份時自動帶入假日
-            updateHolidays();
+            document.getElementById('exemptDays').value = ""; 
             
             document.getElementById('prevMonthShiftDays').value = "0"; document.getElementById('calendar-container').innerHTML = "";
             document.getElementById('summaryPanel').style.display = "none"; document.getElementById('btnCalc').style.display = "none";
@@ -443,7 +475,7 @@
     function exportImage() {
         const container = document.getElementById('export-zone');
         
-        const hides = document.querySelectorAll('.export-hide, #ignore-grid-layout');
+        const hides = document.querySelectorAll('.export-hide, #ignore-grid-layout, #ignore-in-export-fab');
         hides.forEach(el => el.style.display = 'none');
         
         const selects = document.querySelectorAll('.action-select');
@@ -586,7 +618,10 @@
         const shiftType = document.getElementById('shiftType').value;
         
         const statutoryHolidays = parseDateString(document.getElementById('statutoryHolidays').value);
-        const exemptMap = parseHolidayMap(document.getElementById('exemptDays').value);
+        
+        // 💡 取得背景隱藏的「系統國定假日」與「使用者自訂免出勤日」
+        const internalHolidays = taiwanHolidays[year]?.[month] || {};
+        const userExemptMap = parseHolidayMap(document.getElementById('exemptDays').value);
 
         const daysInMonth = new Date(year, month, 0).getDate();
         const firstDayOfWeek = new Date(year, month - 1, 1).getDay(); 
@@ -627,9 +662,15 @@
         for (let day = 1; day <= daysInMonth; day++) {
             let dayOfWeek = (firstDayOfWeek + day - 1) % 7;
             let isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+            
+            // 判斷放假邏輯
             let isStatutory = statutoryHolidays.includes(day);
-            let isExempt = exemptMap.hasOwnProperty(day);
-            let exemptName = isExempt ? (exemptMap[day] || '免出勤日') : '';
+            let isInternalHoliday = !!internalHolidays[day];
+            let isUserExempt = userExemptMap.hasOwnProperty(day);
+            let isExempt = isInternalHoliday || isUserExempt;
+            
+            // 決定顯示名稱：優先顯示使用者自訂，再來是系統內建，最後才是預設字眼
+            let exemptName = userExemptMap[day] || internalHolidays[day] || '免出勤日';
 
             let dayType = 'work';
             if (shiftType === 'normal') {
@@ -701,8 +742,14 @@
         const dailyRate = fixedSalaryBase / 30;
         const hourlyRate = fixedSalaryBase / 240;
 
+        const year = parseInt(document.getElementById('year').value);
+        const month = parseInt(document.getElementById('month').value);
+        
         const statutoryHolidays = parseDateString(document.getElementById('statutoryHolidays').value);
-        const exemptMap = parseHolidayMap(document.getElementById('exemptDays').value);
+        
+        // 💡 薪資計算時也要將「系統假」與「自訂假」一起納入免出勤加班費率的判斷
+        const internalHolidays = taiwanHolidays[year]?.[month] || {};
+        const userExemptMap = parseHolidayMap(document.getElementById('exemptDays').value);
 
         const d_tax = parseInt(document.getElementById('d_tax').value) || 0;
         const d_labor = parseInt(document.getElementById('d_labor').value) || 0;
@@ -720,8 +767,6 @@
         
         let currentShiftRate = 0, prevShiftRate = 0;
         let OT_multiplier_rest = 0, OT_multiplier_national = 0;
-        
-        // 💡 判斷當月與上月的班別名稱，用於文字顯示
         let prevShiftName = "", currShiftName = "";
 
         if (shiftType === 'normal') { 
@@ -729,7 +774,6 @@
             OT_multiplier_national = 8;  
         } else { 
             currentShiftRate = shiftType === 'day' ? 100 : 200;
-            // 上月費率自動反向計算
             prevShiftRate = shiftType === 'day' ? 200 : 100;
             OT_multiplier_rest = 18.04; 
             OT_multiplier_national = 8 + (4/3)*2; 
@@ -751,7 +795,7 @@
             let isShiftRange = (day >= 1 && day <= 20);
             
             let isStatutory = statutoryHolidays.includes(day);
-            let isExempt = exemptMap.hasOwnProperty(day);
+            let isExempt = userExemptMap.hasOwnProperty(day) || !!internalHolidays[day];
 
             if (isWorkDay) {
                 let isAttended = true;
@@ -793,7 +837,6 @@
         document.getElementById('resLeave').innerText = Math.round(totalLeaveDeduction).toLocaleString();
         document.getElementById('resCompLeave').innerText = compLeaveCount;
         
-        // 💡 加入 (日班) / (夜班) 標示
         if(shiftType === 'normal'){
             document.getElementById('resShiftDaysDetail').innerHTML = `常日班無輪班津貼`;
         } else {
