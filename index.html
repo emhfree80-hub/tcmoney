@@ -183,6 +183,10 @@
             <div class="form-group"><label>伙食津貼：</label><input type="number" id="s_meal" value="3000"></div>
             <div class="form-group"><input type="text" id="s_other_name" class="remark" value="其它加項"><input type="number" id="s_other_val" value="0"></div>
             
+            <div class="divider"></div>
+            <div class="form-group"><label style="color:#1565C0;">KPI獎金：</label><input type="number" id="s_kpi_bonus" value="0" placeholder="0"></div>
+            <p style="font-size: 11px; color: #888; margin: 0 0 10px 115px;">(不計入本薪，結算時併入業主款項)</p>
+            
             <div class="form-group"><label>零星帆加(時)：</label><input type="number" id="s_ot_company_hours" value="0" step="0.5" placeholder="0"></div>
             <div class="form-group"><label>零星業加(時)：</label><input type="number" id="s_ot_owner_hours" value="0" step="0.5" placeholder="0"></div>
             
@@ -199,13 +203,15 @@
             <div class="form-group"><label>福利金：</label><input type="number" id="d_welfare" value="0"></div>
             <div class="form-group"><label>宿舍費：</label><input type="number" id="d_dorm" value="0"></div>
             <div class="form-group">
-                <label style="width: 140px;">勞退自提 (<input type="number" id="pension_rate" value="6" step="1" style="width:40px; padding:2px; display:inline-block;">%)：</label>
+                <label style="width: 140px;">勞退自提 (<input type="number" id="pension_rate" value="6" step="1" min="0" max="6" oninput="if(this.value>6)this.value=6;if(this.value<0)this.value=0;" style="width:40px; padding:2px; display:inline-block;">%)：</label>
                 <input type="number" id="d_pension" value="0">
             </div>
             <div class="form-group"><input type="text" id="d_other_name" class="remark" value="其它扣項"><input type="number" id="d_other_val" value="0"></div>
             
-            <div class="form-group"><label>請假(小時)：</label><input type="number" id="d_leave_hours" value="0" step="0.5" placeholder="0"></div>
-            
+            <div class="divider"></div>
+            <div class="form-group"><label style="color:#D32F2F;">請假-扣薪(時)：</label><input type="number" id="d_leave_deduct_hours" value="0" step="0.5" placeholder="0"></div>
+            <div class="form-group"><label style="color:#E65100;">請假-換休(時)：</label><input type="number" id="d_leave_comp_hours" value="0" step="0.5" placeholder="0"></div>
+
             <div class="divider"></div>
             <div class="form-group"><input type="text" id="d_subtotal_name" class="remark" value="代扣小計(選填)"><input type="number" id="d_subtotal_val" value="0" placeholder="0"></div>
         </div>
@@ -224,7 +230,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label class="long" style="line-height: 1.3;">上月21~月底出勤：<br><span style="color:#777; font-weight: normal;">(常日/業加不計)</span></label>
+                    <label class="long" style="line-height: 1.3;">上月21號~月底出勤天數：<br><span style="color:#777; font-weight: normal;">(常日/業加不計)</span></label>
                     <input type="number" id="prevMonthShiftDays" value="0" style="text-align: left;">
                 </div>
                 <div class="divider"></div>
@@ -279,8 +285,15 @@
                         <div id="resFixedDetail" style="font-size: 12px; color: #78909C; margin-top: 4px;"></div>
                     </div>
                     <div class="summary-item">其它加項：<span id="resOtherAdd">0</span> 元</div>
-                    <div class="summary-item">勤務津貼 (輪班)：<span id="resShift">0</span> 元</div>
-                    <div class="summary-item" style="color: var(--color-ot); font-weight: bold;">帆宣加班費：+ <span id="resOtPay">0</span> 元</div>
+                    
+                    <div class="summary-item">勤務津貼 (輪班)：<span id="resShift">0</span> 元
+                        <div id="resShiftDetail" style="font-size: 12px; color: #78909C; margin-top: 4px;"></div>
+                    </div>
+                    
+                    <div class="summary-item" style="color: var(--color-ot); font-weight: bold;">帆宣加班費：+ <span id="resOtPay">0</span> 元
+                        <div id="resOtDetail" style="font-size: 12px; color: #4CAF50; margin-top: 4px; font-weight: normal;"></div>
+                    </div>
+                    
                     <div class="divider"></div>
                     <div class="summary-item" style="color: var(--color-leave); font-weight: bold;">各項代扣總計：- <span id="resDeduct">0</span> 元
                         <div id="resDeductDetail" style="font-size: 12px; color: #E57373; margin-top: 4px; font-weight: normal;"></div>
@@ -288,16 +301,14 @@
                     <div class="summary-item" style="color: var(--color-leave); font-weight: bold;">請假扣薪：- <span id="resLeave">0</span> 元</div>
                 </div>
                 <div>
-                    <div class="summary-item">當月新增換休假：<strong id="resCompLeave">0</strong> 天</div>
-                    <div class="summary-item">當月使用換休假：<strong id="resUsedCompLeave" style="color: #E65100;">0</strong> 天</div>
-                    <div class="summary-item" style="font-size: 13px; color: #777;">
-                        輪班天數：<span id="resShiftDaysDetail"></span>
-                    </div>
+                    <div class="summary-item">當月新增換休假：<strong id="resCompLeave">0</strong> 小時</div>
+                    <div class="summary-item">當月使用換休假：<strong id="resUsedCompLeave" style="color: #E65100;">0</strong> 小時</div>
+                    
                     <div class="summary-item" style="margin-top: 15px; font-size: 18px; border-top: 1px solid #ccc; padding-top: 10px;">
                         本月實領薪資：<strong style="font-size: 28px; color: #2E7D32;" id="resTotal">0</strong> 元
                     </div>
                     <div class="summary-item" style="margin-top: 15px; font-size: 14px; background: #E3F2FD; padding: 10px; border-radius: 4px; border: 1px solid #90CAF9;">
-                        <strong style="color: var(--color-owner);">業主加班費 (時薪626及零星574 / 扣10%後發放)：<br> <span id="resOwnerOt" style="font-size: 18px;">0</span> 元</strong>
+                        <strong style="color: var(--color-owner);">業主發放款項 (業加時薪626/零星574扣10% + KPI獎金 / 皆2個月後發放)：<br> <span id="resOwnerOt" style="font-size: 18px;">0</span> 元</strong>
                     </div>
                 </div>
             </div>
@@ -455,8 +466,11 @@
             s_business: document.getElementById('s_business').value, s_branch: document.getElementById('s_branch').value,
             s_meal: document.getElementById('s_meal').value, s_other_name: document.getElementById('s_other_name').value,
             s_other_val: document.getElementById('s_other_val').value,
-            s_ot_company_hours: document.getElementById('s_ot_company_hours').value, // 儲存零星帆加
-            s_ot_owner_hours: document.getElementById('s_ot_owner_hours').value,     // 儲存零星業加
+            
+            // 💡 儲存新增欄位
+            s_kpi_bonus: document.getElementById('s_kpi_bonus').value, 
+            s_ot_company_hours: document.getElementById('s_ot_company_hours').value, 
+            s_ot_owner_hours: document.getElementById('s_ot_owner_hours').value,     
             
             d_tax: document.getElementById('d_tax').value, d_labor: document.getElementById('d_labor').value,
             d_health: document.getElementById('d_health').value, d_supp: document.getElementById('d_supp').value,
@@ -464,7 +478,9 @@
             pension_rate: document.getElementById('pension_rate').value, d_pension: document.getElementById('d_pension').value,
             d_other_name: document.getElementById('d_other_name').value, d_other_val: document.getElementById('d_other_val').value,
             d_subtotal_name: document.getElementById('d_subtotal_name').value, d_subtotal_val: document.getElementById('d_subtotal_val').value,
-            d_leave_hours: document.getElementById('d_leave_hours').value, // 儲存請假小時
+            
+            d_leave_deduct_hours: document.getElementById('d_leave_deduct_hours').value,
+            d_leave_comp_hours: document.getElementById('d_leave_comp_hours').value,
             
             shiftType: document.getElementById('shiftType').value, prevMonthShiftDays: document.getElementById('prevMonthShiftDays').value,
             workDays: document.getElementById('workDays').value, offDays: document.getElementById('offDays').value,
@@ -517,10 +533,12 @@
             document.getElementById('statutoryHolidays').value = ""; 
             document.getElementById('exemptDays').value = ""; 
             
-            // 清空零星時數
+            // 清空零星時數與 KPI
+            document.getElementById('s_kpi_bonus').value = "0";
             document.getElementById('s_ot_company_hours').value = "0";
             document.getElementById('s_ot_owner_hours').value = "0";
-            document.getElementById('d_leave_hours').value = "0";
+            document.getElementById('d_leave_deduct_hours').value = "0";
+            document.getElementById('d_leave_comp_hours').value = "0";
             
             document.getElementById('prevMonthShiftDays').value = "0"; document.getElementById('calendar-container').innerHTML = "";
             document.getElementById('summaryPanel').style.display = "none"; document.getElementById('btnCalc').style.display = "none";
@@ -595,6 +613,7 @@
         let userName = document.getElementById('userName').value.trim() || '未命名';
         const container = document.getElementById('export-zone');
         
+        // 💡 確保包含隱私提示和懸浮按鈕，使其在截圖時消失
         const hides = document.querySelectorAll('.export-hide, #ignore-grid-layout, #ignore-in-export-fab, #ignore-in-export-privacy');
         hides.forEach(el => el.style.display = 'none');
         
@@ -698,7 +717,6 @@
         const shiftType = document.getElementById('shiftType').value;
         
         const statutoryHolidays = parseDateString(document.getElementById('statutoryHolidays').value);
-        
         const internalHolidays = taiwanHolidays[year]?.[month] || {};
         const userExemptMap = parseHolidayMap(document.getElementById('exemptDays').value);
 
@@ -820,10 +838,12 @@
         const dailyRate = fixedSalaryBase / 30;
         const hourlyRate = fixedSalaryBase / 240;
 
-        // 💡 取得新增的零星時數
+        // 💡 取得新增的數值
+        const s_kpi_bonus = parseFloat(document.getElementById('s_kpi_bonus').value) || 0;
         const s_ot_company_hours = parseFloat(document.getElementById('s_ot_company_hours').value) || 0;
         const s_ot_owner_hours = parseFloat(document.getElementById('s_ot_owner_hours').value) || 0;
-        const d_leave_hours = parseFloat(document.getElementById('d_leave_hours').value) || 0;
+        const d_leave_deduct_hours = parseFloat(document.getElementById('d_leave_deduct_hours').value) || 0;
+        const d_leave_comp_hours = parseFloat(document.getElementById('d_leave_comp_hours').value) || 0;
 
         const year = parseInt(document.getElementById('year').value);
         const month = parseInt(document.getElementById('month').value);
@@ -848,6 +868,9 @@
         let currentShiftRate = 0, prevShiftRate = 0;
         let OT_multiplier_rest = 0, OT_multiplier_national = 0;
         let prevShiftName = "", currShiftName = "";
+        
+        // 💡 判斷每日時數 (常日8小，輪班10小)
+        let hoursPerDay = shiftType === 'normal' ? 8 : 10;
 
         if (shiftType === 'normal') { 
             OT_multiplier_rest = 38 / 3; 
@@ -864,7 +887,13 @@
         document.getElementById('rate_rest').innerText = Math.round(hourlyRate * OT_multiplier_rest).toLocaleString();
         document.getElementById('rate_national').innerText = Math.round(hourlyRate * OT_multiplier_national).toLocaleString();
 
-        let totalLeaveDeduction = 0, totalOtPay = 0, ownerOtPay = 0, compLeaveCount = 0, usedCompLeaveCount = 0, currentMonthShiftDays = 0; 
+        let totalLeaveDeduction = 0, totalOtPay = 0, ownerOtPay = 0;
+        let compLeaveAddHours = 0; 
+        let compLeaveUsedHours = d_leave_comp_hours; // 初始加入零星請假換休
+        let currentMonthShiftDays = 0;
+        
+        let ot_rest_days = 0, ot_national_days = 0; 
+
         const cells = document.querySelectorAll('.cal-cell[data-day]');
         
         cells.forEach(cell => {
@@ -882,20 +911,22 @@
                 else if (action === "病假" || action === "生理假") { totalLeaveDeduction += (dailyRate * 0.5); isAttended = false; }
                 else if (['換休假', '公假', '特休假', '婚假', '喪假'].includes(action)) { 
                     isAttended = false; 
-                    if (action === "換休假") usedCompLeaveCount++; // 💡 統計使用掉的換休假
+                    if(action === "換休假") compLeaveUsedHours += hoursPerDay; // 💡 累積使用換休時數
                 }
                 
                 if (isAttended && isShiftRange && shiftType !== 'normal') currentMonthShiftDays++;
             } else {
                 if (action === "帆宣換休") { 
-                    compLeaveCount++; 
+                    compLeaveAddHours += hoursPerDay; // 💡 累積新增換休時數
                     if (isShiftRange && shiftType !== 'normal') currentMonthShiftDays++; 
                 }
                 else if (action === "帆宣換錢") { 
                     if (isExempt || isStatutory) {
                         totalOtPay += hourlyRate * OT_multiplier_national;
+                        ot_national_days++;
                     } else {
                         totalOtPay += hourlyRate * OT_multiplier_rest;
+                        ot_rest_days++;
                     }
                     if (isShiftRange && shiftType !== 'normal') currentMonthShiftDays++; 
                 }
@@ -909,10 +940,11 @@
             totalShiftAllowance = (prevMonthShiftDays * prevShiftRate) + (currentMonthShiftDays * currentShiftRate);
         }
 
-        // 💡 加入零星請假扣款與零星加班計算
-        totalLeaveDeduction += (d_leave_hours * hourlyRate);
+        // 💡 計算零星時數金流
+        totalLeaveDeduction += (d_leave_deduct_hours * hourlyRate);
         totalOtPay += (s_ot_company_hours * hourlyRate * 1.34); 
         ownerOtPay += (s_ot_owner_hours * 574 * 0.9);
+        ownerOtPay += s_kpi_bonus; // KPI直接加入業主款項
 
         let finalSalary = fixedSalaryBase + v_other_add + totalShiftAllowance + totalOtPay - totalDeductions - totalLeaveDeduction;
 
@@ -922,19 +954,12 @@
         document.getElementById('resOtPay').innerText = Math.round(totalOtPay).toLocaleString();
         document.getElementById('resDeduct').innerText = Math.round(totalDeductions).toLocaleString();
         document.getElementById('resLeave').innerText = Math.round(totalLeaveDeduction).toLocaleString();
-        document.getElementById('resCompLeave').innerText = compLeaveCount;
-        document.getElementById('resUsedCompLeave').innerText = usedCompLeaveCount; // 💡 顯示使用換休假
         
-        if(shiftType === 'normal'){
-            document.getElementById('resShiftDaysDetail').innerHTML = `常日班無輪班津貼`;
-        } else {
-            document.getElementById('resShiftDaysDetail').innerHTML = `上月 x${prevMonthShiftDays}天<span style="color:#2196F3; font-weight:bold;">${prevShiftName}</span> / 本月 x${currentMonthShiftDays}天<span style="color:#2196F3; font-weight:bold;">${currShiftName}</span>`;
-        }
+        // 💡 更新換休假(時數)
+        document.getElementById('resCompLeave').innerText = compLeaveAddHours;
+        document.getElementById('resUsedCompLeave').innerText = compLeaveUsedHours; 
         
-        document.getElementById('resTotal').innerText = Math.round(finalSalary).toLocaleString();
-        document.getElementById('resOwnerOt').innerText = Math.round(ownerOtPay).toLocaleString();
-
-        // 💡 動態產生面板上的加給與代扣明細
+        // 💡 產生結算面板明細 (動態產生，不再依賴 exportImage 產生)
         const addItems = [
             {id: 's_base', name: '本薪'}, {id: 's_supervisor', name: '主管'},
             {id: 's_position', name: '職務'}, {id: 's_tcm', name: 'TCM'},
@@ -962,6 +987,20 @@
             if (val > 0) dedDetails.push(`${item.name}:${val.toLocaleString()}`);
         });
         document.getElementById('resDeductDetail').innerText = dedDetails.length > 0 ? `(明細: ${dedDetails.join(' + ')})` : '';
+
+        let shiftDetailStr = shiftType === 'normal' ? 
+            `(明細: 常日班無輪班津貼)` : 
+            `(明細: 上月 x${prevMonthShiftDays}天${prevShiftName} + 本月 x${currentMonthShiftDays}天${currShiftName})`;
+        document.getElementById('resShiftDetail').innerText = shiftDetailStr;
+
+        let otDetailArr = [];
+        if (ot_rest_days > 0) otDetailArr.push(`一般休假日 x${ot_rest_days}天`);
+        if (ot_national_days > 0) otDetailArr.push(`國定/免出勤 x${ot_national_days}天`);
+        if (s_ot_company_hours > 0) otDetailArr.push(`零星加班 x${s_ot_company_hours}時`);
+        document.getElementById('resOtDetail').innerText = otDetailArr.length > 0 ? `(明細: ${otDetailArr.join(' + ')})` : '';
+
+        document.getElementById('resTotal').innerText = Math.round(finalSalary).toLocaleString();
+        document.getElementById('resOwnerOt').innerText = Math.round(ownerOtPay).toLocaleString();
 
         document.getElementById('summaryPanel').style.display = 'block';
         document.querySelector('.btn-export').style.display = 'block';
