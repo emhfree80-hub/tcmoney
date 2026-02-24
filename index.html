@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>班表與專業薪資計算 (企業級)</title>
+    <title>TCM班表及薪資計算小工具</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#455A64">
     <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="apple-mobile-web-app-title" content="TCM班表及薪資計算小工具">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
@@ -46,20 +47,16 @@
         button.action-btn { background-color: var(--primary); color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; font-size: 14px; font-weight: bold; transition: background-color 0.2s; }
         button.action-btn:hover { background-color: #37474F; }
         
-        #cycle-inputs-container { margin-top: 15px; padding: 15px; background: #fff; border: 2px dashed #90A4AE; border-radius: 4px; display: none; }
-        .cycle-row { margin-bottom: 8px; font-size: 14px; }
-        .cycle-row span { display: inline-block; width: 60px; color: #546E7A; font-weight: bold; }
-
         .calendar { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid var(--border); border-left: 1px solid var(--border); margin-top: 20px; }
         .cal-header { background: #ECEFF1; color: var(--primary); text-align: center; padding: 10px 0; font-size: 15px; font-weight: bold; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
         .cal-cell { min-height: 95px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 8px; display: flex; flex-direction: column; background-color: var(--off-bg); transition: background-color 0.3s ease; }
         .cal-cell.active-work { background-color: var(--work-bg); border-left: 3px solid #5DADE2; }
         .cal-cell.empty { background-color: #F5F5F5; border-left: none; }
         
-        .date-num { font-size: 18px; font-weight: bold; margin-bottom: 4px; color: #455A64; }
+        .date-num { font-size: 18px; font-weight: bold; margin-bottom: 4px; transition: color 0.3s; }
         .status-text { font-size: 12px; margin-bottom: 5px; font-weight: bold; }
         .txt-holiday { color: var(--color-leave); }
-        .txt-exempt { color: var(--color-comp); }
+        .txt-exempt { color: var(--color-leave); }
         .txt-work { color: #78909C; }
         .txt-off { color: #B0BEC5; }
 
@@ -106,7 +103,7 @@
         <button class="btn-file" style="background:#546E7A;" onclick="newRecord()">📝 建立新月份</button>
     </div>
 
-    <h1>📅 輪班班表與專業薪資計算</h1>
+    <h1>薪資設定</h1>
 
     <div class="salary-grid" id="ignore-salary-grid">
         <div class="salary-col">
@@ -134,7 +131,7 @@
             <div class="form-group"><label>福利金：</label><input type="number" id="d_welfare" value="0"></div>
             <div class="form-group"><label>宿舍費：</label><input type="number" id="d_dorm" value="0"></div>
             <div class="form-group">
-                <label style="width: 140px;">勞退自提 (<input type="number" id="pension_rate" value="6" step="0.1" style="width:40px; padding:2px; display:inline-block;">%)：</label>
+                <label style="width: 140px;">勞退自提 (<input type="number" id="pension_rate" value="6" step="1" style="width:40px; padding:2px; display:inline-block;">%)：</label>
                 <input type="number" id="d_pension" value="0">
             </div>
             <div class="form-group"><input type="text" id="d_other_name" class="remark" value="其它扣項"><input type="number" id="d_other_val" value="0"></div>
@@ -152,7 +149,7 @@
                     <select id="shiftType" class="normal-text" onchange="handleShiftChange()">
                         <option value="normal">常日班 (無輪班津貼)</option>
                         <option value="day">日輪班 (100元/日)</option>
-                        <option value="night">夜輪班 (200元/日)</option>
+                        <option value="night" selected>夜輪班 (200元/日)</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -164,28 +161,30 @@
                     <input type="number" id="year" value="2026" style="width: 60px; text-align:center;"> / 
                     <input type="number" id="month" value="2" min="1" max="12" style="width: 40px; text-align:center;">
                 </div>
-                <div class="form-group" style="align-items: flex-start;">
+                
+                <div class="form-group" style="align-items: flex-start; display: flex;" id="cycle-setting-group">
                     <label class="long" style="margin-top: 8px;">做幾休幾：</label>
                     <div>
-                        <input type="number" id="workDays" style="width: 40px; text-align:center;" value="5"> / 
-                        <input type="number" id="offDays" style="width: 40px; text-align:center;" value="2">
-                        <button class="action-btn" onclick="generateCycleInputs()">設定循環</button>
+                        <input type="number" id="workDays" style="width: 40px; text-align:center;" value="2" onchange="generateCycleDropdown()"> / 
+                        <input type="number" id="offDays" style="width: 40px; text-align:center;" value="2" onchange="generateCycleDropdown()">
                     </div>
                 </div>
-                <div id="cycle-inputs-container">
-                    <p style="font-size: 12px; color: #555; margin-top: 0; font-weight: bold;">請依序填入第一週的出勤日期：</p>
-                    <div id="cycle-inputs"></div>
+                <div class="form-group" id="cycle-start-container" style="display: flex;">
+                    <label class="long" style="color: #3F51B5;">本月 1 號狀態：</label>
+                    <select id="cycleStartOffset" class="normal-text" style="width: 140px; font-weight: bold; border-color:#3F51B5;">
+                        </select>
                 </div>
+                
             </div>
 
             <div class="section">
                 <h3 style="margin-top:0;">🛑 法規假別設定</h3>
                 <div class="form-group"><label class="long">例假日 (逗號分隔)：</label><input type="text" class="normal-text" style="width:160px;" id="statutoryHolidays" placeholder="例: 5,12,19"></div>
-                <div class="form-group"><label class="long">免出勤日 (逗號分隔)：</label><input type="text" class="normal-text" style="width:160px;" id="exemptDays" placeholder="例: 1,15"></div>
+                <div class="form-group"><label class="long">國定/免出勤：</label><input type="text" class="normal-text" style="width:160px;" id="exemptDays" placeholder="例: 1-元旦, 16-初一"></div>
             </div>
         </div>
 
-        <button class="action-btn export-hide" id="btn-gen-cal" onclick="generateCalendar()" style="width: 100%; font-size: 16px; padding: 12px; margin-top:15px;">📊 產生月曆班表</button>
+        <button class="action-btn export-hide" id="btn-gen-cal" onclick="generateCalendar()" style="width: 100%; font-size: 16px; padding: 12px; margin-top:15px; background-color:#3F51B5;">📊 產生月曆班表</button>
 
         <div id="calendar-container"></div>
 
@@ -235,16 +234,37 @@
         document.getElementById('year').value = today.getFullYear();
         document.getElementById('month').value = today.getMonth() + 1;
         updateRecordDropdown();
+        handleShiftChange(); // 初始化介面
     };
 
+    // 💡 處理班別切換 (隱藏/顯示循環設定)
     function handleShiftChange() {
         const shift = document.getElementById('shiftType').value;
+        const cycleGroup = document.getElementById('cycle-setting-group');
+        const startGroup = document.getElementById('cycle-start-container');
+        
         if (shift === 'normal') {
-            document.getElementById('workDays').value = 5;
-            document.getElementById('offDays').value = 2;
+            cycleGroup.style.display = 'none';
+            startGroup.style.display = 'none';
         } else {
-            document.getElementById('workDays').value = 2;
-            document.getElementById('offDays').value = 2;
+            cycleGroup.style.display = 'flex';
+            startGroup.style.display = 'flex';
+            generateCycleDropdown();
+        }
+    }
+
+    // 💡 動態產生「1號狀態」下拉選單
+    function generateCycleDropdown() {
+        const w = parseInt(document.getElementById('workDays').value) || 0;
+        const o = parseInt(document.getElementById('offDays').value) || 0;
+        const sel = document.getElementById('cycleStartOffset');
+        sel.innerHTML = '';
+        
+        for(let i=1; i<=w; i++) {
+            sel.innerHTML += `<option value="W${i-1}">上班 第 ${i} 天</option>`;
+        }
+        for(let i=1; i<=o; i++) {
+            sel.innerHTML += `<option value="O${i-1}">休假 第 ${i} 天</option>`;
         }
     }
 
@@ -305,8 +325,7 @@
             shiftType: document.getElementById('shiftType').value, prevMonthShiftDays: document.getElementById('prevMonthShiftDays').value,
             workDays: document.getElementById('workDays').value, offDays: document.getElementById('offDays').value,
             statutoryHolidays: document.getElementById('statutoryHolidays').value, exemptDays: document.getElementById('exemptDays').value,
-            cycleWorks: Array.from(document.querySelectorAll('.cycle-work')).map(el => el.value),
-            cycleOffs: Array.from(document.querySelectorAll('.cycle-off')).map(el => el.value),
+            cycleStartOffset: document.getElementById('cycleStartOffset').value, // 儲存新的週期狀態
             cellActions: {}
         };
         const cells = document.querySelectorAll('.cal-cell[data-day]');
@@ -330,12 +349,8 @@
             if(el && typeof data[k] !== 'object') el.value = data[k];
         });
 
-        if (data.cycleWorks?.length > 0 || data.cycleOffs?.length > 0) {
-            generateCycleInputs(false);
-            const cw = document.querySelectorAll('.cycle-work'), co = document.querySelectorAll('.cycle-off');
-            data.cycleWorks.forEach((val, i) => { if(cw[i]) cw[i].value = val; });
-            data.cycleOffs.forEach((val, i) => { if(co[i]) co[i].value = val; });
-        }
+        handleShiftChange(); // 更新介面顯示狀態
+        if (data.cycleStartOffset) document.getElementById('cycleStartOffset').value = data.cycleStartOffset;
 
         try {
             generateCalendar();
@@ -358,6 +373,7 @@
             document.getElementById('summaryPanel').style.display = "none"; document.getElementById('btnCalc').style.display = "none";
             const s = document.getElementById('shiftType');
             if(s.value !== 'normal') s.value = s.value === 'day' ? 'night' : 'day';
+            handleShiftChange();
             document.getElementById('recordSelector').value = "";
         }
     }
@@ -388,7 +404,7 @@
         const year = document.getElementById('year').value;
         const month = document.getElementById('month').value;
         const shiftSelect = document.getElementById('shiftType');
-        const shiftText = shiftSelect.options[shiftSelect.selectedIndex].text;
+        let shiftText = shiftSelect.options[shiftSelect.selectedIndex].text.split(' ')[0];
         
         const titleDiv = document.createElement('div');
         titleDiv.id = 'export-title';
@@ -463,30 +479,22 @@
         });
     }
 
-    function generateCycleInputs(autoFill = true) {
-        const workDays = parseInt(document.getElementById('workDays').value) || 0;
-        const offDays = parseInt(document.getElementById('offDays').value) || 0;
-        const container = document.getElementById('cycle-inputs');
-        container.innerHTML = '';
-        if (workDays + offDays === 0) return alert('請輸入有效的天數');
-
-        const shiftType = document.getElementById('shiftType').value;
-        let startFill = 1;
-
-        for (let i = 1; i <= workDays; i++) {
-            let val = (autoFill && shiftType === 'normal') ? startFill++ : '';
-            container.innerHTML += `<div class="cycle-row"><span>上班 ${i}</span> <input type="number" class="cycle-work" min="1" max="31" value="${val}"></div>`;
-        }
-        for (let i = 1; i <= offDays; i++) {
-            let val = (autoFill && shiftType === 'normal') ? startFill++ : '';
-            container.innerHTML += `<div class="cycle-row"><span>休假 ${i}</span> <input type="number" class="cycle-off" min="1" max="31" value="${val}"></div>`;
-        }
-        document.getElementById('cycle-inputs-container').style.display = 'block';
-    }
-
     function parseDateString(str) {
         if (!str.trim()) return [];
         return str.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+    }
+
+    function parseHolidayMap(str) {
+        const map = {};
+        if (!str.trim()) return map;
+        str.split(',').forEach(s => {
+            let match = s.trim().match(/^(\d+)(?:[\-\:\=](.*))?$/);
+            if (match) {
+                let num = parseInt(match[1]);
+                map[num] = match[2] ? match[2].trim() : '';
+            }
+        });
+        return map;
     }
 
     function updateCellState(selectObj) {
@@ -510,48 +518,79 @@
         else cell.classList.remove('active-work');
     }
 
+    // 💡 全新的月曆生成邏輯
     function generateCalendar() {
         const year = parseInt(document.getElementById('year').value);
         const month = parseInt(document.getElementById('month').value);
+        const shiftType = document.getElementById('shiftType').value;
+        
         const statutoryHolidays = parseDateString(document.getElementById('statutoryHolidays').value);
-        const exemptDays = parseDateString(document.getElementById('exemptDays').value);
-
-        const workInputs = Array.from(document.querySelectorAll('.cycle-work')).map(i => parseInt(i.value));
-        const offInputs = Array.from(document.querySelectorAll('.cycle-off')).map(i => parseInt(i.value));
-        let cycleMap = [];
-        workInputs.forEach(d => { if(!isNaN(d)) cycleMap.push({ date: d, type: 'work' }); });
-        offInputs.forEach(d => { if(!isNaN(d)) cycleMap.push({ date: d, type: 'off' }); });
-
-        if (cycleMap.length === 0) return alert('請先設定一組循環日期！');
-
-        cycleMap.sort((a, b) => a.date - b.date);
-        const anchorDate = cycleMap[0].date;
-        const cycleLength = cycleMap.length;
-        const sequence = cycleMap.map(c => c.type); 
+        const exemptMap = parseHolidayMap(document.getElementById('exemptDays').value);
 
         const daysInMonth = new Date(year, month, 0).getDate();
         const firstDayOfWeek = new Date(year, month - 1, 1).getDay(); 
 
+        let sequence = [];
+        let cycleLength = 0;
+        let startOffset = 0;
+
+        // 輪班制的演算法設定
+        if (shiftType !== 'normal') {
+            const w = parseInt(document.getElementById('workDays').value) || 0;
+            const o = parseInt(document.getElementById('offDays').value) || 0;
+            if (w + o === 0) return alert('做幾休幾不可為 0');
+            cycleLength = w + o;
+            
+            for(let i=0; i<w; i++) sequence.push('work');
+            for(let i=0; i<o; i++) sequence.push('off');
+            
+            const offsetVal = document.getElementById('cycleStartOffset').value; // e.g. "W0", "O1"
+            if (!offsetVal) return alert('請選擇1號的狀態！');
+            
+            if(offsetVal.startsWith('W')) {
+                startOffset = parseInt(offsetVal.substring(1));
+            } else {
+                startOffset = w + parseInt(offsetVal.substring(1));
+            }
+        }
+
         let html = '<div class="calendar">';
         const days = ['日', '一', '二', '三', '四', '五', '六'];
-        days.forEach(d => html += `<div class="cal-header">${d}</div>`);
+        
+        days.forEach((d, idx) => {
+            let colorStyle = (idx === 0 || idx === 6) ? 'color: var(--color-leave);' : '';
+            html += `<div class="cal-header" style="${colorStyle}">${d}</div>`;
+        });
+        
         for (let i = 0; i < firstDayOfWeek; i++) html += `<div class="cal-cell empty"></div>`;
 
         for (let day = 1; day <= daysInMonth; day++) {
-            let delta = day - anchorDate;
-            let mod = ((delta % cycleLength) + cycleLength) % cycleLength;
-            let dayType = sequence[mod]; 
-
+            let dayOfWeek = (firstDayOfWeek + day - 1) % 7;
+            let isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
             let isStatutory = statutoryHolidays.includes(day);
-            let isExempt = exemptDays.includes(day);
+            let isExempt = exemptMap.hasOwnProperty(day);
+            let exemptName = isExempt ? (exemptMap[day] || '免出勤日') : '';
+
+            // 決定這天原本是「該上班」還是「該休假」
+            let dayType = 'work';
+            if (shiftType === 'normal') {
+                // 常日班直接抓行事曆 (六日排休)
+                dayType = isWeekend ? 'off' : 'work';
+            } else {
+                // 輪班制套用數學公式推算
+                let mod = (day - 1 + startOffset) % cycleLength;
+                dayType = sequence[mod]; 
+            }
 
             let bgClass = dayType === 'work' ? 'active-work' : '';
             let statusTextHtml = '';
 
             if (isStatutory) statusTextHtml = '<div class="status-text txt-holiday">例假日</div>';
-            else if (isExempt) statusTextHtml = '<div class="status-text txt-exempt">免出勤日</div>';
+            else if (isExempt) statusTextHtml = `<div class="status-text txt-exempt">${exemptName}</div>`;
             else if (dayType === 'work') statusTextHtml = '<div class="status-text txt-work">應出勤</div>';
             else statusTextHtml = '<div class="status-text txt-off">排休</div>';
+
+            let dateNumColor = (isWeekend || isStatutory || isExempt) ? 'color: var(--color-leave);' : 'color: #455A64;';
 
             let selectHtml = '';
             if (dayType === 'work') {
@@ -575,7 +614,11 @@
                     <option value="業主8">業主加班(8hr)</option>
                 </select>`;
             }
-            html += `<div class="cal-cell ${bgClass}" data-type="${dayType}" data-day="${day}"><div class="date-num">${day}</div>${statusTextHtml}${selectHtml}</div>`;
+            html += `<div class="cal-cell ${bgClass}" data-type="${dayType}" data-day="${day}">
+                        <div class="date-num" style="${dateNumColor}">${day}</div>
+                        ${statusTextHtml}
+                        ${selectHtml}
+                     </div>`;
         }
         html += '</div>';
         document.getElementById('calendar-container').innerHTML = html;
@@ -602,7 +645,7 @@
         const hourlyRate = fixedSalaryBase / 240;
 
         const statutoryHolidays = parseDateString(document.getElementById('statutoryHolidays').value);
-        const exemptDays = parseDateString(document.getElementById('exemptDays').value);
+        const exemptMap = parseHolidayMap(document.getElementById('exemptDays').value);
 
         const d_tax = parseInt(document.getElementById('d_tax').value) || 0;
         const d_labor = parseInt(document.getElementById('d_labor').value) || 0;
@@ -644,7 +687,7 @@
             let isShiftRange = (day >= 1 && day <= 20);
             
             let isStatutory = statutoryHolidays.includes(day);
-            let isExempt = exemptDays.includes(day);
+            let isExempt = exemptMap.hasOwnProperty(day);
 
             if (isWorkDay) {
                 let isAttended = true;
