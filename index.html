@@ -196,6 +196,12 @@
 
         <div class="salary-col">
             <h4>📉 應扣項目 (減項) <button class="btn-auto" onclick="autoCalcDeductions()">🤖 自動估算</button></h4>
+            <div class="form-group">
+                <label style="color:#1565C0;">申報投保基準：</label>
+                <input type="number" id="d_ins_base" value="45800">
+            </div>
+            <p style="font-size: 11px; color: #888; margin: 0 0 10px 115px;">(依公司實際申報之投保薪資級距填寫)</p>
+
             <div class="form-group"><label>所得稅款：</label><input type="number" id="d_tax" value="0"></div>
             <div class="form-group"><label>勞保費：</label><input type="number" id="d_labor" value="0"></div>
             <div class="form-group"><label>健保費：</label><input type="number" id="d_health" value="0"></div>
@@ -369,6 +375,19 @@
         }
     };
 
+    // 💡 內建勞保與健保(勞退)投保薪資級距表
+    const laborBrackets = [27470, 27600, 28800, 30300, 31800, 33300, 34800, 36300, 38200, 40100, 42000, 43900, 45800];
+    const healthPensionBrackets = [27470, 27600, 28800, 30300, 31800, 33300, 34800, 36300, 38200, 40100, 42000, 43900, 45800, 48200, 50600, 53000, 55400, 57800, 60800, 63800, 66800, 69800, 72800, 76500, 80200, 83900, 87600, 92100, 96600, 101100, 105600, 110100, 115500];
+
+    function getLaborBracket(amount) {
+        for(let b of laborBrackets) { if(amount <= b) return b; }
+        return laborBrackets[laborBrackets.length - 1];
+    }
+    function getHealthPensionBracket(amount) {
+        for(let b of healthPensionBrackets) { if(amount <= b) return b; }
+        return healthPensionBrackets[healthPensionBrackets.length - 1];
+    }
+
     window.onload = () => {
         const today = new Date();
         document.getElementById('year').value = today.getFullYear();
@@ -411,26 +430,26 @@
     }
 
     function autoCalcDeductions() {
-        if(!confirm('自動估算僅供參考，實際勞健保級距落差可能產生數十元誤差，是否繼續？')) return;
-        
         const base = parseInt(document.getElementById('s_base').value) || 0;
-        const fixedSalary = base 
-            + (parseInt(document.getElementById('s_supervisor').value) || 0)
-            + (parseInt(document.getElementById('s_position').value) || 0)
-            + (parseInt(document.getElementById('s_tcm').value) || 0)
-            + (parseInt(document.getElementById('s_safety').value) || 0)
-            + (parseInt(document.getElementById('s_transport').value) || 0)
-            + (parseInt(document.getElementById('s_business').value) || 0)
-            + (parseInt(document.getElementById('s_branch').value) || 0)
-            + (parseInt(document.getElementById('s_meal').value) || 0);
-
+        const declareBase = parseInt(document.getElementById('d_ins_base').value) || 0;
+        
+        if(declareBase === 0) return alert("請先填寫「申報投保基準」金額！");
+        
+        // 💡 自動查詢級距並計算
+        let l_bracket = getLaborBracket(declareBase);
+        let hp_bracket = getHealthPensionBracket(declareBase);
+        
+        // 勞保：級距 * 12.5% * 20%
+        document.getElementById('d_labor').value = Math.round(l_bracket * 0.125 * 0.2);
+        // 健保：級距 * 5.17% * 30%
+        document.getElementById('d_health').value = Math.round(hp_bracket * 0.0517 * 0.3);
+        // 勞退：級距 * 自提%
+        const pRate = parseFloat(document.getElementById('pension_rate').value) || 0;
+        document.getElementById('d_pension').value = Math.round(hp_bracket * (pRate / 100));
+        // 福利金：本薪 * 0.5%
         document.getElementById('d_welfare').value = Math.round(base * 0.005);
         
-        const pRate = parseFloat(document.getElementById('pension_rate').value) || 0;
-        document.getElementById('d_pension').value = Math.round(fixedSalary * (pRate / 100));
-
-        document.getElementById('d_labor').value = Math.round(fixedSalary * 0.024);
-        document.getElementById('d_health').value = Math.round(fixedSalary * 0.01551);
+        alert(`自動估算完成！\n\n已為您套用官方級距表：\n📍 勞保判定級距：${l_bracket.toLocaleString()} 元\n📍 健保/勞退判定級距：${hp_bracket.toLocaleString()} 元`);
     }
 
     function updateRecordDropdown() {
@@ -467,11 +486,11 @@
             s_meal: document.getElementById('s_meal').value, s_other_name: document.getElementById('s_other_name').value,
             s_other_val: document.getElementById('s_other_val').value,
             
-            // 💡 儲存新增欄位
             s_kpi_bonus: document.getElementById('s_kpi_bonus').value, 
             s_ot_company_hours: document.getElementById('s_ot_company_hours').value, 
             s_ot_owner_hours: document.getElementById('s_ot_owner_hours').value,     
             
+            d_ins_base: document.getElementById('d_ins_base').value, // 儲存投保基準
             d_tax: document.getElementById('d_tax').value, d_labor: document.getElementById('d_labor').value,
             d_health: document.getElementById('d_health').value, d_supp: document.getElementById('d_supp').value,
             d_welfare: document.getElementById('d_welfare').value, d_dorm: document.getElementById('d_dorm').value,
@@ -533,7 +552,6 @@
             document.getElementById('statutoryHolidays').value = ""; 
             document.getElementById('exemptDays').value = ""; 
             
-            // 清空零星時數與 KPI
             document.getElementById('s_kpi_bonus').value = "0";
             document.getElementById('s_ot_company_hours').value = "0";
             document.getElementById('s_ot_owner_hours').value = "0";
@@ -613,7 +631,6 @@
         let userName = document.getElementById('userName').value.trim() || '未命名';
         const container = document.getElementById('export-zone');
         
-        // 💡 確保包含隱私提示和懸浮按鈕，使其在截圖時消失
         const hides = document.querySelectorAll('.export-hide, #ignore-grid-layout, #ignore-in-export-fab, #ignore-in-export-privacy');
         hides.forEach(el => el.style.display = 'none');
         
@@ -838,7 +855,6 @@
         const dailyRate = fixedSalaryBase / 30;
         const hourlyRate = fixedSalaryBase / 240;
 
-        // 💡 取得新增的數值
         const s_kpi_bonus = parseFloat(document.getElementById('s_kpi_bonus').value) || 0;
         const s_ot_company_hours = parseFloat(document.getElementById('s_ot_company_hours').value) || 0;
         const s_ot_owner_hours = parseFloat(document.getElementById('s_ot_owner_hours').value) || 0;
@@ -868,8 +884,6 @@
         let currentShiftRate = 0, prevShiftRate = 0;
         let OT_multiplier_rest = 0, OT_multiplier_national = 0;
         let prevShiftName = "", currShiftName = "";
-        
-        // 💡 判斷每日時數 (常日8小，輪班10小)
         let hoursPerDay = shiftType === 'normal' ? 8 : 10;
 
         if (shiftType === 'normal') { 
@@ -889,9 +903,8 @@
 
         let totalLeaveDeduction = 0, totalOtPay = 0, ownerOtPay = 0;
         let compLeaveAddHours = 0; 
-        let compLeaveUsedHours = d_leave_comp_hours; // 初始加入零星請假換休
+        let compLeaveUsedHours = d_leave_comp_hours; 
         let currentMonthShiftDays = 0;
-        
         let ot_rest_days = 0, ot_national_days = 0; 
 
         const cells = document.querySelectorAll('.cal-cell[data-day]');
@@ -911,13 +924,13 @@
                 else if (action === "病假" || action === "生理假") { totalLeaveDeduction += (dailyRate * 0.5); isAttended = false; }
                 else if (['換休假', '公假', '特休假', '婚假', '喪假'].includes(action)) { 
                     isAttended = false; 
-                    if(action === "換休假") compLeaveUsedHours += hoursPerDay; // 💡 累積使用換休時數
+                    if(action === "換休假") compLeaveUsedHours += hoursPerDay; 
                 }
                 
                 if (isAttended && isShiftRange && shiftType !== 'normal') currentMonthShiftDays++;
             } else {
                 if (action === "帆宣換休") { 
-                    compLeaveAddHours += hoursPerDay; // 💡 累積新增換休時數
+                    compLeaveAddHours += hoursPerDay; 
                     if (isShiftRange && shiftType !== 'normal') currentMonthShiftDays++; 
                 }
                 else if (action === "帆宣換錢") { 
@@ -940,11 +953,10 @@
             totalShiftAllowance = (prevMonthShiftDays * prevShiftRate) + (currentMonthShiftDays * currentShiftRate);
         }
 
-        // 💡 計算零星時數金流
         totalLeaveDeduction += (d_leave_deduct_hours * hourlyRate);
         totalOtPay += (s_ot_company_hours * hourlyRate * 1.34); 
         ownerOtPay += (s_ot_owner_hours * 574 * 0.9);
-        ownerOtPay += s_kpi_bonus; // KPI直接加入業主款項
+        ownerOtPay += s_kpi_bonus; 
 
         let finalSalary = fixedSalaryBase + v_other_add + totalShiftAllowance + totalOtPay - totalDeductions - totalLeaveDeduction;
 
@@ -955,11 +967,9 @@
         document.getElementById('resDeduct').innerText = Math.round(totalDeductions).toLocaleString();
         document.getElementById('resLeave').innerText = Math.round(totalLeaveDeduction).toLocaleString();
         
-        // 💡 更新換休假(時數)
         document.getElementById('resCompLeave').innerText = compLeaveAddHours;
         document.getElementById('resUsedCompLeave').innerText = compLeaveUsedHours; 
         
-        // 💡 產生結算面板明細 (動態產生，不再依賴 exportImage 產生)
         const addItems = [
             {id: 's_base', name: '本薪'}, {id: 's_supervisor', name: '主管'},
             {id: 's_position', name: '職務'}, {id: 's_tcm', name: 'TCM'},
@@ -994,8 +1004,8 @@
         document.getElementById('resShiftDetail').innerText = shiftDetailStr;
 
         let otDetailArr = [];
-        if (ot_rest_days > 0) otDetailArr.push(`一般休假日 x${ot_rest_days}天`);
-        if (ot_national_days > 0) otDetailArr.push(`國定/免出勤 x${ot_national_days}天`);
+        if (ot_rest_days > 0) otDetailArr.push(`一般休假 x${ot_rest_days}天`);
+        if (ot_national_days > 0) otDetailArr.push(`免出勤 x${ot_national_days}天`);
         if (s_ot_company_hours > 0) otDetailArr.push(`零星加班 x${s_ot_company_hours}時`);
         document.getElementById('resOtDetail').innerText = otDetailArr.length > 0 ? `(明細: ${otDetailArr.join(' + ')})` : '';
 
