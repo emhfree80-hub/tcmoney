@@ -262,19 +262,15 @@
             + (parseInt(document.getElementById('s_branch').value) || 0)
             + (parseInt(document.getElementById('s_meal').value) || 0);
 
-        // 福利金 0.5% (依本薪)
         document.getElementById('d_welfare').value = Math.round(base * 0.005);
         
-        // 勞退自提 (依總固定薪資 * 自提%)
         const pRate = parseFloat(document.getElementById('pension_rate').value) || 0;
         document.getElementById('d_pension').value = Math.round(fixedSalary * (pRate / 100));
 
-        // 勞保健保估算 (以 2024+ 費率概算: 勞保約2.4%, 健保約1.55%)
         document.getElementById('d_labor').value = Math.round(fixedSalary * 0.024);
         document.getElementById('d_health').value = Math.round(fixedSalary * 0.01551);
     }
 
-    // 歷史紀錄處理邏輯
     function updateRecordDropdown() {
         const selector = document.getElementById('recordSelector');
         selector.innerHTML = '<option value="">-- 選擇歷史月份 --</option>';
@@ -366,38 +362,102 @@
         }
     }
 
-    // 匯出圖片邏輯 (強制桌面比例)
     function exportImage() {
         const container = document.getElementById('export-zone');
         
-        // 隱藏不要入鏡的按鈕
         const hides = document.querySelectorAll('.export-hide, #ignore-grid-layout');
         hides.forEach(el => el.style.display = 'none');
         
-        // 消除下拉選單邊框
         const selects = document.querySelectorAll('.action-select');
-        selects.forEach(s => s.style.appearance = 'none');
+        const textSpans = []; 
+        
+        selects.forEach(s => {
+            s.style.display = 'none'; 
+            const span = document.createElement('div');
+            span.innerText = s.options[s.selectedIndex].text; 
+            span.style.color = s.style.color || 'var(--text-main)';
+            span.style.fontSize = '12px';
+            span.style.fontWeight = 'bold';
+            span.style.textAlign = 'center';
+            span.style.marginTop = 'auto';
+            span.style.padding = '4px 0';
+            s.parentNode.appendChild(span);
+            textSpans.push({ select: s, span: span });
+        });
 
-        // 強制設定寬度為電腦版尺寸，確保截圖不會變窄
+        const year = document.getElementById('year').value;
+        const month = document.getElementById('month').value;
+        const shiftSelect = document.getElementById('shiftType');
+        const shiftText = shiftSelect.options[shiftSelect.selectedIndex].text;
+        
+        const titleDiv = document.createElement('div');
+        titleDiv.id = 'export-title';
+        titleDiv.innerHTML = `<h2 style="text-align: center; color: #3F51B5; margin-bottom: 20px; font-size: 26px; border-bottom: 2px solid #E8EAF6; padding-bottom: 10px;">📅 ${year} 年 ${month} 月 班表與薪資結算 (${shiftText})</h2>`;
+        container.insertBefore(titleDiv, container.firstChild);
+
+        const addItems = [
+            {id: 's_base', name: '本薪'}, {id: 's_supervisor', name: '主管'},
+            {id: 's_position', name: '職務'}, {id: 's_tcm', name: 'TCM'},
+            {id: 's_safety', name: '安全'}, {id: 's_transport', name: '交通'},
+            {id: 's_business', name: '業務'}, {id: 's_branch', name: '分公司'},
+            {id: 's_meal', name: '伙食'}, {id: 's_other_val', name: '其它'}
+        ];
+        let addDetails = [];
+        addItems.forEach(item => {
+            const val = parseInt(document.getElementById(item.id).value) || 0;
+            if (val > 0) addDetails.push(`${item.name}:${val.toLocaleString()}`);
+        });
+        const addDetailDiv = document.createElement('div');
+        addDetailDiv.style.fontSize = '12px';
+        addDetailDiv.style.color = '#78909C';
+        addDetailDiv.style.marginTop = '4px';
+        addDetailDiv.innerText = `(明細: ${addDetails.join(' + ')})`;
+        document.getElementById('resFixed').parentNode.appendChild(addDetailDiv);
+
+        const dedItems = [
+            {id: 'd_tax', name: '所得稅'}, {id: 'd_labor', name: '勞保'},
+            {id: 'd_health', name: '健保'}, {id: 'd_supp', name: '補充保費'},
+            {id: 'd_welfare', name: '福利金'}, {id: 'd_dorm', name: '宿舍'},
+            {id: 'd_pension', name: '勞退自提'}, {id: 'd_other_val', name: '其它'},
+            {id: 'd_subtotal_val', name: '代扣小計'}
+        ];
+        let dedDetails = [];
+        dedItems.forEach(item => {
+            const val = parseInt(document.getElementById(item.id).value) || 0;
+            if (val > 0) dedDetails.push(`${item.name}:${val.toLocaleString()}`);
+        });
+        const dedDetailDiv = document.createElement('div');
+        dedDetailDiv.style.fontSize = '12px';
+        dedDetailDiv.style.color = '#E57373';
+        dedDetailDiv.style.marginTop = '4px';
+        dedDetailDiv.innerText = `(明細: ${dedDetails.join(' + ')})`;
+        document.getElementById('resDeduct').parentNode.appendChild(dedDetailDiv);
+
+        const originalWidth = container.style.width;
+        const originalPadding = container.style.padding;
+        const originalBg = container.style.background;
         container.style.width = '1000px';
-        container.style.padding = '20px';
+        container.style.padding = '30px';
         container.style.background = 'white';
 
-        html2canvas(container, { scale: 2, windowWidth: 1200 }).then(canvas => {
-            // 還原狀態
-            hides.forEach(el => el.style.display = '');
-            selects.forEach(s => s.style.appearance = '');
-            container.style.width = '';
-            container.style.padding = '';
-            container.style.background = '';
+        html2canvas(container, { scale: 2, windowWidth: 1200, backgroundColor: '#ffffff' }).then(canvas => {
+            hides.forEach(el => el.style.display = ''); 
+            textSpans.forEach(item => {
+                item.select.style.display = ''; 
+                item.span.remove(); 
+            });
+            titleDiv.remove(); 
+            addDetailDiv.remove(); 
+            dedDetailDiv.remove(); 
             
-            const year = document.getElementById('year').value;
-            const month = document.getElementById('month').value.padStart(2, '0');
+            container.style.width = originalWidth; 
+            container.style.padding = originalPadding;
+            container.style.background = originalBg;
+            
             const d = new Date();
             const dateStr = `${d.getFullYear()}${(d.getMonth()+1).toString().padStart(2,'0')}${d.getDate().toString().padStart(2,'0')}`;
-            
             const link = document.createElement('a');
-            link.download = `${year}-${month}-${dateStr}.png`;
+            link.download = `${year}-${month.padStart(2, '0')}-${dateStr}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
         });
@@ -410,7 +470,6 @@
         container.innerHTML = '';
         if (workDays + offDays === 0) return alert('請輸入有效的天數');
 
-        // 自動帶入常日班 1~7 號的邏輯
         const shiftType = document.getElementById('shiftType').value;
         let startFill = 1;
 
@@ -435,7 +494,6 @@
         const cell = selectObj.closest('.cal-cell');
         const baseType = cell.getAttribute('data-type'); 
 
-        // 全薪假(綠/橘)、半薪/無薪假(紅)、加班(綠)
         if (['事假', '病假', '生理假'].includes(val)) selectObj.style.color = 'var(--color-leave)';
         else if (['換休假', '公假', '特休假', '婚假', '喪假'].includes(val)) selectObj.style.color = 'var(--color-comp)';
         else if (['帆宣換休', '帆宣換錢', '業主10', '業主8'].includes(val)) selectObj.style.color = 'var(--color-ot)';
@@ -524,7 +582,6 @@
         document.getElementById('btnCalc').style.display = 'block';
         document.getElementById('summaryPanel').style.display = 'none';
         
-        // 點擊後順便觸發一次試算更新面板
         calculateSalary();
     }
 
@@ -561,21 +618,19 @@
         const shiftType = document.getElementById('shiftType').value;
         const prevMonthShiftDays = parseInt(document.getElementById('prevMonthShiftDays').value) || 0;
         
-        // 判定費率與乘數
         let currentShiftRate = 0, prevShiftRate = 0;
         let OT_multiplier_rest = 0, OT_multiplier_national = 0;
 
-        if (shiftType === 'normal') { // 常日班 8H
-            OT_multiplier_rest = 38 / 3; // 12.67倍
-            OT_multiplier_national = 8;  // 免出勤加給1日
-        } else { // 輪班 10H 給薪
+        if (shiftType === 'normal') { 
+            OT_multiplier_rest = 38 / 3; 
+            OT_multiplier_national = 8;  
+        } else { 
             currentShiftRate = shiftType === 'day' ? 100 : 200;
             prevShiftRate = shiftType === 'day' ? 200 : 100;
-            OT_multiplier_rest = 18.04; // (4/3)*2 + (5/3)*6 + (8/3)*2 = 18.04
-            OT_multiplier_national = 8 + (4/3)*2; // 加給1日(8H) + 延長工時2H = 10.67倍
+            OT_multiplier_rest = 18.04; 
+            OT_multiplier_national = 8 + (4/3)*2; 
         }
 
-        // 顯示費率在面板
         document.getElementById('rate_rest').innerText = Math.round(hourlyRate * OT_multiplier_rest).toLocaleString();
         document.getElementById('rate_national').innerText = Math.round(hourlyRate * OT_multiplier_national).toLocaleString();
 
@@ -595,7 +650,7 @@
                 let isAttended = true;
                 if (action === "事假") { totalLeaveDeduction += dailyRate; isAttended = false; }
                 else if (action === "病假" || action === "生理假") { totalLeaveDeduction += (dailyRate * 0.5); isAttended = false; }
-                else if (['換休假', '公假', '特休假', '婚假', '喪假'].includes(action)) { isAttended = false; } // 不扣薪，但無輪班津貼
+                else if (['換休假', '公假', '特休假', '婚假', '喪假'].includes(action)) { isAttended = false; }
                 
                 if (isAttended && isShiftRange && shiftType !== 'normal') currentMonthShiftDays++;
             } else {
@@ -604,7 +659,6 @@
                     if (isShiftRange && shiftType !== 'normal') currentMonthShiftDays++; 
                 }
                 else if (action === "帆宣換錢") { 
-                    // 根據假日性質給予不同倍率
                     if (isExempt || isStatutory) {
                         totalOtPay += hourlyRate * OT_multiplier_national;
                     } else {
