@@ -101,8 +101,8 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             position: relative;
         }
-        .feedback-modal h3 { margin-top: 0; color: #FF5722; }
-        .feedback-modal p { font-size: 14px; color: #555; line-height: 1.5; margin-bottom: 20px; }
+        .feedback-modal h3 { margin-top: 0; color: #FF5722; margin-bottom: 15px; }
+        .feedback-modal p { font-size: 14px; color: #555; line-height: 1.6; margin-bottom: 20px; }
         .feedback-modal .btn-close {
             position: absolute; top: 10px; right: 15px;
             background: none; border: none; font-size: 20px;
@@ -278,10 +278,15 @@
 <div class="feedback-modal-overlay" id="feedbackModal">
     <div class="feedback-modal">
         <button class="btn-close" onclick="closeFeedback()">×</button>
-        <h3>💬 幫助我們變得更好</h3>
-        <p>如果你在使用過程中發現 Bug，或是覺得有哪些地方可以改進，歡迎透過表單告訴我們！</p>
+        <h3>💬 意見與問題回饋</h3>
+        <p style="text-align: left; background: #f9f9f9; padding: 15px; border-radius: 6px;">
+            如果您在使用過程中遇到以下狀況，歡迎填寫表單告訴我們：<br><br>
+            🐞 <b>回報 BUG 或計算錯誤</b><br>
+            ✨ <b>許願想要新增的功能</b><br>
+            ❓ <b>其他遇到的問題或建議</b>
+        </p>
         
-        <a href="這裡請貼上你的Google表單連結" target="_blank" class="btn-go-form" onclick="closeFeedback()">👉 前往填寫回饋</a>
+        <a href="https://forms.gle/ZdqL4eXy2gAyJwBb6" target="_blank" class="btn-go-form" onclick="closeFeedback()">👉 前往填寫表單</a>
     </div>
 </div>
 
@@ -475,6 +480,7 @@
     function exportImage() {
         const container = document.getElementById('export-zone');
         
+        // 加入 ignore-in-export-fab，隱藏右下角回饋按鈕
         const hides = document.querySelectorAll('.export-hide, #ignore-grid-layout, #ignore-in-export-fab');
         hides.forEach(el => el.style.display = 'none');
         
