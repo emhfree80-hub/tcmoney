@@ -85,8 +85,10 @@
         .segmented-control {
             display: flex; background-color: #E5E5EA; border-radius: 8px; padding: 3px; width: 100%; box-sizing: border-box;
         }
+        /* 💡 確保分段按鈕內的文字絕對置中 */
         .segmented-control label {
-            flex: 1; text-align: center; padding: 8px 0; font-size: 14px; font-weight: 600;
+            flex: 1; display: flex; justify-content: center; align-items: center; 
+            padding: 8px 0; font-size: 14px; font-weight: 600;
             color: var(--text-secondary); cursor: pointer; border-radius: 6px; transition: all 0.2s ease; margin: 0;
         }
         .segmented-control input { display: none; }
@@ -316,7 +318,7 @@
                         <div style="display:flex; justify-content:space-between; width:100%; align-items: center; margin-top:8px;">
                             <label style="flex-direction: column; align-items: flex-start; gap: 2px;">
                                 <span style="font-size:13px; color:var(--text-primary);">輪班出勤 (天)</span>
-                                <span class="field-note" style="font-size:11px;">(計算輪班津貼。含休假/免出勤帆加，不含業加)</span>
+                                <span class="field-note" style="font-size:11px;">(計算輪班津貼用。一般/免出勤帆加有計入，業加不計入)</span>
                             </label>
                             <input type="number" id="prevMonthShiftDays" value="0" style="width: 50px; background: #fff;">
                         </div>
@@ -330,16 +332,9 @@
                         <div style="display:flex; justify-content:space-between; width:100%; align-items: center; margin-top:8px;">
                             <label style="flex-direction: column; align-items: flex-start; gap: 2px;">
                                 <span style="font-size:13px; color:var(--text-primary);">帆宣加班 (免出勤日出勤)</span>
-                                <span class="field-note" style="font-size:11px;">(變形工時空班，倍率同休假日)</span>
+                                <span class="field-note" style="font-size:11px;">(國定假日出勤請一併填入此格)</span>
                             </label>
                             <input type="number" id="prevMonthOtExempt" value="0" step="0.5" style="width: 50px; background: #fff;">
-                        </div>
-                        <div style="display:flex; justify-content:space-between; width:100%; align-items: center; margin-top:8px;">
-                            <label style="flex-direction: column; align-items: flex-start; gap: 2px;">
-                                <span style="font-size:13px; color:var(--text-primary);">帆宣加班 (國定假日出勤)</span>
-                                <span class="field-note" style="font-size:11px;">(紅字出勤，計算帆宣加班費用)</span>
-                            </label>
-                            <input type="number" id="prevMonthOtNational" value="0" step="0.5" style="width: 50px; background: #fff;">
                         </div>
                     </div>
                     
@@ -364,14 +359,14 @@
                             <input type="text" id="statutoryHolidays" placeholder="例: 5,12,19" style="width: 120px; background: #fff;">
                         </div>
                         <div style="display:flex; justify-content:space-between; width:100%; align-items: center; margin-top:5px;">
-                            <span style="font-size:13px; color:var(--text-primary);">免出勤日 (變形工時)</span>
+                            <span style="font-size:13px; color:var(--text-primary);">免出勤日</span>
                             <input type="text" id="exemptDays" placeholder="例: 1,15" style="width: 120px; background: #fff;">
                         </div>
-                        <p style="font-size: 11px; color: var(--text-secondary); margin: 5px 0 0 0; line-height:1.4;">(系統已內建國定假日，此處僅需填寫公司排定之變形免出勤或自訂例假)</p>
+                        <p style="font-size: 11px; color: var(--text-secondary); margin: 5px 0 0 0; line-height:1.4;">(系統已內建國定假日，此處僅需填寫公司排定之免出勤或自訂例假)</p>
                     </div>
 
-                    <div class="form-group"><label>零星帆宣加班 (時)</label><input type="number" id="s_ot_company_hours" value="0" step="0.5"></div>
-                    <div class="form-group"><label>零星業主加班 (時)</label><input type="number" id="s_ot_owner_hours" value="0" step="0.5"></div>
+                    <div class="form-group"><label>帆宣延時加班 (時)</label><input type="number" id="s_ot_company_hours" value="0" step="0.5"></div>
+                    <div class="form-group"><label>業主延時加班 (時)</label><input type="number" id="s_ot_owner_hours" value="0" step="0.5"></div>
                     <div class="form-group"><label class="txt-red">請假扣薪 (時)</label><input type="number" id="d_leave_deduct_hours" value="0" step="0.5"></div>
                     <div class="form-group"><label class="txt-orange">請假換休 (時)</label><input type="number" id="d_leave_comp_hours" value="0" step="0.5"></div>
                 </div>
@@ -398,11 +393,11 @@
             <div class="rate-hint-box">
                 <strong style="display:block; margin-bottom:6px;">💡 當前班別加班費率 (系統依全薪自動對應)</strong>
                 <div style="display:flex; justify-content: space-between; margin-bottom:4px;">
-                    <span>一般休假 / 免出勤日：</span>
+                    <span>一般休假日：</span>
                     <strong><span id="rate_rest">0</span> 元/天</strong>
                 </div>
                 <div style="display:flex; justify-content: space-between;">
-                    <span>國定假日：</span>
+                    <span>國定假日 / 免出勤日：</span>
                     <strong><span id="rate_national">0</span> 元/天</strong>
                 </div>
             </div>
@@ -415,6 +410,10 @@
                         <span class="sum-val">$ <span id="resFixed">0</span></span>
                     </div>
                     <div class="summary-row" id="row-other-add">
+                        <span class="sum-label">其它加項 (計入全薪)</span>
+                        <span class="sum-val">$ <span id="resOtherAdd">0</span></span>
+                    </div>
+                    <div class="summary-row" id="row-other-add2">
                         <span class="sum-label">其它加項 (不計全薪)</span>
                         <span class="sum-val">$ <span id="resOtherAdd2">0</span></span>
                     </div>
@@ -463,10 +462,6 @@
                     <div class="summary-row" style="padding: 5px 0; border: none;">
                         <span class="sum-label">帆宣加班 (免出勤日出勤)</span>
                         <span class="sum-val"><span id="resCarryOtExempt">0</span> 天</span>
-                    </div>
-                    <div class="summary-row" style="padding: 5px 0; border: none;">
-                        <span class="sum-label">帆宣加班 (國定假日出勤)</span>
-                        <span class="sum-val"><span id="resCarryOtNational">0</span> 天</span>
                     </div>
                 </div>
             </div>
@@ -547,7 +542,9 @@
                 <div class="v-desc">
                     • <b>【優化】</b>移除手動投保基準欄位，改由系統依全薪自動查表帶入<br>
                     • <b>【新增】</b>應發項目標示(計入/不計入全薪)，並新增不計入全薪之自訂加項<br>
-                    • <b>【優化】</b>結轉區塊欄位正名，並拆分「免出勤日」與「國定假日」以對應不同法規費率
+                    • <b>【校正】</b>精準區分「休假日」與「免出勤/國定假日」之不同法規加班倍率<br>
+                    • <b>【優化】</b>結轉區塊欄位正名(延時加班)，並移除不必要之生硬詞彙<br>
+                    • <b>【修復】</b>修復因新增參數導致結算面板崩潰無法顯示之錯誤
                 </div>
             </div>
             <div class="version-item">
@@ -618,7 +615,7 @@
             <div class="version-item">
                 <span class="v-num">V1.00</span><span class="v-date">2026-02-24</span>
                 <div class="v-desc">
-                    • <b>【發布】</b>初始版本建立 (TCM 基礎排班月曆與 18.04 倍加班費核心計算模型)
+                    • <b>【發布】</b>初始版本建立 (TCM 基礎排班月曆與加班費核心計算模型)
                 </div>
             </div>
         </div>
@@ -690,7 +687,6 @@
             document.getElementById('prevMonthShiftDays').value = pData.carryOverShiftDays || 0;
             document.getElementById('prevMonthOtRest').value = pData.carryOverOtRest || 0;
             document.getElementById('prevMonthOtExempt').value = pData.carryOverOtExempt || 0;
-            document.getElementById('prevMonthOtNational').value = pData.carryOverOtNational || 0;
             alert(`✅ 已為您抓取 ${prevM}月份 的結轉資料！`);
         } else {
             alert(`找不到 ${prevY}年${prevM}月 的存檔紀錄，無法自動帶入。`);
@@ -770,7 +766,6 @@
         const v_meal = parseInt(document.getElementById('s_meal').value) || 0;
         const v_other_add = parseInt(document.getElementById('s_other_val').value) || 0;
         
-        // 全薪不包含 s_other_val2
         const fixedSalaryBase = v_base + v_supervisor + v_position + v_tcm + v_safety + v_transport + v_business + v_branch + v_meal + v_other_add;
         const hourlyRate = fixedSalaryBase / 240;
 
@@ -779,7 +774,6 @@
         const prevMonthShiftDays = parseInt(document.getElementById('prevMonthShiftDays').value) || 0;
         const prevMonthOtRest = parseFloat(document.getElementById('prevMonthOtRest').value) || 0;
         const prevMonthOtExempt = parseFloat(document.getElementById('prevMonthOtExempt').value) || 0;
-        const prevMonthOtNational = parseFloat(document.getElementById('prevMonthOtNational').value) || 0;
         const s_ot_company_hours = parseFloat(document.getElementById('s_ot_company_hours').value) || 0;
 
         let currentShiftRate = 0, prevShiftRate = 0;
@@ -790,7 +784,8 @@
         } else {
             currentShiftRate = shiftType === 'day' ? 100 : 200;
             prevShiftRate = shiftType === 'day' ? 200 : 100;
-            OT_multiplier_rest = 18.04; OT_multiplier_national = 8 + (4/3)*2;
+            OT_multiplier_rest = 18.04; 
+            OT_multiplier_national = 8 + (4/3)*2; // 免出勤/國定假日倍率為 10.67
         }
 
         let currentMonthShiftDays = 0;
@@ -814,12 +809,13 @@
                 let isAttended = !(["事假", "病假", "生理假", "換休假", "公假", "特休假", "婚假", "喪假", "國定假日休假"].includes(action));
                 if (isAttended && isCurrentCycle && shiftType !== 'normal') currentMonthShiftDays++;
             } else {
-                if (action === "帆宣換休" || action === "國定假日出勤") {
+                if (action === "帆宣換休") {
                     if (isCurrentCycle && shiftType !== 'normal') currentMonthShiftDays++;
                 } else if (action === "帆宣換錢") {
                     if (isCurrentCycle) {
-                        if (isStatutory) totalOtPay += hourlyRate * OT_multiplier_national;
-                        else totalOtPay += hourlyRate * OT_multiplier_rest; // 一般休假與免出勤日皆套用此倍率
+                        // 💡 免出勤日與國定假日適用較低倍率 (OT_multiplier_national)
+                        if (isStatutory || isExempt) totalOtPay += hourlyRate * OT_multiplier_national;
+                        else totalOtPay += hourlyRate * OT_multiplier_rest; 
                     }
                     if (isCurrentCycle && shiftType !== 'normal') currentMonthShiftDays++;
                 }
@@ -829,11 +825,9 @@
         if (shiftType !== 'normal') totalShiftAllowance = (prevMonthShiftDays * prevShiftRate) + (currentMonthShiftDays * currentShiftRate);
         
         totalOtPay += (prevMonthOtRest * hourlyRate * OT_multiplier_rest);
-        totalOtPay += (prevMonthOtExempt * hourlyRate * OT_multiplier_rest);
-        totalOtPay += (prevMonthOtNational * hourlyRate * OT_multiplier_national);
+        totalOtPay += (prevMonthOtExempt * hourlyRate * OT_multiplier_national); // 免出勤套用 national 費率
         totalOtPay += (s_ot_company_hours * hourlyRate * 1.34);
         
-        // 💡 計算預估總薪資時，不含業主款項，但要包含不計入全薪的其它加項(s_other_val2)
         const v_other_add2 = parseInt(document.getElementById('s_other_val2').value) || 0;
         let estimatedGross = fixedSalaryBase + v_other_add2 + totalShiftAllowance + totalOtPay;
         
@@ -893,12 +887,10 @@
             prevMonthShiftDays: document.getElementById('prevMonthShiftDays').value,
             prevMonthOtRest: document.getElementById('prevMonthOtRest').value,
             prevMonthOtExempt: document.getElementById('prevMonthOtExempt').value,
-            prevMonthOtNational: document.getElementById('prevMonthOtNational').value,
             
             carryOverShiftDays: document.getElementById('resCarryShift') ? document.getElementById('resCarryShift').innerText : 0,
             carryOverOtRest: document.getElementById('resCarryOtRest') ? document.getElementById('resCarryOtRest').innerText : 0,
             carryOverOtExempt: document.getElementById('resCarryOtExempt') ? document.getElementById('resCarryOtExempt').innerText : 0,
-            carryOverOtNational: document.getElementById('resCarryOtNational') ? document.getElementById('resCarryOtNational').innerText : 0,
 
             workDays: document.getElementById('workDays').value, offDays: document.getElementById('offDays').value,
             statutoryHolidays: document.getElementById('statutoryHolidays').value, exemptDays: document.getElementById('exemptDays').value,
@@ -972,18 +964,15 @@
                     document.getElementById('prevMonthShiftDays').value = records[prevKey].carryOverShiftDays || 0;
                     document.getElementById('prevMonthOtRest').value = records[prevKey].carryOverOtRest || 0;
                     document.getElementById('prevMonthOtExempt').value = records[prevKey].carryOverOtExempt || 0;
-                    document.getElementById('prevMonthOtNational').value = records[prevKey].carryOverOtNational || 0;
                 } else {
                     document.getElementById('prevMonthShiftDays').value = "0";
                     document.getElementById('prevMonthOtRest').value = "0";
                     document.getElementById('prevMonthOtExempt').value = "0";
-                    document.getElementById('prevMonthOtNational').value = "0";
                 }
             } else {
                 document.getElementById('prevMonthShiftDays').value = "0";
                 document.getElementById('prevMonthOtRest').value = "0";
                 document.getElementById('prevMonthOtExempt').value = "0";
-                document.getElementById('prevMonthOtNational').value = "0";
             }
 
             document.getElementById('calendar-container').innerHTML = ""; document.getElementById('summaryPanel').style.display = "none"; 
@@ -1083,12 +1072,12 @@
 
         if (['事假', '病假', '生理假'].includes(val)) selectObj.style.color = 'var(--apple-red)';
         else if (['換休假', '公假', '特休假', '婚假', '喪假', '國定假日休假'].includes(val)) selectObj.style.color = 'var(--apple-orange)';
-        else if (['帆宣換休', '帆宣換錢', '業主10', '業主8', '國定假日出勤'].includes(val)) selectObj.style.color = 'var(--apple-green)';
+        else if (['帆宣換休', '帆宣換錢', '業主10', '業主8'].includes(val)) selectObj.style.color = 'var(--apple-green)';
         else selectObj.style.color = 'var(--text-primary)';
 
         let isActuallyWorking = false;
         if (baseType === 'work') { isActuallyWorking = !(['事假', '病假', '生理假', '換休假', '公假', '特休假', '婚假', '喪假', '國定假日休假'].includes(val)); } 
-        else { isActuallyWorking = ['帆宣換休', '帆宣換錢', '業主10', '業主8', '國定假日出勤'].includes(val); }
+        else { isActuallyWorking = ['帆宣換休', '帆宣換錢', '業主10', '業主8'].includes(val); }
 
         if (isActuallyWorking) cell.classList.add('active-work'); else cell.classList.remove('active-work');
     }
@@ -1170,12 +1159,12 @@
                 let defaultAction = "正常出勤";
                 if (isStatutory || isExempt) {
                     if (shiftType === 'normal') defaultAction = "國定假日休假";
-                    else defaultAction = "國定假日出勤";
+                    else defaultAction = "帆宣換休"; // 輪班遇國定假日直接預設換休
                 }
                 const workOptions = [
                     {val: "正常出勤", label: "正常出勤"},
-                    {val: "國定假日出勤", label: "國定假日出勤(換休)"},
                     {val: "國定假日休假", label: "國定假日休假(不扣薪)"},
+                    {val: "帆宣換休", label: "國定假日出勤(換休)"},
                     {val: "特休假", label: "特休假(不扣薪)"},
                     {val: "換休假", label: "換休假(不扣薪)"},
                     {val: "公假", label: "公假(不扣薪)"},
@@ -1238,7 +1227,6 @@
         const v_other_add = parseInt(document.getElementById('s_other_val').value) || 0;
         const v_other_add2 = parseInt(document.getElementById('s_other_val2').value) || 0;
 
-        // 💡 全薪僅包含有標示(計入全薪)的項目
         const fixedSalaryBase = v_base + v_supervisor + v_position + v_tcm + v_safety + v_transport + v_business + v_branch + v_meal + v_other_add;
         const dailyRate = fixedSalaryBase / 30;
         const hourlyRate = fixedSalaryBase / 240;
@@ -1271,7 +1259,6 @@
         const prevMonthShiftDays = parseInt(document.getElementById('prevMonthShiftDays').value) || 0;
         const prevMonthOtRest = parseFloat(document.getElementById('prevMonthOtRest').value) || 0;
         const prevMonthOtExempt = parseFloat(document.getElementById('prevMonthOtExempt').value) || 0;
-        const prevMonthOtNational = parseFloat(document.getElementById('prevMonthOtNational').value) || 0;
         
         let currentShiftRate = 0, prevShiftRate = 0;
         let OT_multiplier_rest = 0, OT_multiplier_national = 0;
@@ -1283,9 +1270,8 @@
         } else { 
             currentShiftRate = shiftType === 'day' ? 100 : 200;
             prevShiftRate = shiftType === 'day' ? 200 : 100;
-            OT_multiplier_rest = 18.04; OT_multiplier_national = 8 + (4/3)*2; 
-            currShiftName = shiftType === 'day' ? "日班" : "夜班";
-            prevShiftName = shiftType === 'day' ? "夜班" : "日班";
+            OT_multiplier_rest = 18.04; 
+            OT_multiplier_national = 8 + (4/3)*2; // 國定假日/免出勤日 較低倍率
         }
 
         document.getElementById('rate_rest').innerText = Math.round(hourlyRate * OT_multiplier_rest).toLocaleString();
@@ -1294,8 +1280,8 @@
         let totalLeaveDeduction = 0, totalOtPay = 0, ownerOtPay = 0;
         let compLeaveAddHours = 0; let compLeaveUsedHours = d_leave_comp_hours; 
         
-        let currentMonthShiftDays = 0; let ot_rest_days = 0, ot_exempt_days = 0, ot_national_days = 0; 
-        let carryOverShiftDays = 0; let carryOverOtRest = 0; let carryOverOtExempt = 0; let carryOverOtNational = 0;
+        let currentMonthShiftDays = 0; let ot_rest_days = 0, ot_exempt_days = 0; 
+        let carryOverShiftDays = 0; let carryOverOtRest = 0; let carryOverOtExempt = 0; 
 
         const cells = document.querySelectorAll('.cal-cell[data-day]');
         cells.forEach(cell => {
@@ -1320,24 +1306,17 @@
                     else carryOverShiftDays++;
                 }
 
-                if (action === "國定假日出勤") {
-                    compLeaveAddHours += hoursPerDay;
-                }
-
             } else {
-                if (action === "帆宣換休" || action === "國定假日出勤") { 
+                if (action === "帆宣換休") { 
                     compLeaveAddHours += hoursPerDay; 
                     if (shiftType !== 'normal') {
                         if(isCurrentCycle) currentMonthShiftDays++;
                         else carryOverShiftDays++;
                     }
                 } else if (action === "帆宣換錢") { 
-                    if (isStatutory) { 
-                        if(isCurrentCycle) { totalOtPay += hourlyRate * OT_multiplier_national; ot_national_days++; }
-                        else { carryOverOtNational++; }
-                    } else if (isExempt) {
-                        // 💡 免出勤日(變形工時)適用休息日倍率
-                        if(isCurrentCycle) { totalOtPay += hourlyRate * OT_multiplier_rest; ot_exempt_days++; }
+                    // 💡 國定與免出勤統一套用 national 費率 (10.67倍)
+                    if (isStatutory || isExempt) { 
+                        if(isCurrentCycle) { totalOtPay += hourlyRate * OT_multiplier_national; ot_exempt_days++; }
                         else { carryOverOtExempt++; }
                     } else { 
                         if(isCurrentCycle) { totalOtPay += hourlyRate * OT_multiplier_rest; ot_rest_days++; }
@@ -1360,13 +1339,11 @@
 
         totalLeaveDeduction += (d_leave_deduct_hours * hourlyRate);
         totalOtPay += (prevMonthOtRest * hourlyRate * OT_multiplier_rest);
-        totalOtPay += (prevMonthOtExempt * hourlyRate * OT_multiplier_rest);
-        totalOtPay += (prevMonthOtNational * hourlyRate * OT_multiplier_national);
+        totalOtPay += (prevMonthOtExempt * hourlyRate * OT_multiplier_national); // 上月結轉免出勤套用較低倍率
         totalOtPay += (s_ot_company_hours * hourlyRate * 1.34); 
         
         ownerOtPay += (s_ot_owner_hours * 574 * 0.9); ownerOtPay += s_kpi_bonus; 
 
-        // 💡 發放總薪資加入不計全薪的其它加項(v_other_add2)
         let finalSalary = fixedSalaryBase + v_other_add2 + totalShiftAllowance + totalOtPay - totalDeductions - totalLeaveDeduction;
 
         document.getElementById('resFixed').innerText = Math.round(fixedSalaryBase).toLocaleString();
@@ -1382,7 +1359,6 @@
         document.getElementById('resCarryShift').innerText = carryOverShiftDays;
         document.getElementById('resCarryOtRest').innerText = carryOverOtRest;
         document.getElementById('resCarryOtExempt').innerText = carryOverOtExempt;
-        document.getElementById('resCarryOtNational').innerText = carryOverOtNational;
         
         const addItems = [{id: 's_base', name: '本薪'}, {id: 's_supervisor', name: '主管'}, {id: 's_position', name: '職務'}, {id: 's_tcm', name: 'TCM'}, {id: 's_safety', name: '安全'}, {id: 's_transport', name: '交通'}, {id: 's_business', name: '業務'}, {id: 's_branch', name: '分公司'}, {id: 's_meal', name: '伙食'}, {id: 's_other_val', name: '其它(計全薪)'}];
         let addDetails = [];
@@ -1393,7 +1369,8 @@
         let dedDetails = [];
         dedItems.forEach(item => { const val = parseInt(document.getElementById(item.id).value) || 0; if (val > 0) dedDetails.push(`${item.name}:${val.toLocaleString()}`); });
         
-        document.getElementById('row-other-add').style.display = (v_other_add > 0 || v_other_add2 > 0) ? 'flex' : 'none';
+        document.getElementById('row-other-add').style.display = (v_other_add > 0) ? 'flex' : 'none';
+        document.getElementById('row-other-add2').style.display = (v_other_add2 > 0) ? 'flex' : 'none';
         document.getElementById('row-leave-deduct').style.display = totalLeaveDeduction > 0 ? 'flex' : 'none';
 
         document.getElementById('resDeductDetail').innerText = dedDetails.length > 0 ? `(${dedDetails.join(' + ')})` : '';
@@ -1404,12 +1381,10 @@
 
         let otDetailArr = [];
         if (prevMonthOtRest > 0) otDetailArr.push(`上月結轉一般休假 x${prevMonthOtRest}天`);
-        if (prevMonthOtExempt > 0) otDetailArr.push(`上月結轉免出勤 x${prevMonthOtExempt}天`);
-        if (prevMonthOtNational > 0) otDetailArr.push(`上月結轉國定假日 x${prevMonthOtNational}天`);
+        if (prevMonthOtExempt > 0) otDetailArr.push(`上月結轉免出勤/國定假日 x${prevMonthOtExempt}天`);
         if (ot_rest_days > 0) otDetailArr.push(`本期一般休假 x${ot_rest_days}天`);
-        if (ot_exempt_days > 0) otDetailArr.push(`本期免出勤 x${ot_exempt_days}天`);
-        if (ot_national_days > 0) otDetailArr.push(`本期國定假日 x${ot_national_days}天`);
-        if (s_ot_company_hours > 0) otDetailArr.push(`零星加班 x${s_ot_company_hours}時`);
+        if (ot_exempt_days > 0) otDetailArr.push(`本期免出勤/國定假日 x${ot_exempt_days}天`);
+        if (s_ot_company_hours > 0) otDetailArr.push(`延時加班 x${s_ot_company_hours}時`);
         document.getElementById('resOtDetail').innerText = otDetailArr.length > 0 ? `(${otDetailArr.join(' + ')})` : '';
 
         document.getElementById('resTotal').innerText = Math.round(finalSalary).toLocaleString();
