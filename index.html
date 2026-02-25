@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TCM班表及薪資計算小工具 v2.02</title>
+    <title>TCM班表及薪資計算小工具 v2.03</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#F2F2F7">
@@ -85,7 +85,6 @@
         .segmented-control {
             display: flex; background-color: #E5E5EA; border-radius: 8px; padding: 3px; width: 100%; box-sizing: border-box;
         }
-        /* 💡 確保分段按鈕內的文字絕對置中 */
         .segmented-control label {
             flex: 1; display: flex; justify-content: center; align-items: center; 
             padding: 8px 0; font-size: 14px; font-weight: 600;
@@ -213,7 +212,7 @@
     
     <h1>
         薪資設定 
-        <span class="version-badge" onclick="openVersionHistory()">v2.02</span>
+        <span class="version-badge" onclick="openVersionHistory()">v2.03</span>
     </h1>
 
     <div class="file-manager" id="ignore-in-export">
@@ -298,8 +297,8 @@
                         </div>
                     </div>
                     
-                    <div class="form-group col-layout" style="padding-top:15px; padding-bottom:15px;">
-                        <label style="margin-bottom: 4px;">當月班別</label>
+                    <div class="form-group col-layout" style="padding-top:15px; padding-bottom:15px; border-bottom: 1px dashed var(--divider);">
+                        <label style="margin-bottom: 4px;">當月班別 (津貼計算)</label>
                         <div class="segmented-control">
                             <input type="radio" name="shiftType" id="shift_normal" value="normal" onchange="handleShiftChange()">
                             <label for="shift_normal">常日班</label>
@@ -310,7 +309,38 @@
                         </div>
                     </div>
 
-                    <div class="form-group col-layout" style="background: #F9F9FB; padding: 12px; border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--divider);">
+                    <div id="shift-cycle-container">
+                        <div class="form-group col-layout" style="padding-top:15px; padding-bottom:15px;">
+                            <label style="margin-bottom: 4px;">班表模式 (預設台積電四班二輪)</label>
+                            <div class="segmented-control">
+                                <input type="radio" name="scheduleMode" id="mode_tsmc_a" value="A" onchange="handleModeChange()" checked>
+                                <label for="mode_tsmc_a">台積 A 班</label>
+                                <input type="radio" name="scheduleMode" id="mode_tsmc_b" value="B" onchange="handleModeChange()">
+                                <label for="mode_tsmc_b">台積 B 班</label>
+                                <input type="radio" name="scheduleMode" id="mode_custom" value="Custom" onchange="handleModeChange()">
+                                <label for="mode_custom">自訂輪班</label>
+                            </div>
+                        </div>
+
+                        <details class="ios-details" id="custom-cycle-details" style="display: none; background: #F9F9FB; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--divider);">
+                            <summary style="font-size: 14px; padding: 10px 15px; background: transparent; box-shadow: none;">⚙️ 自訂輪班週期設定</summary>
+                            <div class="details-content" style="padding: 10px 15px; background: transparent; box-shadow: none; border-top: 1px dashed var(--divider); border-radius: 0;">
+                                <div class="form-group">
+                                    <label>輪班週期</label>
+                                    <div style="display:flex; align-items:center; gap:5px; font-weight:500;">
+                                        做 <input type="number" id="workDays" style="width: 35px; text-align:center;" value="2" onchange="generateCycleDropdown()"> 天 / 
+                                        休 <input type="number" id="offDays" style="width: 35px; text-align:center;" value="2" onchange="generateCycleDropdown()"> 天
+                                    </div>
+                                </div>
+                                <div class="form-group" style="border-bottom: none; padding-bottom: 0;">
+                                    <label>本月 1 號狀態</label>
+                                    <select id="cycleStartOffset" style="width: 120px; font-weight: bold; color: var(--apple-blue);" onchange="generateCalendar()"></select>
+                                </div>
+                            </div>
+                        </details>
+                    </div>
+
+                    <div class="form-group col-layout" style="background: #F9F9FB; padding: 12px; border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--divider); margin-top: 10px;">
                         <label style="color: var(--apple-blue); font-weight: 600; font-size: 14px; width: 100%; display: flex; justify-content: space-between; align-items: center;">
                             <span><span id="prevMonthText">1月21日~1月底出勤結轉</span></span>
                             <button class="btn-link" onclick="manualPullCarryOver()">抓取上月</button>
@@ -336,18 +366,6 @@
                             </label>
                             <input type="number" id="prevMonthOtExempt" value="0" step="0.5" style="width: 50px; background: #fff;">
                         </div>
-                    </div>
-                    
-                    <div class="form-group" id="cycle-setting-group">
-                        <label>輪班週期</label>
-                        <div style="display:flex; align-items:center; gap:5px; font-weight:500;">
-                            做 <input type="number" id="workDays" style="width: 35px; text-align:center;" value="2" onchange="generateCycleDropdown()"> 天 / 
-                            休 <input type="number" id="offDays" style="width: 35px; text-align:center;" value="2" onchange="generateCycleDropdown()"> 天
-                        </div>
-                    </div>
-                    <div class="form-group" id="cycle-start-container">
-                        <label>本月 1 號狀態</label>
-                        <select id="cycleStartOffset" style="width: 120px; font-weight: bold; color: var(--apple-blue);"></select>
                     </div>
                 </div>
 
@@ -538,6 +556,14 @@
         
         <div class="version-list">
             <div class="version-item">
+                <span class="v-num">V2.03</span><span class="v-date">2026-02-25</span>
+                <div class="v-desc">
+                    • <b>【新增】</b>內建台積電四班二輪 A/B 班預設版型，一鍵切換自動對齊當月班表<br>
+                    • <b>【優化】</b>將手動自訂輪班設定收折，保持主畫面操作介面極簡乾淨<br>
+                    • <b>【修正】</b>嚴格校正台積電115年行事曆起算基準(1/1為A班休假第二天)
+                </div>
+            </div>
+            <div class="version-item">
                 <span class="v-num">V2.02</span><span class="v-date">2026-02-25</span>
                 <div class="v-desc">
                     • <b>【優化】</b>移除手動投保基準欄位，改由系統依全薪自動查表帶入<br>
@@ -663,8 +689,56 @@
         document.getElementById('prevMonthText').innerText = `${prevM}月21日~${prevM}月底出勤結轉`;
     }
 
+    function syncTsmcOffset() {
+        const modeInput = document.querySelector('input[name="scheduleMode"]:checked');
+        if (!modeInput) return;
+        const mode = modeInput.value;
+        
+        if (mode === 'Custom') return;
+
+        const y = parseInt(document.getElementById('year').value);
+        const m = parseInt(document.getElementById('month').value);
+        
+        const anchor = new Date(2026, 0, 1);
+        const target = new Date(y, m - 1, 1);
+        const diffTime = target.getTime() - anchor.getTime();
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+        
+        // 💡 修正台積基準：
+        // 根據 115 年度行事曆：2026/1/1 是 A班的休假第2天 (O1)
+        // B班與A班相反，所以 2026/1/1 是 B班的上班第2天 (W1)
+        let baseIndex = (mode === 'A') ? 3 : 1; 
+        
+        let mod = (diffDays + baseIndex) % 4;
+        if (mod < 0) mod += 4;
+        
+        document.getElementById('workDays').value = 2;
+        document.getElementById('offDays').value = 2;
+        generateCycleDropdown(); 
+        
+        const states = ['W0', 'W1', 'O0', 'O1'];
+        document.getElementById('cycleStartOffset').value = states[mod];
+    }
+
+    function handleModeChange() {
+        const mode = document.querySelector('input[name="scheduleMode"]:checked').value;
+        const customDetails = document.getElementById('custom-cycle-details');
+        
+        if (mode === 'Custom') {
+            customDetails.style.display = 'block';
+        } else {
+            customDetails.style.display = 'none';
+            syncTsmcOffset();
+        }
+        
+        if (document.getElementById('calendar-container').innerHTML !== '') {
+            generateCalendar();
+        }
+    }
+
     function updateHolidays() {
         updateMonthLabels(); 
+        syncTsmcOffset(); 
         document.getElementById('calendar-container').innerHTML = '';
         document.getElementById('summaryPanel').style.display = 'none';
         document.getElementById('btnExportCal').style.display = 'none';
@@ -727,16 +801,17 @@
 
     function handleShiftChange() {
         const shift = getShiftValue();
-        const cycleGroup = document.getElementById('cycle-setting-group');
-        const startGroup = document.getElementById('cycle-start-container');
+        const cycleContainer = document.getElementById('shift-cycle-container');
         
         if (shift === 'normal') {
-            cycleGroup.style.display = 'none';
-            startGroup.style.display = 'none';
+            cycleContainer.style.display = 'none';
         } else {
-            cycleGroup.style.display = 'flex';
-            startGroup.style.display = 'flex';
-            generateCycleDropdown();
+            cycleContainer.style.display = 'block';
+            handleModeChange();
+        }
+        
+        if (document.getElementById('calendar-container').innerHTML !== '') {
+            generateCalendar();
         }
     }
 
@@ -785,7 +860,7 @@
             currentShiftRate = shiftType === 'day' ? 100 : 200;
             prevShiftRate = shiftType === 'day' ? 200 : 100;
             OT_multiplier_rest = 18.04; 
-            OT_multiplier_national = 8 + (4/3)*2; // 免出勤/國定假日倍率為 10.67
+            OT_multiplier_national = 8 + (4/3)*2; 
         }
 
         let currentMonthShiftDays = 0;
@@ -813,7 +888,6 @@
                     if (isCurrentCycle && shiftType !== 'normal') currentMonthShiftDays++;
                 } else if (action === "帆宣換錢") {
                     if (isCurrentCycle) {
-                        // 💡 免出勤日與國定假日適用較低倍率 (OT_multiplier_national)
                         if (isStatutory || isExempt) totalOtPay += hourlyRate * OT_multiplier_national;
                         else totalOtPay += hourlyRate * OT_multiplier_rest; 
                     }
@@ -825,7 +899,7 @@
         if (shiftType !== 'normal') totalShiftAllowance = (prevMonthShiftDays * prevShiftRate) + (currentMonthShiftDays * currentShiftRate);
         
         totalOtPay += (prevMonthOtRest * hourlyRate * OT_multiplier_rest);
-        totalOtPay += (prevMonthOtExempt * hourlyRate * OT_multiplier_national); // 免出勤套用 national 費率
+        totalOtPay += (prevMonthOtExempt * hourlyRate * OT_multiplier_national);
         totalOtPay += (s_ot_company_hours * hourlyRate * 1.34);
         
         const v_other_add2 = parseInt(document.getElementById('s_other_val2').value) || 0;
@@ -862,6 +936,8 @@
         const month = document.getElementById('month').value;
         const key = `${userName}_${year}-${month.toString().padStart(2, '0')}`;
         
+        const currentMode = document.querySelector('input[name="scheduleMode"]:checked') ? document.querySelector('input[name="scheduleMode"]:checked').value : 'Custom';
+
         const data = {
             userName, year, month,
             s_base: document.getElementById('s_base').value, s_supervisor: document.getElementById('s_supervisor').value,
@@ -883,6 +959,7 @@
             d_leave_comp_hours: document.getElementById('d_leave_comp_hours').value,
             
             shiftType: getShiftValue(), 
+            scheduleMode: currentMode,
             
             prevMonthShiftDays: document.getElementById('prevMonthShiftDays').value,
             prevMonthOtRest: document.getElementById('prevMonthOtRest').value,
@@ -914,7 +991,7 @@
 
         Object.keys(data).forEach(k => {
             const el = document.getElementById(k);
-            if(el && typeof data[k] !== 'object' && k !== 'shiftType' && !k.startsWith('carryOver')) el.value = data[k];
+            if(el && typeof data[k] !== 'object' && k !== 'shiftType' && k !== 'scheduleMode' && !k.startsWith('carryOver')) el.value = data[k];
         });
 
         if (data.userName) document.getElementById('userName').value = data.userName;
@@ -925,9 +1002,17 @@
             if(rb) rb.checked = true;
         }
 
+        if (data.scheduleMode) {
+            let rm = document.querySelector(`input[name="scheduleMode"][value="${data.scheduleMode}"]`);
+            if(rm) rm.checked = true;
+        }
+
         updateMonthLabels(); 
         handleShiftChange();
-        if (data.cycleStartOffset) document.getElementById('cycleStartOffset').value = data.cycleStartOffset;
+        
+        if (data.scheduleMode === 'Custom' && data.cycleStartOffset) {
+            document.getElementById('cycleStartOffset').value = data.cycleStartOffset;
+        }
 
         try {
             generateCalendar();
@@ -979,6 +1064,7 @@
             document.getElementById('btnCalc').style.display = "none"; document.getElementById('btnExportCal').style.display = "none";
             
             document.getElementById('shift_night').checked = true;
+            document.getElementById('mode_tsmc_a').checked = true; 
             handleShiftChange();
             document.getElementById('recordSelector').value = "";
         }
@@ -1159,7 +1245,7 @@
                 let defaultAction = "正常出勤";
                 if (isStatutory || isExempt) {
                     if (shiftType === 'normal') defaultAction = "國定假日休假";
-                    else defaultAction = "帆宣換休"; // 輪班遇國定假日直接預設換休
+                    else defaultAction = "帆宣換休"; 
                 }
                 const workOptions = [
                     {val: "正常出勤", label: "正常出勤"},
@@ -1210,7 +1296,6 @@
         document.getElementById('btnCalc').style.display = 'block';
         document.getElementById('btnExportCal').style.display = 'block'; 
         document.getElementById('summaryPanel').style.display = 'none';
-        document.getElementById('ignore-salary-grid').removeAttribute('open');
         calculateSalary();
     }
 
@@ -1271,7 +1356,9 @@
             currentShiftRate = shiftType === 'day' ? 100 : 200;
             prevShiftRate = shiftType === 'day' ? 200 : 100;
             OT_multiplier_rest = 18.04; 
-            OT_multiplier_national = 8 + (4/3)*2; // 國定假日/免出勤日 較低倍率
+            OT_multiplier_national = 8 + (4/3)*2; 
+            currShiftName = shiftType === 'day' ? "日班" : "夜班";
+            prevShiftName = shiftType === 'day' ? "夜班" : "日班";
         }
 
         document.getElementById('rate_rest').innerText = Math.round(hourlyRate * OT_multiplier_rest).toLocaleString();
@@ -1314,7 +1401,6 @@
                         else carryOverShiftDays++;
                     }
                 } else if (action === "帆宣換錢") { 
-                    // 💡 國定與免出勤統一套用 national 費率 (10.67倍)
                     if (isStatutory || isExempt) { 
                         if(isCurrentCycle) { totalOtPay += hourlyRate * OT_multiplier_national; ot_exempt_days++; }
                         else { carryOverOtExempt++; }
@@ -1339,7 +1425,7 @@
 
         totalLeaveDeduction += (d_leave_deduct_hours * hourlyRate);
         totalOtPay += (prevMonthOtRest * hourlyRate * OT_multiplier_rest);
-        totalOtPay += (prevMonthOtExempt * hourlyRate * OT_multiplier_national); // 上月結轉免出勤套用較低倍率
+        totalOtPay += (prevMonthOtExempt * hourlyRate * OT_multiplier_national); 
         totalOtPay += (s_ot_company_hours * hourlyRate * 1.34); 
         
         ownerOtPay += (s_ot_owner_hours * 574 * 0.9); ownerOtPay += s_kpi_bonus; 
