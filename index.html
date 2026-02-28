@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TCM班表及薪資計算小工具 v3.01</title>
+    <title>TCM班表及薪資計算小工具 v3.02</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#F2F2F7">
@@ -139,25 +139,33 @@
 <div class="container">
     <h1>
         <span>TCM 薪資結算系統</span>
-        <span class="version-badge" onclick="openVersionHistory()">v3.01</span>
+        <span class="version-badge" onclick="openVersionHistory()">v3.02</span>
     </h1>
 
     <input type="file" id="importSettingsFile" accept=".edc" style="display: none;" onchange="importEDC(event, 'settings')">
     <input type="file" id="importMonthFile" accept=".edc" style="display: none;" onchange="importEDC(event, 'month')">
 
     <div id="tab-cal" class="tab-content active">
+        <div class="ios-card" style="margin-bottom: 10px; padding: 15px; background: #FAFAFC;">
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <select id="recordSelector" style="flex: 1; background-color: #FFFFFF; border: 1px solid var(--divider); font-weight: 600; font-size: 13px;"><option value="">選擇歷史紀錄(舊版)</option></select>
+                <button class="action-btn btn-sec" style="width: auto; padding: 6px 12px; font-size: 13px;" onclick="loadRecord()">讀取</button>
+                <button class="action-btn" style="width: auto; padding: 6px 12px; font-size: 13px;" onclick="saveRecord()">本機儲存</button>
+            </div>
+        </div>
+
         <div class="ios-card" style="margin-bottom: 10px; padding: 15px;">
             <div class="grid-2">
                 <div class="form-group col-layout" style="padding:0;">
                     <label style="font-size: 14px;">年月設定</label>
                     <div style="display: flex; gap: 5px;">
-                        <input type="number" id="year" value="2026" style="width: 70px; text-align:center;">
-                        <input type="number" id="month" value="2" min="1" max="12" style="width: 50px; text-align:center;">
+                        <input type="number" id="year" value="2026" style="width: 70px; text-align:center;" onchange="generateMonthData()">
+                        <input type="number" id="month" value="2" min="1" max="12" style="width: 50px; text-align:center;" onchange="generateMonthData()">
                     </div>
                 </div>
                 <div class="form-group col-layout" style="padding:0;">
                     <label style="font-size: 14px;">預設班別 (當日班別)</label>
-                    <select id="defaultShiftType" style="width: 100%; font-size: 14px;">
+                    <select id="defaultShiftType" style="width: 100%; font-size: 14px;" onchange="generateMonthData()">
                         <option value="night" selected>預設排: 夜輪班</option>
                         <option value="day">預設排: 日輪班</option>
                         <option value="normal">預設排: 常日班</option>
@@ -187,12 +195,12 @@
                 </div>
                 <div class="form-group" style="border-bottom: none; padding-bottom: 0;">
                     <label style="font-size:14px;">本月1號狀態</label>
-                    <select id="cycleStartOffset" style="width: 120px; font-weight: bold; color: var(--apple-blue);"></select>
+                    <select id="cycleStartOffset" style="width: 120px; font-weight: bold; color: var(--apple-blue);" onchange="generateMonthData()"></select>
                 </div>
             </div>
 
             <div class="form-group col-layout" style="background: #FFF5F5; padding: 12px; border-radius: 12px; margin-bottom: 15px; border: 1px dashed #FFCDD2;">
-                <label style="color: var(--apple-red); font-weight: 600; font-size: 13px;">🛑 當月額外休假設定</label>
+                <label style="color: var(--apple-red); font-weight: 600; font-size: 13px;">🛑 當月額外休假設定 (輸入後點擊產生)</label>
                 <div style="display:flex; justify-content:space-between; width:100%; align-items: center; margin-top:5px;">
                     <span style="font-size:12px;">例假日 (逗號分隔)</span>
                     <input type="text" id="statutoryHolidays" placeholder="例: 5,12" style="width: 120px; background: #fff; font-size:13px;">
@@ -204,7 +212,7 @@
             </div>
 
             <div style="display: flex; gap: 10px;">
-                <button class="action-btn" style="padding: 10px; font-size: 14px; width: 60%;" onclick="generateMonthData()">🔄 產生/重設 月曆</button>
+                <button class="action-btn" style="padding: 10px; font-size: 14px; width: 60%;" onclick="generateMonthData()">🔄 產生 / 重設月曆</button>
                 <button class="action-btn btn-sec" style="padding: 10px; font-size: 14px; width: 40%;" onclick="document.getElementById('importMonthFile').click()">📂 匯入 .edc</button>
             </div>
         </div>
@@ -215,7 +223,8 @@
     </div>
 
     <div id="tab-calc" class="tab-content">
-        <div id="export-zone"> <div class="ios-card export-hide" style="background: #F9F9FB; border: 1px dashed var(--divider);">
+        <div id="export-zone">
+            <div class="ios-card export-hide" style="background: #F9F9FB; border: 1px dashed var(--divider);">
                 <h3 style="font-size: 15px; margin-top:0; color: var(--apple-blue);">結算前最後確認 (當月變動項)</h3>
                 <div class="form-group"><label>帆宣延時加班 (時)</label><input type="number" id="s_ot_company_hours" value="0" step="0.5" style="width:60px;"></div>
                 <div class="form-group"><label>業主延時加班 (時)</label><input type="number" id="s_ot_owner_hours" value="0" step="0.5" style="width:60px;"></div>
@@ -244,10 +253,8 @@
                     <h3 style="font-size: 16px; margin-top:0; border-bottom: 1px solid var(--divider); padding-bottom: 10px;">薪資結算明細</h3>
                     <div class="summary-list">
                         <div class="summary-row"><span class="sum-label">各項固定加給<span class="sum-detail" id="resFixedDetail"></span></span><span class="sum-val">$ <span id="resFixed">0</span></span></div>
-                        
                         <div class="summary-row" id="row-other-add"><span class="sum-label">其它加項 (計入全薪)</span><span class="sum-val">$ <span id="resOtherAdd">0</span></span></div>
                         <div class="summary-row" id="row-other-add2"><span class="sum-label">其它加項 (不計全薪)</span><span class="sum-val">$ <span id="resOtherAdd2">0</span></span></div>
-
                         <div class="summary-row"><span class="sum-label">勤務津貼 (輪班)<span class="sum-detail" id="resShiftDetail"></span></span><span class="sum-val txt-blue">$ <span id="resShift">0</span></span></div>
                         <div class="summary-row"><span class="sum-label">帆宣加班費<span class="sum-detail" id="resOtDetail"></span></span><span class="sum-val txt-green">+$ <span id="resOtPay">0</span></span></div>
                         <div class="summary-row"><span class="sum-label">各項代扣總計<span class="sum-detail" id="resDeductDetail"></span></span><span class="sum-val txt-red">-$ <span id="resDeduct">0</span></span></div>
@@ -266,7 +273,9 @@
                     <div style="display:flex; justify-content:space-between; font-size:13px;"><span>免出勤/國定帆加：</span><strong><span id="resNextOtNational">0</span> 天</strong></div>
                 </div>
             </div>
-        </div> <div class="grid-2 export-hide" style="margin-top: 15px;">
+        </div> 
+        
+        <div class="grid-2 export-hide" style="margin-top: 15px;">
             <button class="action-btn" onclick="exportEDC('month')">💾 儲存本月.edc</button>
             <button class="action-btn btn-sec" onclick="exportImage()">📸 截圖報表</button>
         </div>
@@ -274,7 +283,7 @@
 
     <div id="tab-set" class="tab-content">
         <div class="ios-card" style="background: #E8F5E9; border: 1px dashed #A5D6A7; padding: 15px;">
-            <p style="margin: 0 0 10px 0; font-size: 13px; color: #2E7D32;"><strong>📂 雲端漫遊設定：</strong><br>填寫完畢後，請點擊「儲存設定檔」將 .edc 檔存至您的電腦/手機。未來換電腦時，只要「匯入」即可瞬間還原所有設定！</p>
+            <p style="margin: 0 0 10px 0; font-size: 13px; color: #2E7D32;"><strong>📂 雲端漫遊設定：</strong><br>填寫完畢後，請點擊「匯出設定檔」將 .edc 檔存至您的電腦。未來換電腦時，只要「匯入」即可瞬間還原所有設定！</p>
             <div class="grid-2">
                 <button class="action-btn btn-sec" style="font-size:13px; padding:8px;" onclick="document.getElementById('importSettingsFile').click()">📥 匯入 .edc</button>
                 <button class="action-btn" style="font-size:13px; padding:8px; background:#2E7D32;" onclick="exportEDC('settings')">💾 匯出 .edc</button>
@@ -284,7 +293,7 @@
         <div class="ios-card">
             <h3 style="font-size: 16px; border-bottom: 1px solid var(--divider); padding-bottom: 10px;">👤 基本資料</h3>
             <div class="form-group"><label>姓名</label><input type="text" id="p_name" placeholder="報表顯示用"></div>
-            <div class="form-group"><label>到職日</label><input type="date" id="hireDate" onchange="calculateAnnualLeave()"></div>
+            <div class="form-group"><label>到職日</label><input type="date" id="p_hireDate" onchange="calculateAnnualLeave()"></div>
         </div>
 
         <div class="ios-card">
@@ -294,29 +303,34 @@
             <div class="form-group"><label>職務加給</label><input type="number" id="s_position" value="0"></div>
             <div class="form-group"><label>TCM津貼</label><input type="number" id="s_tcm" value="5500"></div>
             <div class="form-group"><label>安全津貼</label><input type="number" id="s_safety" value="2500"></div>
+            <div class="form-group"><label>交通津貼</label><input type="number" id="s_transport" value="0"></div>
+            <div class="form-group"><label>業務津貼</label><input type="number" id="s_business" value="0"></div>
+            <div class="form-group"><label>分公司薪資</label><input type="number" id="s_branch" value="0"></div>
             <div class="form-group"><label>伙食津貼</label><input type="number" id="s_meal" value="3000"></div>
             <div class="form-group"><input type="text" id="s_other_name" class="remark" value="其它(計全薪)"><input type="number" id="s_other_val" value="0"></div>
             <div class="form-group" style="background: #FAFAFC; padding: 5px; border-radius: 8px;"><input type="text" id="s_other_name2" class="remark" value="其它(不計)"><input type="number" id="s_other_val2" value="0"></div>
+            <div class="form-group"><label class="txt-blue">KPI獎金(業主) <span class="field-note">(不計入全薪)</span></label><input type="number" id="s_kpi_bonus" value="0"></div>
         </div>
 
         <div class="ios-card">
             <h3 style="font-size: 16px; border-bottom: 1px solid var(--divider); padding-bottom: 10px;">📉 應扣代扣項目</h3>
             <button class="action-btn" style="background: var(--apple-orange); padding: 8px; font-size: 14px; margin-bottom: 10px;" onclick="autoCalcSettingsDeductions()">🤖 依上方全薪自動查表估算代扣</button>
+            <div class="form-group"><label>所得稅款</label><input type="number" id="d_tax" value="0"></div>
             <div class="form-group"><label>勞保費</label><input type="number" id="d_labor" value="0"></div>
             <div class="form-group"><label>健保費</label><input type="number" id="d_health" value="0"></div>
+            <div class="form-group"><label>補充保費</label><input type="number" id="d_supp" value="0"></div>
             <div class="form-group"><label>福利金 <span class="field-note">(本薪x0.5%)</span></label><input type="number" id="d_welfare" value="0"></div>
             <div class="form-group"><label>宿舍費</label><input type="number" id="d_dorm" value="0"></div>
             <div class="form-group"><label>勞退自提 (<input type="number" id="pension_rate" value="0" max="6" style="width:30px; padding:2px; text-align:center;">%)</label><input type="number" id="d_pension" value="0"></div>
             <div class="form-group"><input type="text" id="d_other_name" class="remark" value="其它扣項"><input type="number" id="d_other_val" value="0"></div>
             <div class="form-group"><input type="text" id="d_subtotal_name" class="remark" value="代扣小計(選填)"><input type="number" id="d_subtotal_val" value="0"></div>
-            <div class="form-group" style="display:none;"><input type="number" id="d_tax" value="0"></div>
         </div>
     </div>
 
     <div id="tab-box" class="tab-content">
         <div class="ios-card">
             <h3 style="font-size: 16px; color: var(--apple-blue);">🌴 特休假計算機</h3>
-            <p style="font-size: 13px; color: var(--text-secondary);">系統會抓取您在「設定」中填寫的到職日來進行精算。</p>
+            <p style="font-size: 13px; color: var(--text-secondary);">系統會自動抓取您在「設定」中填寫的到職日來進行精算。</p>
             <div id="leaveResult" style="font-weight: bold; color: var(--apple-blue); background: var(--work-bg); padding: 12px; border-radius: 8px; font-size: 14px; text-align: center; margin-bottom: 15px;">請先至設定頁面填寫到職日</div>
             <ul style="font-size: 13px; color: var(--text-secondary); padding-left: 20px; line-height: 1.6; margin-bottom: 0;">
                 <li>滿 6 個月，未滿 1 年：<strong>3 天</strong></li>
@@ -382,7 +396,6 @@
                 <option value="國定假日休假">國定假日休假 (不扣薪)</option>
             </select>
         </div>
-        
         <button class="action-btn" style="margin-top: 20px;" onclick="saveCellModal()">確認修改</button>
     </div>
 </div>
@@ -392,13 +405,21 @@
         <button class="modal-close" onclick="closeVersionHistory()">×</button>
         <h3 style="color: var(--text-primary); margin-bottom:5px;">🔄 版本更新日誌</h3>
         <p style="font-size:12px; color:var(--text-secondary); margin-top:0;">TCM班表及薪資計算小工具</p>
-        <div class="version-list" style="text-align: left; max-height: 300px; overflow-y: auto; padding-right: 10px;">
+        
+        <div class="version-list" style="text-align: left; max-height: 400px; overflow-y: auto; padding-right: 10px;">
+            <div style="margin-bottom: 15px; border-bottom: 1px dashed var(--divider); padding-bottom: 10px;">
+                <span style="font-weight: bold; color: var(--apple-blue); font-size: 16px;">V3.02</span><span style="font-size: 12px; color: var(--text-secondary); margin-left: 8px;">2026-03-01</span>
+                <div style="font-size: 13px; color: var(--text-primary); margin-top: 5px; line-height: 1.5;">
+                    • <b>【修復】</b>完整修復結算面板按鈕無反應之致命錯誤 (補齊遺漏參數宣告)。<br>
+                    • <b>【回歸】</b>修復「自訂輪班週期」與「手動紅字輸入」無法連動月曆的問題。<br>
+                    • <b>【修復】</b>修正到職日重複 ID 導致特休計算機無法連動的錯誤。<br>
+                    • <b>【回歸】</b>完整保留 V1.0 起之所有歷史更新日誌 (以收折方式呈現)。
+                </div>
+            </div>
             <div style="margin-bottom: 15px; border-bottom: 1px dashed var(--divider); padding-bottom: 10px;">
                 <span style="font-weight: bold; color: var(--apple-blue); font-size: 16px;">V3.01</span><span style="font-size: 12px; color: var(--text-secondary); margin-left: 8px;">2026-03-01</span>
                 <div style="font-size: 13px; color: var(--text-primary); margin-top: 5px; line-height: 1.5;">
-                    • <b>【修復】</b>完整修復因 V3 架構改版導致的結算崩潰與參數漏失問題。<br>
-                    • <b>【回歸】</b>「自訂輪班週期」與「手動紅字判定」邏輯強勢回歸並連動。<br>
-                    • <b>【修復】</b>修正到職日無法連動至特休計算機的問題。
+                    • <b>【緊急修正】</b>嘗試修復 V3 架構切換所導致的部分 UI 與大腦計算脫鉤。
                 </div>
             </div>
             <div style="margin-bottom: 15px; border-bottom: 1px dashed var(--divider); padding-bottom: 10px;">
@@ -410,7 +431,44 @@
                     • <b>【修正】</b>夜輪班津貼上調至 300元/天，並校正跨月結轉之邏輯演算法。
                 </div>
             </div>
-            <div style="font-size: 12px; color: var(--text-secondary);">* V2.03 以前之紀錄已收錄至開發者檔案中。</div>
+
+            <details style="margin-top: 15px;">
+                <summary style="font-size: 13px; color: var(--apple-blue); cursor: pointer; font-weight: bold;">📂 點擊展開歷史更新紀錄 (V2.03 以前)</summary>
+                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--divider);">
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V2.03</span><span style="font-size: 11px; color: var(--text-secondary); margin-left: 8px;">2026-02-25</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 內建台積電四班二輪 A/B 班預設版型；嚴格校正115年行事曆基準。</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V2.02</span><span style="font-size: 11px; color: var(--text-secondary); margin-left: 8px;">2026-02-25</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 移除手動投保基準欄位，全自動查表；區分「休假日」與「國定假日」加班倍率。</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V2.01</span><span style="font-size: 11px; color: var(--text-secondary); margin-left: 8px;">2026-02-25</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 同步加班費計算週期與輪班津貼 (上月21號至本月20號)，支援次月結轉。</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V2.00</span><span style="font-size: 11px; color: var(--text-secondary); margin-left: 8px;">2026-02-24</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• UI/UX 介面大改版，全面導入 Apple iOS HIG 設計語彙。</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.19</span><span style="font-size: 11px; color: var(--text-secondary); margin-left: 8px;">2026-02-24</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 自動估算時，強制將業主款項與KPI獎金排除於投保基準之外。</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.10</span><span style="font-size: 11px; color: var(--text-secondary); margin-left: 8px;">2026-02-24</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 導入勞動部/健保署最新官方投保薪資分級表，實裝一鍵查表估算。</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.06</span><span style="font-size: 11px; color: var(--text-secondary); margin-left: 8px;">2026-02-24</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 支援 0.5 小時為單位的延時加班與請假輸入；細分請假扣薪與換休雙軌邏輯。</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.00</span><span style="font-size: 11px; color: var(--text-secondary); margin-left: 8px;">2026-02-24</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 初始版本發布 (建立基礎排班月曆與 18.04 倍加班費核心計算模型)。</div>
+                    </div>
+                </div>
+            </details>
         </div>
     </div>
 </div>
@@ -438,14 +496,21 @@
         return healthPensionBrackets[healthPensionBrackets.length - 1];
     }
 
+    // 💡 防呆安全抓取法，如果 ID 被誤刪也不會報錯
+    function getSetting(id) { 
+        let el = document.getElementById(id);
+        return el ? (parseFloat(el.value) || 0) : 0; 
+    }
+
     window.onload = () => {
         const today = new Date();
         document.getElementById('year').value = today.getFullYear();
         document.getElementById('month').value = today.getMonth() + 1;
         generateMonthData(); 
+        updateRecordDropdown(); // 載入舊版清單
         
         if(!localStorage.getItem('tcm_has_visited')) {
-            alert("👋 歡迎使用 TCM 薪資系統 V3.01！\n\n初次使用，請先前往底部的【⚙️ 設定】分頁，將您的「姓名」與「底薪/津貼」填寫完成並下載設定檔備份喔！");
+            alert("👋 歡迎使用 TCM 薪資系統 V3.02！\n\n初次使用，請先前往底部的【⚙️ 設定】分頁，將您的「姓名」與「底薪/津貼」填寫完成並下載設定檔備份喔！");
             localStorage.setItem('tcm_has_visited', 'true');
         }
     };
@@ -463,11 +528,12 @@
     function closeVersionHistory() { document.getElementById('versionHistoryModal').style.display = 'none'; }
     
     function parseDateString(str) {
-        if (!str.trim()) return []; return str.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+        if (!str) return [];
+        return str.trim().split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
     }
     function parseHolidayMap(str) {
-        const map = {}; if (!str.trim()) return map;
-        str.split(',').forEach(s => {
+        const map = {}; if (!str) return map;
+        str.trim().split(',').forEach(s => {
             let match = s.trim().match(/^(\d+)(?:[\-\:\=](.*))?$/);
             if (match) { map[parseInt(match[1])] = match[2] ? match[2].trim() : ''; }
         });
@@ -475,14 +541,17 @@
     }
 
     function handleModeChange() {
-        const mode = document.querySelector('input[name="scheduleMode"]:checked').value;
+        const modeInput = document.querySelector('input[name="scheduleMode"]:checked');
+        const mode = modeInput ? modeInput.value : 'Custom';
         const customDetails = document.getElementById('custom-cycle-details');
+        
         if (mode === 'Custom') {
             customDetails.style.display = 'block';
             generateCycleDropdown();
         } else {
             customDetails.style.display = 'none';
         }
+        generateMonthData(); // 自動重繪月曆
     }
 
     function generateCycleDropdown() {
@@ -496,11 +565,11 @@
         if(currentVal) sel.value = currentVal;
     }
 
-    // 💡 終極回歸：完美整合 A/B班 與 自訂輪班/紅字 的月曆產生引擎
+    // 💡 月曆產生核心 (完美支援台積 A/B 與自訂紅字)
     function generateMonthData() {
         const y = parseInt(document.getElementById('year').value);
         const m = parseInt(document.getElementById('month').value);
-        const mode = document.querySelector('input[name="scheduleMode"]:checked').value;
+        const mode = document.querySelector('input[name="scheduleMode"]:checked') ? document.querySelector('input[name="scheduleMode"]:checked').value : 'Custom';
         const defaultShift = document.getElementById('defaultShiftType').value;
 
         const statHolidays = parseDateString(document.getElementById('statutoryHolidays').value);
@@ -549,7 +618,6 @@
             let cellShift = isWorkDay ? defaultShift : 'off';
             let cellStatus = isWorkDay ? '正常出勤' : '';
 
-            // 紅字預設邏輯
             if (isStat || isExempt) {
                 if (isWorkDay) cellStatus = '帆宣換休'; // 輪班遇紅字預設換休
                 else {
@@ -645,11 +713,11 @@
         renderCalendar(); 
     }
 
-    function getSetting(id) { return parseFloat(document.getElementById(id).value) || 0; }
-
+    // 💡 修復代扣按鈕崩潰：完全獨立的計算，不仰賴可能不存在的 ID
     function autoCalcSettingsDeductions() {
         const v_base = getSetting('s_base');
         const fixedSalaryBase = v_base + getSetting('s_supervisor') + getSetting('s_position') + getSetting('s_tcm') + getSetting('s_safety') + getSetting('s_transport') + getSetting('s_business') + getSetting('s_branch') + getSetting('s_meal') + getSetting('s_other_val');
+        
         let l_bracket = getLaborBracket(fixedSalaryBase);
         let hp_bracket = getHealthPensionBracket(fixedSalaryBase);
 
@@ -657,10 +725,10 @@
         document.getElementById('d_health').value = Math.round(hp_bracket * 0.0517 * 0.3);
         document.getElementById('d_pension').value = Math.round(hp_bracket * (getSetting('pension_rate') / 100));
         document.getElementById('d_welfare').value = Math.round(v_base * 0.005);
-        alert(`✅ 已根據固定全薪(${fixedSalaryBase}元)自動帶入勞健保級距！\n(註：實務可能含加班費跳階，請參考薪資單微調)`);
+        alert(`✅ 已根據固定全薪(${fixedSalaryBase}元)自動帶入勞健保級距！\n(註：若含加班費有跳階，請參考薪資單微調)`);
     }
 
-    // 💡 修復完成：精準算錢大腦，確保每個 DOM ID 都對接無誤
+    // 💡 終極修復結算面板：重新建立安全變數，確保沒有 ReferenceError
     function calculateSalary() {
         const v_base = getSetting('s_base'); const v_supervisor = getSetting('s_supervisor');
         const v_position = getSetting('s_position'); const v_tcm = getSetting('s_tcm');
@@ -696,6 +764,7 @@
         let currentMonthShiftAllowance = 0; 
         let ot_rest_days = 0, ot_national_days = 0; 
         let nextCarryShift = 0; let nextCarryOtRest = 0; let nextCarryOtNational = 0;
+        let currentMonthShiftDays = 0;
 
         for (let day in appState.monthData) {
             let d = parseInt(day);
@@ -710,20 +779,22 @@
             else if (cell.status === "病假" || cell.status === "生理假") totalLeaveDeduction += (hourlyRate * 8 * 0.5);
             else if (cell.status === "換休假") compLeaveUsedHours += hoursPerDay;
 
-            // 輪班津貼
+            // 輪班津貼與天數 (只有 day 或 night 才有)
             if (isAttended && (cell.shift === 'day' || cell.shift === 'night')) {
                 let allowance = (cell.shift === 'night') ? SHIFT_RATE_NIGHT : SHIFT_RATE_DAY;
-                if(isCurrentCycle) currentMonthShiftAllowance += allowance;
-                else nextCarryShift++;
+                if(isCurrentCycle) {
+                    currentMonthShiftAllowance += allowance;
+                    currentMonthShiftDays++;
+                } else {
+                    nextCarryShift++;
+                }
             }
 
-            // 換休與加班
+            // 加班與換休判定
             if (cell.status === "帆宣換休" || cell.status === "國定假日出勤") {
                 compLeaveAddHours += hoursPerDay;
             } else if (cell.status === "帆宣換錢") {
-                // 判斷是否為紅字倍率
-                let isNationalRate = (cell.note || cell.status.includes('國定'));
-                
+                let isNationalRate = (cell.note || (cell.status && cell.status.includes('國定')));
                 if(isCurrentCycle) {
                     if(isNationalRate) { totalOtPay += hourlyRate * OT_multiplier_national; ot_national_days++; }
                     else { totalOtPay += hourlyRate * OT_multiplier_rest; ot_rest_days++; }
@@ -738,10 +809,11 @@
             }
         }
 
-        let totalShiftAllowance = currentMonthShiftAllowance + (carry_shift * SHIFT_RATE_NIGHT); // 簡化以夜班結轉
+        // 以夜班結轉為預設算入
+        let totalShiftAllowance = currentMonthShiftAllowance + (carry_shift * SHIFT_RATE_NIGHT); 
         let finalSalary = fixedSalaryBase + v_other_add2 + totalShiftAllowance + totalOtPay - totalDeductions - totalLeaveDeduction;
 
-        // UI 渲染 (已補回缺失的 ID 節點)
+        // UI 渲染寫入
         document.getElementById('resFixed').innerText = Math.round(fixedSalaryBase).toLocaleString();
         document.getElementById('resOtherAdd').innerText = Math.round(v_other_add).toLocaleString();
         document.getElementById('resOtherAdd2').innerText = Math.round(v_other_add2).toLocaleString();
@@ -759,7 +831,18 @@
         document.getElementById('resTotal').innerText = Math.round(finalSalary).toLocaleString();
         document.getElementById('resOwnerOt').innerText = Math.round(ownerOtPay).toLocaleString();
         
-        // 控制隱藏項目
+        // 明細文字小標
+        document.getElementById('resShiftDetail').innerText = `(上月結轉 x${carry_shift}天 + 本期1~20號 x${currentMonthShiftDays}天)`;
+        
+        let otDetailArr = [];
+        if (carry_otRest > 0) otDetailArr.push(`上月結轉休假 x${carry_otRest}天`);
+        if (carry_otNational > 0) otDetailArr.push(`上月結轉免出勤/國定 x${carry_otNational}天`);
+        if (ot_rest_days > 0) otDetailArr.push(`本期一般休假 x${ot_rest_days}天`);
+        if (ot_national_days > 0) otDetailArr.push(`本期免出勤/國定 x${ot_national_days}天`);
+        if (s_ot_company_hours > 0) otDetailArr.push(`延時加班 x${s_ot_company_hours}時`);
+        document.getElementById('resOtDetail').innerText = otDetailArr.length > 0 ? `(${otDetailArr.join(' + ')})` : '';
+
+        // 隱藏判斷
         document.getElementById('row-other-add').style.display = (v_other_add > 0) ? 'flex' : 'none';
         document.getElementById('row-other-add2').style.display = (v_other_add2 > 0) ? 'flex' : 'none';
         document.getElementById('row-leave-deduct').style.display = (totalLeaveDeduction > 0) ? 'flex' : 'none';
@@ -769,7 +852,7 @@
     }
 
     function calculateAnnualLeave() {
-        const hireDateStr = document.getElementById('hireDate').value;
+        const hireDateStr = document.getElementById('p_hireDate').value;
         const resultEl = document.getElementById('leaveResult');
         if(!hireDateStr) { resultEl.innerText = '請先至設定頁面填寫到職日'; return; }
         
@@ -798,7 +881,7 @@
     // 💾 EDC 檔案管理
     function exportEDC(type) {
         let userName = document.getElementById('p_name').value.trim() || '未命名';
-        let exportData = { version: "3.01", userName: userName, settings: {} };
+        let exportData = { version: "3.02", userName: userName, settings: {} };
         
         document.getElementById('tab-set').querySelectorAll('input').forEach(el => {
             if(el.id && !el.id.includes('import')) exportData.settings[el.id] = el.value;
@@ -855,7 +938,7 @@
                     }
                 } else if (type === 'settings') {
                     alert("✅ 個人設定檔匯入成功！");
-                    if (document.getElementById('hireDate').value) calculateAnnualLeave();
+                    if (document.getElementById('p_hireDate').value) calculateAnnualLeave();
                 }
             } catch (err) {
                 alert("檔案讀取失敗，請確認是否為正確的 .edc 檔案！");
@@ -863,6 +946,71 @@
         };
         reader.readAsText(file);
         event.target.value = ''; 
+    }
+
+    // 💾 舊版 LocalStorage 支援 (確保平滑過渡)
+    function updateRecordDropdown() {
+        const selector = document.getElementById('recordSelector');
+        if(!selector) return;
+        selector.innerHTML = '<option value="">選擇歷史紀錄(舊版)</option>';
+        const records = JSON.parse(localStorage.getItem('shiftAppRecords') || '{}');
+        Object.keys(records).sort().reverse().forEach(key => {
+            const opt = document.createElement('option');
+            opt.value = key; opt.textContent = key.includes('_') ? key.replace('_', ' ') : key;
+            selector.appendChild(opt);
+        });
+    }
+
+    function saveRecord() {
+        let userName = document.getElementById('p_name').value.trim();
+        if(!userName) { alert("⚠️ 請先前往【⚙️設定】分頁輸入「姓名」以防存檔覆蓋！"); switchTab('tab-set'); document.getElementById('p_name').focus(); return; }
+
+        const year = document.getElementById('year').value;
+        const month = document.getElementById('month').value;
+        const key = `${userName}_${year}-${month.toString().padStart(2, '0')}`;
+        
+        let exportData = { version: "3.02", userName: userName, settings: {}, monthData: appState.monthData, year: year, month: month };
+        document.getElementById('tab-set').querySelectorAll('input').forEach(el => {
+            if(el.id && !el.id.includes('import')) exportData.settings[el.id] = el.value;
+        });
+
+        let records = JSON.parse(localStorage.getItem('shiftAppRecords') || '{}');
+        records[key] = exportData; 
+        localStorage.setItem('shiftAppRecords', JSON.stringify(records));
+        alert(`✅ 本機儲存成功！(強烈建議仍需匯出 .edc 實體檔案備份)`); 
+        updateRecordDropdown(); document.getElementById('recordSelector').value = key;
+    }
+
+    function loadRecord() {
+        const key = document.getElementById('recordSelector').value;
+        if(!key) return;
+        const data = JSON.parse(localStorage.getItem('shiftAppRecords') || '{}')[key];
+        if(!data) return;
+
+        // 相容 V3 新架構
+        if (data.settings) {
+            Object.keys(data.settings).forEach(k => {
+                let el = document.getElementById(k);
+                if (el) el.value = data.settings[k];
+            });
+        } else {
+            // 相容 V2 舊資料
+            Object.keys(data).forEach(k => {
+                let el = document.getElementById(k);
+                if(el && typeof data[k] !== 'object') el.value = data[k];
+            });
+            if(data.userName) document.getElementById('p_name').value = data.userName;
+        }
+
+        if (data.monthData) {
+            document.getElementById('year').value = data.year;
+            document.getElementById('month').value = data.month;
+            appState.monthData = data.monthData;
+            renderCalendar();
+            alert("✅ 舊版紀錄讀取成功！");
+        } else {
+            alert("⚠️ 這是舊版 V2 的存檔，僅還原設定參數，請手動重繪月曆。");
+        }
     }
 
     function exportImage() {
