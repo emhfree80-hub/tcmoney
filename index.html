@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TCM班表及薪資計算小工具 v2.04</title>
+    <title>TCM班表及薪資計算小工具 v2.05</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#F2F2F7">
@@ -128,7 +128,9 @@
         .salary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
         .salary-col h4 { display: flex; justify-content: space-between; align-items: center; margin-top: 0; color: var(--text-secondary); font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; border-bottom: none; padding-bottom:0;}
 
-        /* 💡 月曆格子優化：增加高度以容納單日班別選單 */
+        /* 💡 新增版面分割佈局 */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
         .calendar { display: grid; grid-template-columns: repeat(7, 1fr); border-radius: 12px; overflow: hidden; background: var(--divider); gap: 1px; margin-top: 20px; border: 1px solid var(--divider);}
         .cal-header { background: var(--bg-card); color: var(--text-secondary); text-align: center; padding: 12px 0; font-size: 13px; font-weight: 600; }
         .cal-cell { min-height: 105px; padding: 6px; display: flex; flex-direction: column; background-color: var(--bg-card); transition: background-color 0.2s;}
@@ -138,7 +140,6 @@
         .date-num { font-size: 18px; font-weight: 600; margin-bottom: 4px; color: var(--text-primary); text-align: left; padding-left: 4px; }
         .status-text { font-size: 11px; margin-bottom: 5px; font-weight: 600; text-align: center; }
         
-        /* 💡 新增的單日班別下拉選單樣式 */
         select.shift-select { 
             width: 100%; margin-top: auto; margin-bottom: 3px; font-size: 11px; font-weight: 600; padding: 2px 0; 
             background-color: transparent; border: 1px solid rgba(0, 122, 255, 0.4); border-radius: 4px; color: var(--apple-blue); 
@@ -204,6 +205,7 @@
             body { padding: 10px; padding-bottom: 80px; }
             .container { padding: 5px; }
             .salary-grid { grid-template-columns: 1fr; gap: 20px; }
+            .grid-2 { grid-template-columns: 1fr; }
             .form-group label { font-size: 14px; }
             .cal-header { font-size: 12px; padding: 8px 0; }
             .cal-cell { min-height: 90px; padding: 4px; }
@@ -219,7 +221,7 @@
     
     <h1>
         薪資設定 
-        <span class="version-badge" onclick="openVersionHistory()">v2.04</span>
+        <span class="version-badge" onclick="openVersionHistory()">v2.05</span>
     </h1>
 
     <div class="file-manager" id="ignore-in-export">
@@ -346,45 +348,11 @@
                             </div>
                         </details>
                     </div>
-
-                    <div class="form-group col-layout" style="background: #F9F9FB; padding: 12px; border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--divider); margin-top: 10px;">
-                        <label style="color: var(--apple-blue); font-weight: 600; font-size: 14px; width: 100%; border-bottom: 1px solid var(--divider); padding-bottom: 8px;">
-                            上月出勤與加班結轉 (計入本月薪資)
-                        </label>
-                        
-                        <div style="width: 100%; font-size: 13px; font-weight: bold; color: var(--text-secondary); margin-top: 8px;">【輪班津貼】 上月21號 ~ 月底</div>
-                        <div style="display:flex; justify-content:space-between; width:100%; align-items: center; margin-top:4px;">
-                            <span style="font-size:13px; color:var(--text-primary);">日班出勤 (天)</span>
-                            <input type="number" id="prevMonthShiftDay" value="0" style="width: 60px; background: #fff;">
-                        </div>
-                        <div style="display:flex; justify-content:space-between; width:100%; align-items: center; margin-top:4px;">
-                            <span style="font-size:13px; color:var(--text-primary);">夜班出勤 (天)</span>
-                            <input type="number" id="prevMonthShiftNight" value="0" style="width: 60px; background: #fff;">
-                        </div>
-
-                        <div style="width: 100%; font-size: 13px; font-weight: bold; color: var(--text-secondary); margin-top: 15px; border-top: 1px solid var(--divider); padding-top: 10px;">【帆宣加班】 上月整月 (1號~月底)</div>
-                        <div style="display:flex; justify-content:space-between; width:100%; align-items: center; margin-top:4px;">
-                            <span style="font-size:13px; color:var(--text-primary);">休假日加班 (天)</span>
-                            <input type="number" id="prevMonthOtRest" value="0" step="0.5" style="width: 60px; background: #fff;">
-                        </div>
-                        <div style="display:flex; justify-content:space-between; width:100%; align-items: center; margin-top:4px;">
-                            <span style="font-size:13px; color:var(--text-primary);">免出勤加班 (天) <span style="font-size:11px;color:var(--text-secondary);">(18.04倍)</span></span>
-                            <input type="number" id="prevMonthOtExempt" value="0" step="0.5" style="width: 60px; background: #fff;">
-                        </div>
-                        <div style="display:flex; justify-content:space-between; width:100%; align-items: center; margin-top:4px;">
-                            <span style="font-size:13px; color:var(--text-primary);">國定假日加班 (天) <span style="font-size:11px;color:var(--text-secondary);">(10.67倍)</span></span>
-                            <input type="number" id="prevMonthOtNational" value="0" step="0.5" style="width: 60px; background: #fff;">
-                        </div>
-                        <div style="display:flex; justify-content:space-between; width:100%; align-items: center; margin-top:4px;">
-                            <span style="font-size:13px; color:var(--text-primary);">延時加班 (時)</span>
-                            <input type="number" id="prevMonthOtHours" value="0" step="0.5" style="width: 60px; background: #fff;">
-                        </div>
-                    </div>
                 </div>
 
                 <div>
                     <div class="form-group col-layout" style="background: #FAFAFC; padding: 12px; border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--divider);">
-                        <label style="color: var(--apple-red); font-weight: 600; font-size: 14px;">🛑 本月額外休假設定 (輸入後點擊產生)</label>
+                        <label style="color: var(--apple-red); font-weight: 600; font-size: 14px;">🛑 額外休假設定 (輸入後點擊產生)</label>
                         <div style="display:flex; justify-content:space-between; width:100%; align-items: center; margin-top:5px;">
                             <span style="font-size:13px; color:var(--text-primary);">例假日 (逗號分隔)</span>
                             <input type="text" id="statutoryHolidays" placeholder="例: 5,12,19" style="width: 120px; background: #fff;">
@@ -395,11 +363,6 @@
                         </div>
                         <p style="font-size: 11px; color: var(--text-secondary); margin: 5px 0 0 0; line-height:1.4;">(系統已內建國定假日，此處僅需填寫公司排定之免出勤或自訂例假)</p>
                     </div>
-
-                    <div class="form-group"><label>本月帆宣延時 (時) <span style="font-size:11px;color:var(--text-secondary);">(將結轉下月)</span></label><input type="number" id="curr_ot_company_hours" value="0" step="0.5"></div>
-                    <div class="form-group"><label>本月業主延時 (時)</label><input type="number" id="curr_ot_owner_hours" value="0" step="0.5"></div>
-                    <div class="form-group"><label class="txt-red">請假扣薪 (時)</label><input type="number" id="d_leave_deduct_hours" value="0" step="0.5"></div>
-                    <div class="form-group"><label class="txt-orange">請假換休 (時)</label><input type="number" id="d_leave_comp_hours" value="0" step="0.5"></div>
                 </div>
             </div>
             <button class="action-btn export-hide" id="btn-gen-cal" onclick="generateCalendar()" style="margin-top:20px;">🔄 產生 / 重設月曆班表</button>
@@ -410,7 +373,58 @@
         
         <button class="action-btn btn-export-sec export-hide" onclick="exportCalendarImage()" style="display: none;" id="btnExportCal">📸 單獨儲存班表圖片</button>
 
-        <button class="action-btn export-hide" onclick="calculateSalary()" style="display: none; background-color: var(--apple-green); margin-top: 25px;" id="btnCalc">💰 結算當月薪資</button>
+        <details class="ios-details export-hide" id="ignore-var-hours" style="display: none; margin-top: 20px;">
+            <summary style="background: var(--work-bg);">📝 結轉與變動時數輸入 <span style="font-size:12px; color:var(--text-secondary); margin-left:10px; font-weight:normal;">(算薪水前必填)</span></summary>
+            <div class="details-content grid-2" style="padding: 15px;">
+                
+                <div class="form-group col-layout" style="background: #F9F9FB; padding: 15px; border-radius: 12px; border: 1px solid var(--divider); margin: 0;">
+                    <label style="color: var(--apple-blue); font-weight: 600; font-size: 14px; width: 100%; border-bottom: 1px solid var(--divider); padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <span><span id="prevMonthText">1月21日~1月底出勤結轉</span></span>
+                        <button class="btn-link" onclick="manualPullCarryOver()">抓取上月</button>
+                    </label>
+                    
+                    <div style="width: 100%; font-size: 13px; font-weight: bold; color: var(--text-secondary); margin-top: 8px;">【輪班津貼】 上月21號 ~ 月底</div>
+                    <div style="display:flex; justify-content:space-between; width:100%; align-items: center; margin-top:4px;">
+                        <span style="font-size:13px; color:var(--text-primary);">日班出勤 (天)</span>
+                        <input type="number" id="prevMonthShiftDay" value="0" style="width: 60px; background: #fff;">
+                    </div>
+                    <div style="display:flex; justify-content:space-between; width:100%; align-items: center; margin-top:4px;">
+                        <span style="font-size:13px; color:var(--text-primary);">夜班出勤 (天)</span>
+                        <input type="number" id="prevMonthShiftNight" value="0" style="width: 60px; background: #fff;">
+                    </div>
+
+                    <div style="width: 100%; font-size: 13px; font-weight: bold; color: var(--text-secondary); margin-top: 15px; border-top: 1px solid var(--divider); padding-top: 10px;">【帆宣加班】 上月整月 (1號~月底)</div>
+                    <div style="display:flex; justify-content:space-between; width:100%; align-items: center; margin-top:4px;">
+                        <span style="font-size:13px; color:var(--text-primary);">休假日加班 (天)</span>
+                        <input type="number" id="prevMonthOtRest" value="0" step="0.5" style="width: 60px; background: #fff;">
+                    </div>
+                    <div style="display:flex; justify-content:space-between; width:100%; align-items: center; margin-top:4px;">
+                        <span style="font-size:13px; color:var(--text-primary);">免出勤加班 (天) <span style="font-size:11px;color:var(--text-secondary);">(18.04倍)</span></span>
+                        <input type="number" id="prevMonthOtExempt" value="0" step="0.5" style="width: 60px; background: #fff;">
+                    </div>
+                    <div style="display:flex; justify-content:space-between; width:100%; align-items: center; margin-top:4px;">
+                        <span style="font-size:13px; color:var(--text-primary);">國定假日加班 (天) <span style="font-size:11px;color:var(--text-secondary);">(10.67倍)</span></span>
+                        <input type="number" id="prevMonthOtNational" value="0" step="0.5" style="width: 60px; background: #fff;">
+                    </div>
+                    <div style="display:flex; justify-content:space-between; width:100%; align-items: center; margin-top:4px;">
+                        <span style="font-size:13px; color:var(--text-primary);">延時加班 (時)</span>
+                        <input type="number" id="prevMonthOtHours" value="0" step="0.5" style="width: 60px; background: #fff;">
+                    </div>
+                </div>
+
+                <div class="form-group col-layout" style="background: #FAFAFC; padding: 15px; border-radius: 12px; border: 1px solid var(--divider); margin: 0;">
+                    <label style="color: var(--text-primary); font-weight: 600; font-size: 14px; width: 100%; border-bottom: 1px solid var(--divider); padding-bottom: 8px;">
+                        本月變動時數 (請假與延時)
+                    </label>
+                    <div class="form-group" style="width:100%; padding:8px 0;"><label>帆宣延時 (時) <span style="font-size:11px;color:var(--text-secondary);">(結轉下月)</span></label><input type="number" id="curr_ot_company_hours" value="0" step="0.5" style="width: 60px;"></div>
+                    <div class="form-group" style="width:100%; padding:8px 0;"><label>業主延時 (時)</label><input type="number" id="curr_ot_owner_hours" value="0" step="0.5" style="width: 60px;"></div>
+                    <div class="form-group" style="width:100%; padding:8px 0;"><label class="txt-red">請假扣薪 (時)</label><input type="number" id="d_leave_deduct_hours" value="0" step="0.5" style="width: 60px;"></div>
+                    <div class="form-group" style="width:100%; padding:8px 0; border:none;"><label class="txt-orange">請假換休 (時)</label><input type="number" id="d_leave_comp_hours" value="0" step="0.5" style="width: 60px;"></div>
+                </div>
+            </div>
+        </details>
+
+        <button class="action-btn export-hide" onclick="calculateSalary()" style="display: none; background-color: var(--apple-green); margin-top: 15px;" id="btnCalc">💰 結算當月薪資</button>
 
         <div class="ios-card" id="summaryPanel" style="display: none; margin-top: 20px; padding: 0; overflow: hidden; background: transparent; box-shadow: none;">
             
@@ -573,54 +587,145 @@
 <div class="feedback-modal-overlay" id="versionHistoryModal">
     <div class="feedback-modal" style="max-width: 450px;">
         <button class="btn-close" onclick="closeVersionHistory()">×</button>
-        <h3 style="color: var(--text-primary); margin-bottom:5px;">🔄 版本更新日誌</h3>
+        <h3 style="color: var(--text-primary); margin-bottom:5px;">🔄 版本進化史</h3>
         <p style="font-size:12px; color:var(--text-secondary); margin-top:0;">TCM班表及薪資計算小工具</p>
         
         <div class="version-list">
             <div class="version-item">
+                <span class="v-num">V2.05</span><span class="v-date">2026-03-02</span>
+                <div class="v-desc">
+                    • 聽你的！把「上月結轉」跟「本月時數」這兩大區塊從排班月曆那邊搬走，通通收納到算薪水前的專屬收折區，畫面瞬間清爽 100 倍！
+                </div>
+            </div>
+
+            <div class="version-item">
                 <span class="v-num">V2.04</span><span class="v-date">2026-03-01</span>
                 <div class="v-desc">
-                    • <b>【退回】</b>放棄實驗性的 V3 架構，回歸最穩定之 V2 介面並進行核心邏輯升級。<br>
-                    • <b>【核心】</b>帆宣加班計算週期調整為「當月全月結算，下月發放」，實裝「上月結轉系統」。<br>
-                    • <b>【精準】</b>拆分「國定假日 (10.67倍)」與「免出勤日 (18.04倍)」費率輸入，並將夜輪班津貼上調至 300元。<br>
-                    • <b>【強大】</b>月曆升級「單日獨立班別」下拉選單，完美應對跨月轉班與日夜混排。
+                    • 爭取加薪啦！夜班津貼調高到 300 塊。<br>
+                    • 月曆大進化，每一天的格子裡都有自己的「班別選單」，完美解決月初月底「換班」或常日班臨時被拉去「支援輪班」的問題。<br>
+                    • 加班費實領機制大翻修，變成真實的「當月做、下月領」，把上月結轉的格子整理得明明白白。
+                </div>
+            </div>
+            
+            <div class="version-item">
+                <span class="v-num">V2.03</span><span class="v-date">2026-02-25</span>
+                <div class="v-desc">
+                    • 不用再自己慢慢數做二休二了！直接內建「台積電 A班 / B班」快捷鍵。<br>
+                    • 嚴格對齊 115 年行事曆（系統記得 1/1 是 A 班休假第二天），按下去整個月自動排好。舊的自訂做幾休幾就被收進抽屜裡了。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V2.02</span><span class="v-date">2026-02-25</span>
+                <div class="v-desc">
+                    • 把難用的「投保基準」輸入框直接砍了，全部讓系統在背後偷偷查表。<br>
+                    • 發現免出勤日跟國定假日錢不一樣，趕緊把它們拆開算。<br>
+                    • 「零星加班」這詞太遜了，正名為「延時加班」。<br>
+                    • 把加項標清楚「算不算全薪」，並多給一個可以自己填的不計全薪格子。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V2.01</span><span class="v-date">2026-02-25</span>
+                <div class="v-desc">
+                    • 加班費計薪週期終於跟輪班同步了（上月21~本月20）。<br>
+                    • 系統會自動幫你算月底那幾天可以結轉到下個月。<br>
+                    • 發現很多人不自提，勞退預設改為 0%。<br>
+                    • 順便在下面開了一個「百寶箱」放特休跟離職小抄。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V2.00</span><span class="v-date">2026-02-24</span>
+                <div class="v-desc">
+                    • <b>【大換皮+1.0】</b>整個介面大拉皮！換上蘋果 iOS 風格，實領薪資變成像 Apple Wallet 信用卡一樣有質感。<br>
+                    • 把一堆不常用的設定折疊藏起來。<br>
+                    • 順便加上了超聰明的紅字判斷（常日遇紅字排休、輪班遇紅字送換休）。
                 </div>
             </div>
             
             <details style="margin-top: 15px;">
-                <summary style="font-size: 13px; color: var(--apple-blue); cursor: pointer; font-weight: bold; outline: none;">📂 點擊展開歷史更新紀錄 (V2.03 以前)</summary>
+                <summary style="font-size: 13px; color: var(--apple-blue); cursor: pointer; font-weight: bold; outline: none;">🌱 點擊展開 幼苗期 (V1.00 ~ V1.19)</summary>
                 <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--divider);">
                     <div style="margin-bottom: 10px;">
-                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V2.03</span><span style="font-size: 11px; color: var(--text-secondary); margin-left: 8px;">2026-02-25</span>
-                        <div style="font-size: 12px; margin-top: 3px;">• 內建台積電四班二輪 A/B 班預設版型；嚴格校正115年行事曆基準。</div>
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.19</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 讓自動查表更聰明一點，知道要把業主的錢跟 KPI 獎金撇除掉，才不會害你勞保被亂跳級。</div>
                     </div>
                     <div style="margin-bottom: 10px;">
-                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V2.02</span><span style="font-size: 11px; color: var(--text-secondary); margin-left: 8px;">2026-02-25</span>
-                        <div style="font-size: 12px; margin-top: 3px;">• 移除手動投保基準欄位，全自動查表；新增不計入全薪之自訂加項。</div>
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.18</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 修理請假扣錢的邏輯，精準算出你的日薪跟時薪來扣。</div>
                     </div>
                     <div style="margin-bottom: 10px;">
-                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V2.01</span><span style="font-size: 11px; color: var(--text-secondary); margin-left: 8px;">2026-02-25</span>
-                        <div style="font-size: 12px; margin-top: 3px;">• 同步加班費計算週期與輪班津貼 (上月21號至本月20號)，支援次月結轉。</div>
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.17</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 多給一個 KPI 獎金格子，並把「帆宣發的」跟「業主的」錢分得清清楚楚。</div>
                     </div>
                     <div style="margin-bottom: 10px;">
-                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V2.00</span><span style="font-size: 11px; color: var(--text-secondary); margin-left: 8px;">2026-02-24</span>
-                        <div style="font-size: 12px; margin-top: 3px;">• UI/UX 介面大改版，全面導入 Apple iOS HIG 設計語彙。</div>
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.16</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 加入業主專屬的「10小時 / 8小時」加班選項與固定費率。</div>
                     </div>
                     <div style="margin-bottom: 10px;">
-                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.19</span><span style="font-size: 11px; color: var(--text-secondary); margin-left: 8px;">2026-02-24</span>
-                        <div style="font-size: 12px; margin-top: 3px;">• 自動估算時，強制將業主款項與KPI獎金排除於投保基準之外。</div>
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.15</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 抓到蟲了！趕快把輪班津貼從「全薪」裡面踢出去，免得加班費算錯。</div>
                     </div>
                     <div style="margin-bottom: 10px;">
-                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.10</span><span style="font-size: 11px; color: var(--text-secondary); margin-left: 8px;">2026-02-24</span>
-                        <div style="font-size: 12px; margin-top: 3px;">• 導入勞動部/健保署最新官方投保薪資分級表，實裝一鍵查表估算。</div>
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.14</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 輪班津貼獨立出來算，日班、夜班給的錢不一樣囉。</div>
                     </div>
                     <div style="margin-bottom: 10px;">
-                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.06</span><span style="font-size: 11px; color: var(--text-secondary); margin-left: 8px;">2026-02-24</span>
-                        <div style="font-size: 12px; margin-top: 3px;">• 支援 0.5 小時為單位的延時加班與請假輸入；細分請假扣薪與換休。</div>
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.13</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 新增宿舍費、補充保費等各種「薪水小偷」的扣款格子。</div>
                     </div>
                     <div style="margin-bottom: 10px;">
-                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.00</span><span style="font-size: 11px; color: var(--text-secondary); margin-left: 8px;">2026-02-24</span>
-                        <div style="font-size: 12px; margin-top: 3px;">• 初始版本發布 (建立基礎排班月曆與 18.04 倍加班費核心計算模型)。</div>
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.12</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 修補福利金算法，嚴格規定只能用「本薪的 0.5%」來扣。</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.11</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 順便把健保跟勞退的表也抄進來，按一下全部幫你算好。</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.10</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 偷偷把勞保局的級距表抄進來，一鍵就能自動幫你抓勞保要扣多少錢。</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.09</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 加了個記帳本，幫你算這個月到底用掉幾小時的換休假。</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.08</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 請假不再一刀切，乖乖拆成「扣錢的」跟「扣換休的」。</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.07</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 請假也比照辦理，支援 0.5 小時扣時數。</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.06</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 加班有時候只有半小時，加入了 0.5 小時的輸入選項。</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.05</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 發現公用電腦大家輪流用會互相蓋掉資料！趕快加個「姓名」欄位當護身符。</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.04</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 覺得整張圖太長？再加一個「只拍月曆」的按鈕，方便傳給同事看班表。</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.03</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 裝上照相機，點一個按鈕就能把整張薪資單截圖存下來。</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.02</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 做了一個歷史紀錄下拉選單，可以找回前幾個月算過的舊帳。</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.01</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 學會記憶了！加上瀏覽器存檔功能，網頁重整資料也不會不見。</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.00</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 誕生啦！畫出了一個基本的排班月曆，並把 TCM 最精髓的「18.04 倍」公式塞進去。</div>
                     </div>
                 </div>
             </details>
@@ -652,7 +757,6 @@
         return healthPensionBrackets[healthPensionBrackets.length - 1];
     }
 
-    // 💡 防呆安全抓取法
     function getSetting(id) { 
         let el = document.getElementById(id);
         return el ? (parseFloat(el.value) || 0) : 0; 
@@ -672,9 +776,8 @@
         if (isNaN(m)) return;
         let prevM = m - 1;
         if (prevM === 0) prevM = 12;
-        // 更新 UI 上方的文字提示
         let el = document.getElementById('prevMonthText');
-        if(el) el.innerText = `上月出勤與加班結轉`;
+        if(el) el.innerText = `${prevM}月21日~${prevM}月底出勤結轉`;
     }
 
     function syncTsmcOffset() {
@@ -723,6 +826,34 @@
         document.getElementById('calendar-container').innerHTML = '';
         document.getElementById('summaryPanel').style.display = 'none';
         document.getElementById('btnExportCal').style.display = 'none';
+        document.getElementById('btnCalc').style.display = 'none';
+        document.getElementById('ignore-var-hours').style.display = 'none';
+    }
+
+    function manualPullCarryOver() {
+        let userName = document.getElementById('userName').value.trim();
+        if(!userName) return alert("請先填寫姓名，系統才能去資料庫尋找您的紀錄！");
+        
+        let currentM = parseInt(document.getElementById('month').value);
+        let currentY = parseInt(document.getElementById('year').value);
+        let prevM = currentM - 1; let prevY = currentY;
+        if (prevM === 0) { prevM = 12; prevY--; }
+        
+        let prevKey = `${userName}_${prevY}-${prevM.toString().padStart(2, '0')}`;
+        let records = JSON.parse(localStorage.getItem('shiftAppRecords') || '{}');
+        
+        if (records[prevKey]) {
+            let pData = records[prevKey];
+            document.getElementById('prevMonthShiftDay').value = pData.carryOverShiftDay || 0;
+            document.getElementById('prevMonthShiftNight').value = pData.carryOverShiftNight || 0;
+            document.getElementById('prevMonthOtRest').value = pData.carryOverOtRest || 0;
+            document.getElementById('prevMonthOtExempt').value = pData.carryOverOtExempt || 0;
+            document.getElementById('prevMonthOtNational').value = pData.carryOverOtNational || 0;
+            document.getElementById('prevMonthOtHours').value = pData.curr_ot_company_hours || 0;
+            alert(`✅ 已為您抓取 ${prevM}月份 的結轉資料！`);
+        } else {
+            alert(`找不到 ${prevY}年${prevM}月 的存檔紀錄，無法自動帶入。`);
+        }
     }
 
     function calculateAnnualLeave() {
@@ -783,13 +914,11 @@
         if(currentVal) sel.value = currentVal;
     }
 
-    // 💡 代扣自動估算
     function autoCalcDeductions() {
         const v_base = getSetting('s_base');
         const fixedSalaryBase = v_base + getSetting('s_supervisor') + getSetting('s_position') + getSetting('s_tcm') + getSetting('s_safety') + getSetting('s_transport') + getSetting('s_business') + getSetting('s_branch') + getSetting('s_meal') + getSetting('s_other_val');
         const hourlyRate = fixedSalaryBase / 240;
 
-        // 估算時直接帶入「上月結轉」的加班資料 (因為這就是本月會領到的錢)
         const prevShiftDay = getSetting('prevMonthShiftDay');
         const prevShiftNight = getSetting('prevMonthShiftNight');
         const prevOtRest = getSetting('prevMonthOtRest');
@@ -804,7 +933,7 @@
         let estimatedOtPay = (prevOtRest * global_mult_rest * hourlyRate) + 
                              (prevOtExempt * global_mult_rest * hourlyRate) + 
                              (prevOtNational * global_mult_national * hourlyRate) + 
-                             (currOtCompanyHours * 1.34 * hourlyRate); // 預估通常包含手動填寫的所有欄位
+                             (currOtCompanyHours * 1.34 * hourlyRate); 
 
         let currentMonthShiftAllowance = 0; 
         const cells = document.querySelectorAll('.cal-cell[data-day]');
@@ -889,6 +1018,13 @@
             prevMonthOtNational: document.getElementById('prevMonthOtNational').value,
             prevMonthOtHours: document.getElementById('prevMonthOtHours').value,
 
+            // 將本月下半月產生的未來結轉資料也存起來供跨月抓取
+            carryOverShiftDay: document.getElementById('resNextShift') ? document.getElementById('resNextShift').innerText.match(/日班 (\d+)/)?.[1] || 0 : 0,
+            carryOverShiftNight: document.getElementById('resNextShift') ? document.getElementById('resNextShift').innerText.match(/夜班 (\d+)/)?.[1] || 0 : 0,
+            carryOverOtRest: document.getElementById('resNextOtRest') ? document.getElementById('resNextOtRest').innerText : 0,
+            carryOverOtExempt: document.getElementById('resNextOtExempt') ? document.getElementById('resNextOtExempt').innerText : 0,
+            carryOverOtNational: document.getElementById('resNextOtNational') ? document.getElementById('resNextOtNational').innerText : 0,
+
             workDays: document.getElementById('workDays').value, offDays: document.getElementById('offDays').value,
             statutoryHolidays: document.getElementById('statutoryHolidays').value, exemptDays: document.getElementById('exemptDays').value,
             cycleStartOffset: document.getElementById('cycleStartOffset').value, 
@@ -896,7 +1032,6 @@
             cellActions: {}
         };
         
-        // 💡 儲存包含「單日獨立班別」的新版陣列
         const cells = document.querySelectorAll('.cal-cell[data-day]');
         cells.forEach(cell => {
             let day = cell.getAttribute('data-day');
@@ -919,7 +1054,7 @@
 
         Object.keys(data).forEach(k => {
             const el = document.getElementById(k);
-            if(el && typeof data[k] !== 'object' && k !== 'shiftType' && k !== 'scheduleMode') el.value = data[k];
+            if(el && typeof data[k] !== 'object' && k !== 'shiftType' && k !== 'scheduleMode' && !k.startsWith('carryOver')) el.value = data[k];
         });
 
         if (data.userName) document.getElementById('userName').value = data.userName;
@@ -949,7 +1084,6 @@
                 const shiftSel = document.getElementById(`shift-${day}`);
                 const actionSel = document.getElementById(`action-${day}`);
                 
-                // 相容舊版本直接存字串的寫法
                 if (typeof actionObj === 'string') {
                     if (actionSel) actionSel.value = actionObj;
                 } else {
@@ -977,7 +1111,6 @@
             document.getElementById('curr_ot_owner_hours').value = "0"; document.getElementById('d_leave_deduct_hours').value = "0";
             document.getElementById('d_leave_comp_hours').value = "0"; 
             
-            // 💡 清空上月結轉
             document.getElementById('prevMonthShiftDay').value = "0";
             document.getElementById('prevMonthShiftNight').value = "0";
             document.getElementById('prevMonthOtRest').value = "0";
@@ -985,8 +1118,25 @@
             document.getElementById('prevMonthOtNational').value = "0";
             document.getElementById('prevMonthOtHours').value = "0";
 
+            if (userName) {
+                let prevM = m - 1; let prevY = y;
+                if (prevM === 0) { prevM = 12; prevY--; }
+                let prevKey = `${userName}_${prevY}-${prevM.toString().padStart(2, '0')}`;
+                let records = JSON.parse(localStorage.getItem('shiftAppRecords') || '{}');
+                
+                if (records[prevKey]) {
+                    document.getElementById('prevMonthShiftDay').value = records[prevKey].carryOverShiftDay || 0;
+                    document.getElementById('prevMonthShiftNight').value = records[prevKey].carryOverShiftNight || 0;
+                    document.getElementById('prevMonthOtRest').value = records[prevKey].carryOverOtRest || 0;
+                    document.getElementById('prevMonthOtExempt').value = records[prevKey].carryOverOtExempt || 0;
+                    document.getElementById('prevMonthOtNational').value = records[prevKey].carryOverOtNational || 0;
+                    document.getElementById('prevMonthOtHours').value = records[prevKey].curr_ot_company_hours || 0;
+                }
+            } 
+
             document.getElementById('calendar-container').innerHTML = ""; document.getElementById('summaryPanel').style.display = "none"; 
             document.getElementById('btnCalc').style.display = "none"; document.getElementById('btnExportCal').style.display = "none";
+            document.getElementById('ignore-var-hours').style.display = "none";
             
             document.getElementById('shift_night').checked = true;
             document.getElementById('mode_tsmc_a').checked = true; 
@@ -1008,7 +1158,6 @@
         return map;
     }
 
-    // 💡 全新底色連動機制：讀取細胞內的雙層選單
     function updateCellState(selectObj) {
         const cell = selectObj.closest('.cal-cell'); 
         const shiftSelect = cell.querySelector('.shift-select');
@@ -1032,11 +1181,10 @@
         if (isActuallyWorking) cell.classList.add('active-work'); else cell.classList.remove('active-work');
     }
 
-    // 💡 月曆產生器 (預設填入獨立班別下拉選單)
     function generateCalendar() {
         const year = parseInt(document.getElementById('year').value);
         const month = parseInt(document.getElementById('month').value);
-        const shiftType = getShiftValue(); // 取得預設的全局班別
+        const shiftType = getShiftValue(); 
         const scheduleMode = document.querySelector('input[name="scheduleMode"]:checked') ? document.querySelector('input[name="scheduleMode"]:checked').value : 'Custom';
         
         const statutoryHolidays = parseDateString(document.getElementById('statutoryHolidays').value);
@@ -1099,14 +1247,12 @@
                 isWorkDay = (sequence[mod] === 'work'); 
             }
 
-            // 決定該格子的初始班別與狀態
             let cellShift = isWorkDay ? shiftType : 'off';
             let cellAction = isWorkDay ? '正常出勤' : '';
 
-            // 紅字預設邏輯覆蓋
             if (isStatutory || isExempt) {
                 if (isWorkDay) {
-                    cellAction = '帆宣換休'; // 輪班遇紅字預設換休
+                    cellAction = '帆宣換休'; 
                 } else {
                     cellShift = 'off';
                     cellAction = '國定假日休假';
@@ -1128,7 +1274,6 @@
 
             let dateNumColor = (isWeekend || isStatutory || isExempt) ? 'color: var(--apple-red);' : 'color: var(--text-primary);';
 
-            // 💡 植入雙層下拉選單
             let selectShiftHtml = `
                 <select class="shift-select" id="shift-${day}" onchange="updateCellState(this)">
                     <option value="day" ${cellShift==='day'?'selected':''}>日班10H</option>
@@ -1173,14 +1318,14 @@
         
         document.querySelectorAll('.action-select').forEach(sel => updateCellState(sel));
 
+        // 💡 產生月曆後，才顯示後續的結算區塊
         document.getElementById('btnCalc').style.display = 'block';
+        document.getElementById('ignore-var-hours').style.display = 'block'; 
         document.getElementById('btnExportCal').style.display = 'block'; 
         document.getElementById('summaryPanel').style.display = 'none';
         document.getElementById('ignore-salary-grid').removeAttribute('open');
-        calculateSalary();
     }
 
-    // 🧮 終極大腦：完全適應單日班別與全月結轉的算錢引擎
     function calculateSalary() {
         const v_base = getSetting('s_base'); const v_supervisor = getSetting('s_supervisor');
         const v_position = getSetting('s_position'); const v_tcm = getSetting('s_tcm');
@@ -1195,7 +1340,6 @@
 
         const totalDeductions = getSetting('d_tax') + getSetting('d_labor') + getSetting('d_health') + getSetting('d_supp') + getSetting('d_welfare') + getSetting('d_dorm') + getSetting('d_pension') + getSetting('d_other_val') + getSetting('d_subtotal_val');
 
-        // 💡 提取「上月結轉」參數 (這些才是本月會拿到錢的)
         const prevShiftDay = getSetting('prevMonthShiftDay');
         const prevShiftNight = getSetting('prevMonthShiftNight');
         const prevOtRest = getSetting('prevMonthOtRest');
@@ -1203,7 +1347,6 @@
         const prevOtNational = getSetting('prevMonthOtNational');
         const prevOtHours = getSetting('prevMonthOtHours');
 
-        // 提取「本月變動」參數
         const curr_ot_company_hours = getSetting('curr_ot_company_hours');
         const s_ot_owner_hours = getSetting('curr_ot_owner_hours');
         const d_leave_deduct_hours = getSetting('d_leave_deduct_hours');
@@ -1215,7 +1358,6 @@
         const internalHolidays = taiwanHolidays[year]?.[month] || {};
         const userExemptMap = parseHolidayMap(document.getElementById('exemptDays').value);
 
-        // 判斷全局預設倍率供結轉輸入使用
         const globalShift = getShiftValue();
         const global_mult_rest = (globalShift === 'normal') ? (38/3) : 18.04;
         const global_mult_national = (globalShift === 'normal') ? 8 : 10.67;
@@ -1225,7 +1367,6 @@
 
         let totalLeaveDeduction = d_leave_deduct_hours * hourlyRate; 
         
-        // 💰 帆宣加班費實發計算 (完全來自上月結轉)
         let totalOtPay = (prevOtRest * global_mult_rest * hourlyRate) + 
                          (prevOtExempt * global_mult_rest * hourlyRate) + 
                          (prevOtNational * global_mult_national * hourlyRate) + 
@@ -1235,7 +1376,6 @@
         
         let compLeaveAddHours = 0; let compLeaveUsedHours = d_leave_comp_hours; 
         
-        // 追蹤器
         let currentMonthShiftAllowance = 0; 
         let nextCarryShiftDay = 0; let nextCarryShiftNight = 0;
         let nextCarryOtRest = 0; let nextCarryOtExempt = 0; let nextCarryOtNational = 0;
@@ -1254,12 +1394,10 @@
             let hoursPerDay = (shiftVal === 'normal') ? 8 : 10;
             let isAttended = !(["事假", "病假", "生理假", "換休假", "公假", "特休假", "婚假", "喪假", "國定假日休假"].includes(actionVal));
 
-            // A. 當月請假扣薪
-            if (actionVal === "事假") totalLeaveDeduction += (hourlyRate * hoursPerDay); // 以當日排定時數扣除
+            if (actionVal === "事假") totalLeaveDeduction += (hourlyRate * hoursPerDay); 
             else if (actionVal === "病假" || actionVal === "生理假") totalLeaveDeduction += (hourlyRate * hoursPerDay * 0.5);
             else if (actionVal === "換休假") compLeaveUsedHours += hoursPerDay;
 
-            // B. 輪班津貼與結轉統計
             if (isAttended && (shiftVal === 'day' || shiftVal === 'night')) {
                 let allowance = (shiftVal === 'night') ? 300 : 100;
                 if (isCurrentCycle) {
@@ -1271,7 +1409,6 @@
                 }
             }
 
-            // C. 加班結轉統計 (全部丟進下月)
             if (actionVal === "帆宣換休" || actionVal === "國定假日出勤") {
                 compLeaveAddHours += hoursPerDay;
             } else if (actionVal === "帆宣換錢") { 
@@ -1285,12 +1422,10 @@
             }
         });
 
-        // 💰 輪班津貼實發計算 = 上月21~月底手填 + 本月1~20號系統算
         let totalShiftAllowance = currentMonthShiftAllowance + (prevShiftDay * 100) + (prevShiftNight * 300);
 
         let finalSalary = fixedSalaryBase + v_other_add2 + totalShiftAllowance + totalOtPay - totalDeductions - totalLeaveDeduction;
 
-        // 💡 更新UI顯示
         document.getElementById('resFixed').innerText = Math.round(fixedSalaryBase).toLocaleString();
         document.getElementById('resOtherAdd').innerText = Math.round(v_other_add).toLocaleString();
         document.getElementById('resOtherAdd2').innerText = Math.round(v_other_add2).toLocaleString();
@@ -1301,7 +1436,6 @@
         document.getElementById('resCompLeave').innerText = compLeaveAddHours;
         document.getElementById('resUsedCompLeave').innerText = compLeaveUsedHours; 
         
-        // 寫入下期結轉預覽
         document.getElementById('resNextShift').innerText = `日班 ${nextCarryShiftDay} 天 / 夜班 ${nextCarryShiftNight} 天`;
         document.getElementById('resNextOtRest').innerText = nextCarryOtRest;
         document.getElementById('resNextOtExempt').innerText = nextCarryOtExempt;
@@ -1364,9 +1498,11 @@
 
         const year = document.getElementById('year').value;
         const month = document.getElementById('month').value;
+        const shiftVal = getShiftValue();
+        let shiftText = shiftVal === 'normal' ? '常日班' : (shiftVal === 'day' ? '日輪班' : '夜輪班');
         
         const titleDiv = document.createElement('div'); titleDiv.id = 'export-cal-title';
-        titleDiv.innerHTML = `<h2 style="text-align: center; color: var(--text-primary); margin-bottom: 20px; font-size: 24px; padding-bottom: 10px;">👤 ${userName} - 📅 ${year} 年 ${month} 月 班表</h2>`;
+        titleDiv.innerHTML = `<h2 style="text-align: center; color: var(--text-primary); margin-bottom: 20px; font-size: 24px; padding-bottom: 10px;">👤 ${userName} - 📅 ${year} 年 ${month} 月 班表 (${shiftText})</h2>`;
         container.insertBefore(titleDiv, container.firstChild);
 
         const originalWidth = container.style.width; const originalPadding = container.style.padding; const originalBg = container.style.background;
@@ -1383,20 +1519,31 @@
     function exportImage() {
         let userName = document.getElementById('userName').value.trim() || '未命名';
         const container = document.getElementById('export-zone');
-        const hides = document.querySelectorAll('.export-hide, #ignore-grid-layout, #ignore-in-export-fab, #ignore-in-export-privacy');
+        const hides = document.querySelectorAll('.export-hide, #ignore-grid-layout, #ignore-var-hours, #ignore-in-export-fab, #ignore-in-export-privacy');
         hides.forEach(el => el.style.display = 'none');
         
+        const selects = document.querySelectorAll('.action-select'); const textSpans = []; 
+        selects.forEach(s => {
+            s.style.display = 'none'; const span = document.createElement('div');
+            span.innerText = s.options[s.selectedIndex].text; span.style.color = s.style.color || 'var(--text-primary)';
+            span.style.fontSize = '12px'; span.style.fontWeight = 'bold'; span.style.textAlign = 'center';
+            span.style.marginTop = 'auto'; span.style.padding = '4px 0'; s.parentNode.appendChild(span);
+            textSpans.push({ select: s, span: span });
+        });
+
         const year = document.getElementById('year').value; const month = document.getElementById('month').value;
+        const shiftVal = getShiftValue();
+        let shiftText = shiftVal === 'normal' ? '常日班' : (shiftVal === 'day' ? '日輪班' : '夜輪班');
         
         const titleDiv = document.createElement('div');
-        titleDiv.innerHTML = `<h2 style="text-align: center; color: var(--text-primary); margin-bottom: 20px; font-size: 26px;">👤 ${userName} - 📅 ${year} 年 ${month} 月 薪資報表</h2>`;
+        titleDiv.innerHTML = `<h2 style="text-align: center; color: var(--text-primary); margin-bottom: 20px; font-size: 26px;">👤 ${userName} - 📅 ${year} 年 ${month} 月 薪資報表 (${shiftText})</h2>`;
         container.insertBefore(titleDiv, container.firstChild);
 
         const originalWidth = container.style.width; const originalPadding = container.style.padding; const originalBg = container.style.background;
         container.style.width = '1000px'; container.style.padding = '40px'; container.style.background = '#F2F2F7';
 
         html2canvas(container, { scale: 2, windowWidth: 1200, backgroundColor: '#F2F2F7' }).then(canvas => {
-            hides.forEach(el => el.style.display = ''); 
+            hides.forEach(el => el.style.display = ''); textSpans.forEach(item => { item.select.style.display = ''; item.span.remove(); });
             titleDiv.remove(); container.style.width = originalWidth; container.style.padding = originalPadding; container.style.background = originalBg;
             const link = document.createElement('a'); link.download = `${userName}-${year}-${month.padStart(2, '0')}-薪資報表.png`;
             link.href = canvas.toDataURL('image/png'); link.click();
