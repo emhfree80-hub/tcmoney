@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TCM班表與薪資試算工具 v2.08</title>
+    <title>TCM班表與薪資試算工具 v2.09</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#F2F2F7">
@@ -135,6 +135,13 @@
 
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 
+        /* 💡 費率試算專用 Grid，解決手機版擠壓問題 */
+        .rate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; font-size: 13px; }
+        .rate-item { display: flex; justify-content: space-between; align-items: center; }
+        .rate-item strong { white-space: nowrap; margin-left: 8px; color: var(--text-primary); }
+        .rate-item span { color: var(--text-primary); }
+        .rate-divider { grid-column: span 2; border-top: 1px dashed #A9CCE3; padding-top: 10px; margin-top: 4px; }
+
         .calendar { display: grid; grid-template-columns: repeat(7, 1fr); border-radius: 12px; overflow: hidden; background: var(--divider); gap: 1px; margin-top: 15px; border: 1px solid var(--divider);}
         .cal-header { background: var(--bg-card); color: var(--text-secondary); text-align: center; padding: 12px 0; font-size: 13px; font-weight: 600; }
         .cal-cell { min-height: 105px; padding: 6px; display: flex; flex-direction: column; background-color: var(--bg-card); transition: background-color 0.2s;}
@@ -163,11 +170,6 @@
         .wallet-title { font-size: 15px; color: var(--text-secondary); margin: 0 0 5px 0; font-weight: 600;}
         .wallet-amount { font-size: 46px; font-weight: 700; margin: 0; letter-spacing: -1px; color: var(--apple-blue); white-space: nowrap;}
         .wallet-sub { background: #FFFFFF; display: inline-block; padding: 8px 16px; border-radius: 20px; font-size: 13px; margin-top: 15px; font-weight: 600; color: var(--text-primary); border: 1px solid var(--divider); box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
-
-        .rate-hint-box {
-            background: #F2F8FF; border: 1px solid #D1E5FF; border-radius: 12px;
-            padding: 15px; margin-bottom: 20px; font-size: 13px; color: #005BB5; line-height: 1.6;
-        }
 
         .summary-list { font-size: 15px; line-height: 1.8; }
         .summary-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--divider); }
@@ -205,6 +207,9 @@
             .container { padding: 5px; }
             .salary-grid { grid-template-columns: 1fr; gap: 20px; }
             .grid-2 { grid-template-columns: 1fr; }
+            /* 💡 手機版專屬費率排版修復 */
+            .rate-grid { grid-template-columns: 1fr; gap: 8px; }
+            .rate-divider { grid-column: span 1; } 
             .form-group label { font-size: 14px; }
             .cal-header { font-size: 12px; padding: 8px 0; }
             .cal-cell { min-height: 90px; padding: 4px; }
@@ -469,21 +474,23 @@
 
                 <details class="ios-details" open style="margin-bottom: 20px; border: 1px solid #D1E5FF; background: #F2F8FF;">
                     <summary style="background: transparent; padding: 15px; font-size: 15px; color: #005BB5;">📊 薪資與加班費率試算 (依全薪自動換算)</summary>
-                    <div class="details-content grid-2" style="background: transparent; padding-top: 0; box-shadow: none;">
-                        <div>
-                            <div style="display:flex; justify-content: space-between; margin-bottom:4px;"><span>💰 目前全薪：</span><strong><span id="rate_base">0</span> 元</strong></div>
-                            <div style="display:flex; justify-content: space-between; margin-bottom:4px;"><span>⏱️ 法規時薪：</span><strong><span id="rate_hourly">0</span> 元/時</strong></div>
-                            <div style="display:flex; justify-content: space-between; margin-bottom:4px;"><span>🌴 特休假換錢：</span><strong><span id="rate_annual_leave">0</span> 元/天</strong></div>
-                        </div>
-                        <div>
-                            <div style="display:flex; justify-content: space-between; margin-bottom:4px;"><span>休息日帆加換錢：</span><strong><span id="rate_rest">0</span> 元/天</strong></div>
-                            <div style="display:flex; justify-content: space-between; margin-bottom:4px;"><span>免出勤日帆加換錢：</span><strong><span id="rate_exempt">0</span> 元/天</strong></div>
-                            <div style="display:flex; justify-content: space-between; margin-bottom:4px;"><span>國定假日出勤換錢：</span><strong><span id="rate_national">0</span> 元/天</strong></div>
-                        </div>
-                        <div style="grid-column: span 2; border-top: 1px dashed #A9CCE3; padding-top: 8px; margin-top: 4px;">
-                            <div style="display:flex; justify-content: space-between; margin-bottom:4px;"><span>業加整天 (輪班10H)：</span><strong><span id="rate_owner_shift">0</span> 元/天</strong></div>
-                            <div style="display:flex; justify-content: space-between; margin-bottom:4px;"><span>業加整天 (常日8H)：</span><strong><span id="rate_owner_normal">0</span> 元/天</strong></div>
-                            <div style="display:flex; justify-content: space-between;"><span>業加延時 (非整天)：</span><strong><span id="rate_owner_hourly">0</span> 元/時</strong></div>
+                    <div class="details-content" style="background: transparent; padding-top: 0; box-shadow: none;">
+                        <div class="rate-grid">
+                            <div class="rate-item"><span>💰 目前全薪：</span><strong><span id="rate_base">0</span> 元</strong></div>
+                            <div class="rate-item"><span>休息日帆加換錢：</span><strong><span id="rate_rest">0</span> 元/天</strong></div>
+                            
+                            <div class="rate-item"><span>⏱️ 法規時薪：</span><strong><span id="rate_hourly">0</span> 元/時</strong></div>
+                            <div class="rate-item"><span>免出勤日帆加換錢：</span><strong><span id="rate_exempt">0</span> 元/天</strong></div>
+                            
+                            <div class="rate-item"><span>🌴 特休假換錢：</span><strong><span id="rate_annual_leave">0</span> 元/天</strong></div>
+                            <div class="rate-item"><span>國定假日出勤換錢：</span><strong><span id="rate_national">0</span> 元/天</strong></div>
+                            
+                            <div class="rate-divider"></div>
+                            
+                            <div class="rate-item"><span>業加整天 (輪班10H)：</span><strong><span id="rate_owner_shift">0</span> 元/天</strong></div>
+                            <div class="rate-item"><span>業加整天 (常日8H)：</span><strong><span id="rate_owner_normal">0</span> 元/天</strong></div>
+                            
+                            <div class="rate-item rate-divider" style="border:none; padding:0; margin:0;"><span>業加延時 (非整天)：</span><strong><span id="rate_owner_hourly">0</span> 元/時</strong></div>
                         </div>
                     </div>
                 </details>
@@ -650,6 +657,13 @@
         
         <div class="version-list">
             <div class="version-item">
+                <span class="v-num">V2.09</span><span class="v-date">2026-03-03</span>
+                <div class="v-desc">
+                    • 完美修復手機版顯示排版！解決了「薪資試算面板」在手機上文字擠成一團的問題，現在不論用電腦還是手機看，畫面都極度清爽漂亮！
+                </div>
+            </div>
+
+            <div class="version-item">
                 <span class="v-num">V2.08</span><span class="v-date">2026-03-03</span>
                 <div class="v-desc">
                     • 繼續優化版面！將「上月加班時數」與「本月零碎請假加班時數統計」也改為可各自收折的區塊，讓介面保持極致清爽。
@@ -692,49 +706,28 @@
                 </div>
             </div>
             
-            <div class="version-item">
-                <span class="v-num">V2.03</span><span class="v-date">2026-02-25</span>
-                <div class="v-desc">
-                    • 不用再自己慢慢數做二休二了！直接內建「台積電 A班 / B班」快捷鍵。<br>
-                    • 嚴格對齊 115 年行事曆（系統記得 1/1 是 A 班休假第二天），按下去整個月自動排好。舊的自訂做幾休幾就被收進抽屜裡了。
-                </div>
-            </div>
-
-            <div class="version-item">
-                <span class="v-num">V2.02</span><span class="v-date">2026-02-25</span>
-                <div class="v-desc">
-                    • 把難用的「投保基準」輸入框直接砍了，全部讓系統在背後偷偷查表。<br>
-                    • 發現免出勤日跟國定假日錢不一樣，趕緊把它們拆開算。<br>
-                    • 「零星加班」這詞太遜了，正名為「延時加班」。<br>
-                    • 把加項標清楚「算不算全薪」，並多給一個可以自己填的不計全薪格子。
-                </div>
-            </div>
-
-            <div class="version-item">
-                <span class="v-num">V2.01</span><span class="v-date">2026-02-25</span>
-                <div class="v-desc">
-                    • 加班費計薪週期終於跟輪班同步了（上月21~本月20）。<br>
-                    • 系統會自動幫你算月底那幾天可以結轉到下個月。<br>
-                    • 發現很多人不自提，勞退預設改為 0%。<br>
-                    • 順便在下面開了一個「TCM 超好用資訊」放特休跟離職小抄。
-                </div>
-            </div>
-
-            <div class="version-item">
-                <span class="v-num">V2.00</span><span class="v-date">2026-02-24</span>
-                <div class="v-desc">
-                    • <b>【大換皮+1.0】</b>整個介面大拉皮！換上蘋果 iOS 風格，實領薪資變成像 Apple Wallet 信用卡一樣有質感。<br>
-                    • 把一堆不常用的設定折疊藏起來。<br>
-                    • 順便加上了超聰明的紅字判斷（常日遇紅字排休、輪班遇紅字送換休）。
-                </div>
-            </div>
-            
             <details style="margin-top: 15px;">
-                <summary style="font-size: 13px; color: var(--apple-blue); cursor: pointer; font-weight: bold; outline: none;">🌱 點擊展開 幼苗期 (V1.00 ~ V1.19)</summary>
+                <summary style="font-size: 13px; color: var(--apple-blue); cursor: pointer; font-weight: bold; outline: none;">🌱 點擊展開 歷史紀錄 (V1.00 ~ V2.03)</summary>
                 <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--divider);">
                     <div style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V2.03</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 不用再自己慢慢數做二休二了！直接內建「台積電 A班 / B班」快捷鍵。</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V2.02</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 把難用的「投保基準」輸入框砍了，全部讓系統偷偷查表；免出勤跟國定假日拆開算。</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V2.01</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 週期終於跟輪班同步了（上月21~本月20）；系統自動算月底結轉。</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V2.00</span>
+                        <div style="font-size: 12px; margin-top: 3px;">• 介面大拉皮！換上蘋果 iOS 風格，實領薪資變成像 Apple Wallet 信用卡。</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
                         <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.19</span>
-                        <div style="font-size: 12px; margin-top: 3px;">• 讓自動查表更聰明一點，知道要把業主的錢跟 KPI 獎金撇除掉，才不會害你勞保被亂跳級。</div>
+                        <div style="font-size: 12px; margin-top: 3px;">• 讓自動查表更聰明，知道要把業主的錢跟 KPI 獎金撇除掉，不亂跳級。</div>
                     </div>
                     <div style="margin-bottom: 10px;">
                         <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.18</span>
@@ -789,27 +782,7 @@
                         <div style="font-size: 12px; margin-top: 3px;">• 加班有時候只有半小時，加入了 0.5 小時的輸入選項。</div>
                     </div>
                     <div style="margin-bottom: 10px;">
-                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.05</span>
-                        <div style="font-size: 12px; margin-top: 3px;">• 發現公用電腦大家輪流用會互相蓋掉資料！趕快加個「姓名」欄位當護身符。</div>
-                    </div>
-                    <div style="margin-bottom: 10px;">
-                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.04</span>
-                        <div style="font-size: 12px; margin-top: 3px;">• 覺得整張圖太長？再加一個「只拍月曆」的按鈕，方便傳給同事看班表。</div>
-                    </div>
-                    <div style="margin-bottom: 10px;">
-                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.03</span>
-                        <div style="font-size: 12px; margin-top: 3px;">• 裝上照相機，點一個按鈕就能把整張薪資單截圖存下來。</div>
-                    </div>
-                    <div style="margin-bottom: 10px;">
-                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.02</span>
-                        <div style="font-size: 12px; margin-top: 3px;">• 做了一個歷史紀錄下拉選單，可以找回前幾個月算過的舊帳。</div>
-                    </div>
-                    <div style="margin-bottom: 10px;">
-                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.01</span>
-                        <div style="font-size: 12px; margin-top: 3px;">• 學會記憶了！加上瀏覽器存檔功能，網頁重整資料也不會不見。</div>
-                    </div>
-                    <div style="margin-bottom: 10px;">
-                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.00</span>
+                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.00 ~ V1.05</span>
                         <div style="font-size: 12px; margin-top: 3px;">• 誕生啦！畫出了一個基本的排班月曆，建立防覆蓋功能與 18.04 倍公式。</div>
                     </div>
                 </div>
@@ -875,6 +848,8 @@
         if (isNaN(m)) return;
         let prevM = m - 1;
         if (prevM === 0) prevM = 12;
+        let el = document.getElementById('prevMonthText');
+        if(el) el.innerText = `${prevM}月21日~${prevM}月底出勤結轉`;
     }
 
     function syncTsmcOffset() {
@@ -925,6 +900,7 @@
         document.getElementById('btnExportCal').style.display = 'none';
         document.getElementById('btnGoToSalary').style.display = 'none';
         document.getElementById('ignore-var-hours').style.display = 'none';
+        document.getElementById('ignore-salary-grid').style.display = 'none';
     }
 
     function manualPullCarryOver() {
@@ -1265,6 +1241,7 @@
             document.getElementById('btnCalc').style.display = "none"; document.getElementById('btnExportCal').style.display = "none";
             document.getElementById('btnGoToSalary').style.display = "none";
             document.getElementById('ignore-var-hours').style.display = "none"; 
+            document.getElementById('ignore-salary-grid').style.display = "none"; 
             
             document.getElementById('shift_night').checked = true;
             document.getElementById('mode_tsmc_a').checked = true; 
@@ -1453,6 +1430,7 @@
         document.getElementById('ignore-grid-layout').removeAttribute('open');
         document.getElementById('btnCalc').style.display = 'block';
         document.getElementById('ignore-var-hours').style.display = 'grid'; 
+        document.getElementById('ignore-salary-grid').style.display = 'block'; 
         document.getElementById('btnExportCal').style.display = 'block'; 
         document.getElementById('btnGoToSalary').style.display = 'block'; 
         document.getElementById('summaryPanel').style.display = 'none';
@@ -1495,6 +1473,7 @@
         const global_mult_rest = (globalShift === 'normal') ? (38/3) : 18.04;
         const global_mult_national = (globalShift === 'normal') ? 8 : 10.67;
         
+        // 💡 費率試算更新
         document.getElementById('rate_base').innerText = Math.round(fixedSalaryBase).toLocaleString();
         document.getElementById('rate_hourly').innerText = Math.round(hourlyRate).toLocaleString();
         document.getElementById('rate_annual_leave').innerText = Math.round(hourlyRate * 8).toLocaleString();
