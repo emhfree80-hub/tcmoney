@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TCM班表與薪資試算工具 v2.12</title>
+    <title>TCM班表與薪資試算工具 v2.14</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#F2F2F7">
@@ -156,7 +156,6 @@
             text-align: center; text-align-last: center; appearance: none; background-image: none;
         }
         
-        /* 💡 假別選單左對齊 */
         select.action-select { 
             width: 100%; font-size: 11px; font-weight: 600; padding: 2px 4px; 
             background-color: rgba(0,0,0,0.04); border: none; border-radius: 4px; color: var(--text-primary); 
@@ -202,6 +201,12 @@
         .txt-green { color: var(--apple-green); }
         .txt-blue { color: var(--apple-blue); }
         .txt-orange { color: var(--apple-orange); }
+
+        .qa-list { list-style-type: none; padding-left: 0; margin: 0; }
+        .qa-list li { margin-bottom: 15px; border-bottom: 1px dashed var(--divider); padding-bottom: 15px; }
+        .qa-list li:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
+        .qa-q { font-weight: bold; color: var(--text-primary); margin-bottom: 4px; display: block; }
+        .qa-a { color: var(--text-secondary); font-size: 13px; line-height: 1.6; }
 
         @media (max-width: 768px) {
             body { padding: 10px; padding-bottom: 80px; }
@@ -584,6 +589,82 @@
     </div>
 
     <div id="pane-info" class="main-pane">
+        
+        <details class="ios-details">
+            <summary>薪水與獎金相關 Q&A</summary>
+            <div class="details-content">
+                <ul class="qa-list">
+                    <li><span class="qa-q">Q: 薪水何時發？遇到假日呢？</span><span class="qa-a">A: 每月月底發薪，遇假日則遞延上班日發放。</span></li>
+                    <li><span class="qa-q">Q: 帆宣加班費跟請假扣款，當月看的到嗎？</span><span class="qa-a">A: 當月加班請假，反應在下個月薪資裡。</span></li>
+                    <li><span class="qa-q">Q: 有沒有薪資條？</span><span class="qa-a">A: 薪資條由北部統一發放防窺視紙本薪資單，通常會在當月5號之後拿到。</span></li>
+                    <li><span class="qa-q">Q: 薪水有問題要找誰？</span><span class="qa-a">A: 薪資屬個資，必需是本人才能辦理。可透過公司人事MH單位協助處理 (06-5055666按9接總機轉MH)。</span></li>
+                    <li><span class="qa-q">Q: 有沒有保證年終？怎麼算？</span><span class="qa-a">A: 沒有保證年終。公司以人員績效計算獎金。每年9月及2月都會領到。績效=出缺勤+工作表現+工作貢獻...等。</span></li>
+                </ul>
+            </div>
+        </details>
+
+        <details class="ios-details">
+            <summary>福利與補助相關 Q&A</summary>
+            <div class="details-content">
+                <p style="font-size: 12px; color: var(--apple-blue); margin-top:0; font-weight:bold; border-bottom: 1px dashed var(--divider); padding-bottom:10px;">有開始被扣福利金，員工福利就開始！</p>
+                <ul class="qa-list">
+                    <li><span class="qa-q">Q: 生日與三節禮券怎麼發？</span><span class="qa-a">A: 51勞動及生日：1000元/人；端午、中秋：1500元/人。公司採電子禮券發放(Mail或簡訊)，生日月月底發。</span></li>
+                    <li><span class="qa-q">Q: 結婚賀金如何申請？</span><span class="qa-a">A: 準備喜帖兩份，必須在婚宴兩週前交給公司秘書申請。結婚新人同為公司員工時，只能申請一份。</span></li>
+                    <li><span class="qa-q">Q: 生育禮券如何申請？</span><span class="qa-a">A: 員工本人或配偶生產，禮券2000元/胎。出生日3個月內申請有效(需附出生證明)，提送生育補助表及應付憑單申請。夫妻皆為公司員工時，皆可申請。</span></li>
+                    <li><span class="qa-q">Q: 直系親屬過世如何申請奠儀？</span><span class="qa-a">A: 直系親屬定義：員工父母親、配偶或子女。準備訃聞或主管機關證明文件1份交由秘書申請，恕無法補發。</span></li>
+                    <li><span class="qa-q">Q: 體檢付錢不付錢？</span><span class="qa-a">A: 新人體格檢查由新人負擔！每年的定檢由公司負擔。</span></li>
+                    <li><span class="qa-q">Q: 團隊定期聚餐與尾牙？</span><span class="qa-a">A: 聚餐依廠區Loading而定；尾牙依當年度公告為主，若停辦福委會會有相關應對措施。</span></li>
+                    <li><span class="qa-q">Q: 員工旅遊何時辦？</span><span class="qa-a">A: 每年由福委會公告國內外旅遊地點跟日期，員工可參與投票。</span></li>
+                    <li><span class="qa-q">Q: 特約商店資訊？</span><span class="qa-a">A: 店家有紀錄帆宣集團的皆是特約。秘書會不定期至公司內網下載清單寄給廠內Mail。</span></li>
+                </ul>
+            </div>
+        </details>
+
+        <details class="ios-details">
+            <summary>保險與理賠相關 Q&A</summary>
+            <div class="details-content">
+                <ul class="qa-list">
+                    <li><span class="qa-q">Q: 公司團保理賠怎麼申請？</span><span class="qa-a">A: 員工享有兩間團保公司。須提供：醫師診斷證明書、看診收據(影本需院方用章)、匯款帳戶影本(以上皆2份)及公司團保申請書。</span></li>
+                    <li><span class="qa-q">Q: 誰可以申請公司團保理賠？</span><span class="qa-a">A: 員工本人(可申請兩份)及其直系親屬：配偶及子女(可申請一份意外或醫療)。若為進公司後才結婚或出生，必須提供記載登記資料之戶口名簿向MH申請加保才能使用福利。</span></li>
+                    <li><span class="qa-q">Q: 旁系親屬可加進公司團保嗎？</span><span class="qa-a">A: 可以，每年5月左右會有自費加保通知書，可於此時填寫加保(限制依申請單為主)。</span></li>
+                    <li><span class="qa-q">Q: 家人可加入公司健保嗎？</span><span class="qa-a">A: 可以，保費會從薪資扣除。需提供戶口名簿/謄本或身分證正反面影本證明關係，並說明加保日期。</span></li>
+                </ul>
+            </div>
+        </details>
+
+        <details class="ios-details">
+            <summary>天災假給假與出勤規定</summary>
+            <div class="details-content">
+                <ul class="qa-list">
+                    <li><span class="qa-q">常日人員</span><span class="qa-a">政府公告停班停課，當天即休假。</span></li>
+                    <li><span class="qa-q">輪班人員</span><span class="qa-a">當天仍然必須出勤。公司會統計出勤人員並給予天災假補休時數(須在時限內休完)。</span></li>
+                    <li><span class="qa-q">公司加班人員</span><span class="qa-a">當天依法規規定給付加班費。</span></li>
+                    <li><span class="qa-q">交通費用報帳</span><span class="qa-a">搭乘計程車出勤者，請索取電子發票或電子收據(不接受傳統手寫收據)，並打統編：96953928 以供報帳。</span></li>
+                </ul>
+            </div>
+        </details>
+
+        <details class="ios-details">
+            <summary>廠商識別證遺失補辦流程</summary>
+            <div class="details-content">
+                <p style="font-size: 13px; color: var(--text-secondary); margin-top:0; line-height:1.6;">
+                    遺失識別證人員親簽切結書<br>
+                    → 公司協助寄至北部說明原因並用印(會簽法務/秘書/MH)<br>
+                    → 寄回台南辦公室<br>
+                    → 送tsmc接待sponsor及副理級以上主管簽單<br>
+                    → 本人帶切結書/身分證至中控室辦理遺失退卡(手續費250元)<br>
+                    → 公司重新提送WPS識別證申請<br>
+                    → tsmc系統簽單<br>
+                    → 人員SO360上課及測驗<br>
+                    → 中控室重新製卡<br>
+                    → 提送WPS預約開卡<br>
+                    → tsmc簽單<br>
+                    → 進廠。<br><br>
+                    <strong style="color:var(--apple-red);">* 以上整個流程跑完約需 1-2 個月。</strong>
+                </p>
+            </div>
+        </details>
+
         <details class="ios-details">
             <summary>💡 我今年特休有幾天？</summary>
             <div class="details-content">
@@ -661,6 +742,21 @@
         
         <div class="version-list">
             <div class="version-item">
+                <span class="v-num">V2.14</span><span class="v-date">2026-03-04</span>
+                <div class="v-desc">
+                    • 補回公司各項人事規章與常見 Q&A 資訊整合。<br>
+                    • 維持假別選單左對齊、薪資明細與實領金額整合、資訊區預設收折及保留原創標題之各項設定。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V2.13</span><span class="v-date">2026-03-04</span>
+                <div class="v-desc">
+                    • 於資訊頁面新增公司各項人事規章與常見 Q&A 彙整。
+                </div>
+            </div>
+
+            <div class="version-item">
                 <span class="v-num">V2.12</span><span class="v-date">2026-03-03</span>
                 <div class="v-desc">
                     • 月曆假別選單改為靠左對齊，提升閱讀辨識度。<br>
@@ -723,15 +819,9 @@
             </div>
 
             <div class="version-item">
-                <span class="v-num">V2.05</span><span class="v-date">2026-03-02</span>
+                <span class="v-num">V2.04 ~ V2.05</span><span class="v-date">2026-03-02</span>
                 <div class="v-desc">
-                    • 排版區分結轉與本月時數輸入區塊，移至結算面板上方。
-                </div>
-            </div>
-
-            <div class="version-item">
-                <span class="v-num">V2.04</span><span class="v-date">2026-03-01</span>
-                <div class="v-desc">
+                    • 調整排版，區分結轉與本月時數輸入區塊。<br>
                     • 夜班津貼調整為 300 元。<br>
                     • 月曆支援單日班別獨立設定。<br>
                     • 修正帆宣加班實領機制為上月結轉計算。
@@ -865,44 +955,9 @@
             </div>
 
             <div class="version-item">
-                <span class="v-num">V1.05</span><span class="v-date">2026-02-24</span>
+                <span class="v-num">V1.00 ~ V1.05</span><span class="v-date">2026-02-24</span>
                 <div class="v-desc">
-                    • 新增姓名綁定欄位，解決存檔覆蓋問題。
-                </div>
-            </div>
-
-            <div class="version-item">
-                <span class="v-num">V1.04</span><span class="v-date">2026-02-24</span>
-                <div class="v-desc">
-                    • 新增單獨匯出月曆班表圖片功能。
-                </div>
-            </div>
-
-            <div class="version-item">
-                <span class="v-num">V1.03</span><span class="v-date">2026-02-24</span>
-                <div class="v-desc">
-                    • 新增一鍵匯出完整薪資報表圖片功能。
-                </div>
-            </div>
-
-            <div class="version-item">
-                <span class="v-num">V1.02</span><span class="v-date">2026-02-24</span>
-                <div class="v-desc">
-                    • 實裝 LocalStorage 歷史紀錄讀取功能。
-                </div>
-            </div>
-
-            <div class="version-item">
-                <span class="v-num">V1.01</span><span class="v-date">2026-02-24</span>
-                <div class="v-desc">
-                    • 實裝 LocalStorage 瀏覽器本機端存檔功能。
-                </div>
-            </div>
-
-            <div class="version-item">
-                <span class="v-num">V1.00</span><span class="v-date">2026-02-24</span>
-                <div class="v-desc">
-                    • 建立基礎排班月曆結構與 18.04 倍加班費計算模型。
+                    • 建立基礎排班月曆結構。實裝 18.04 倍加班費模型。加入本機存檔功能。新增姓名綁定欄位與匯出圖片功能。
                 </div>
             </div>
         </div>
@@ -1017,8 +1072,6 @@
         document.getElementById('summaryPanel').style.display = 'none';
         document.getElementById('btnExportCal').style.display = 'none';
         document.getElementById('btnGoToSalary').style.display = 'none';
-        document.getElementById('ignore-var-hours').style.display = 'none';
-        document.getElementById('ignore-salary-grid').style.display = 'none';
     }
 
     function manualPullCarryOver() {
@@ -1148,10 +1201,11 @@
         const prevOtPayHours = getSetting('prevMonthOtPayHours');
 
         let global_mult_rest = (getShiftValue() === 'normal') ? (38/3) : 18.04;
+        let global_mult_exempt = (getShiftValue() === 'normal') ? (38/3) : 16.04;
         let global_mult_national = (getShiftValue() === 'normal') ? 8 : 10.68; 
         
         let estimatedOtPay = (prevOtRest * global_mult_rest * hourlyRate) + 
-                             (prevOtExempt * 16.04 * hourlyRate) + 
+                             (prevOtExempt * global_mult_exempt * hourlyRate) + 
                              (prevOtNational * global_mult_national * hourlyRate) + 
                              (prevOtPayHours * 1.34 * hourlyRate); 
 
