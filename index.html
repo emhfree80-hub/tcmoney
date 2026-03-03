@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TCM班表與薪資試算工具 v2.11</title>
+    <title>TCM班表與薪資試算工具 v2.12</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#F2F2F7">
@@ -155,17 +155,18 @@
             background-color: transparent; border: 1px solid rgba(0, 122, 255, 0.4); border-radius: 4px; color: var(--apple-blue); 
             text-align: center; text-align-last: center; appearance: none; background-image: none;
         }
+        
+        /* 💡 假別選單左對齊 */
         select.action-select { 
-            width: 100%; font-size: 11px; font-weight: 600; padding: 2px 0; 
+            width: 100%; font-size: 11px; font-weight: 600; padding: 2px 4px; 
             background-color: rgba(0,0,0,0.04); border: none; border-radius: 4px; color: var(--text-primary); 
-            text-align: center; text-align-last: center; appearance: none; background-image: none;
+            text-align: left; text-align-last: left; appearance: none; background-image: none;
         }
         select.action-select optgroup { font-weight: bold; color: var(--apple-blue); }
 
         .wallet-card {
-            background: #F4F7FB; border: 1px solid #D1D8E0;
-            border-radius: 20px; padding: 30px 20px; text-align: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03); margin-bottom: 25px;
+            background: #F4F7FB; border: none;
+            padding: 30px 20px; text-align: center;
         }
         .wallet-title { font-size: 15px; color: var(--text-secondary); margin: 0 0 5px 0; font-weight: 600;}
         .wallet-amount { font-size: 46px; font-weight: 700; margin: 0; letter-spacing: -1px; color: var(--apple-blue); white-space: nowrap;}
@@ -186,16 +187,16 @@
         .fab-feedback:hover { transform: scale(1.05); }
         
         .feedback-modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:1001; align-items:center; justify-content:center; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);}
-        .feedback-modal { background:white; padding:30px; border-radius:20px; width:90%; max-width:450px; text-align:left; box-shadow:0 20px 40px rgba(0,0,0,0.2); position:relative; }
+        .feedback-modal { background:white; padding:30px; border-radius:20px; width:90%; max-width:500px; text-align:left; box-shadow:0 20px 40px rgba(0,0,0,0.2); position:relative; }
         .btn-close { position:absolute; top:15px; right:20px; background:none; border:none; font-size:24px; color:var(--text-secondary); cursor:pointer; }
         .btn-go-form { display:inline-block; background-color:var(--apple-blue); color:white; padding:12px 24px; text-decoration:none; border-radius:12px; font-weight:600; font-size:15px; margin-top: 15px; text-align: center; width: calc(100% - 48px);}
 
-        .version-list { text-align: left; max-height: 400px; overflow-y: auto; padding-right: 10px; margin-top: 15px; }
+        .version-list { text-align: left; max-height: 400px; overflow-y: auto; padding-right: 10px; margin-top: 15px; border-top: 1px solid var(--divider); padding-top: 15px; }
         .version-item { margin-bottom: 15px; border-bottom: 1px dashed var(--divider); padding-bottom: 10px; }
         .version-item:last-child { border-bottom: none; }
         .v-num { font-weight: bold; color: var(--apple-blue); font-size: 16px; }
         .v-date { font-size: 12px; color: var(--text-secondary); margin-left: 8px; }
-        .v-desc { font-size: 13px; color: var(--text-primary); margin-top: 5px; line-height: 1.5; }
+        .v-desc { font-size: 13px; color: var(--text-primary); margin-top: 5px; line-height: 1.6; }
 
         .txt-red { color: var(--apple-red); }
         .txt-green { color: var(--apple-green); }
@@ -463,40 +464,16 @@
 
             <div id="summaryPanel" style="display: none; padding: 0; overflow: hidden; background: transparent; box-shadow: none;">
                 
-                <div class="wallet-card">
-                    <p class="wallet-title">本月實領薪資</p>
-                    <h1 class="wallet-amount">$ <span id="resTotal">0</span></h1>
-                    <div class="wallet-sub">
-                        業主發放款項 (2個月後發放)：$ <span id="resOwnerOt">0</span>
-                    </div>
-                </div>
-
-                <details class="ios-details" open style="margin-bottom: 20px; border: 1px solid #D1E5FF; background: #F2F8FF;">
-                    <summary style="background: transparent; padding: 15px; font-size: 15px; color: #005BB5;">薪資與加班費率試算 (依全薪自動換算)</summary>
-                    <div class="details-content" style="background: transparent; padding-top: 0; box-shadow: none;">
-                        <div class="rate-grid">
-                            <div class="rate-item"><span>目前全薪：</span><strong><span id="rate_base">0</span> 元</strong></div>
-                            <div class="rate-item"><span>休息日帆加換錢：</span><strong><span id="rate_rest">0</span> 元/天</strong></div>
-                            
-                            <div class="rate-item"><span>法規時薪：</span><strong><span id="rate_hourly">0</span> 元/時</strong></div>
-                            <div class="rate-item"><span>免出勤日帆加換錢：</span><strong><span id="rate_exempt">0</span> 元/天</strong></div>
-                            
-                            <div class="rate-item"><span>特休假換錢：</span><strong><span id="rate_annual_leave">0</span> 元/天</strong></div>
-                            <div class="rate-item"><span>國定假日出勤換錢：</span><strong><span id="rate_national">0</span> 元/天</strong></div>
-                            
-                            <div class="rate-divider"></div>
-                            
-                            <div class="rate-item"><span>業加整天 (輪班10H)：</span><strong><span id="rate_owner_shift">0</span> 元/天</strong></div>
-                            <div class="rate-item"><span>業加整天 (常日8H)：</span><strong><span id="rate_owner_normal">0</span> 元/天</strong></div>
-                            
-                            <div class="rate-item rate-divider" style="border:none; padding:0; margin:0;"><span>業加延時 (非整天)：</span><strong><span id="rate_owner_hourly">0</span> 元/時</strong></div>
+                <div class="ios-card" style="padding: 0; border: 1px solid #D1D8E0; border-radius: 20px; overflow: hidden; margin-bottom: 20px;">
+                    <div class="wallet-card" style="border: none; border-radius: 0; margin-bottom: 0; border-bottom: 1px dashed #D1D8E0;">
+                        <p class="wallet-title">本月實領薪資</p>
+                        <h1 class="wallet-amount">$ <span id="resTotal">0</span></h1>
+                        <div class="wallet-sub">
+                            業主發放款項 (2個月後發放)：$ <span id="resOwnerOt">0</span>
                         </div>
                     </div>
-                </details>
-
-                <details class="ios-details" open style="margin-bottom: 20px;">
-                    <summary style="font-size: 15px;">薪資結算明細</summary>
-                    <div class="details-content" style="padding-top: 0;">
+                    <div style="padding: 20px 25px; background: #FFFFFF;">
+                        <h3 style="font-size: 15px; margin-top: 0; margin-bottom: 15px; color: var(--text-secondary);">薪資結算明細</h3>
                         <div class="summary-list">
                             <div class="summary-row">
                                 <span class="sum-label">各項固定加給總計<span class="sum-detail" id="resFixedDetail"></span></span>
@@ -538,6 +515,29 @@
                                 <span class="sum-label">當月使用換休假</span>
                                 <span class="sum-val txt-orange"><span id="resUsedCompLeave">0</span> 小時</span>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <details class="ios-details" open style="margin-bottom: 20px; border: 1px solid #D1E5FF; background: #F2F8FF;">
+                    <summary style="background: transparent; padding: 15px; font-size: 15px; color: #005BB5;">薪資與加班費率試算 (依全薪自動換算)</summary>
+                    <div class="details-content" style="background: transparent; padding-top: 0; box-shadow: none;">
+                        <div class="rate-grid">
+                            <div class="rate-item"><span>目前全薪：</span><strong><span id="rate_base">0</span> 元</strong></div>
+                            <div class="rate-item"><span>休息日帆加換錢：</span><strong><span id="rate_rest">0</span> 元/天</strong></div>
+                            
+                            <div class="rate-item"><span>法規時薪：</span><strong><span id="rate_hourly">0</span> 元/時</strong></div>
+                            <div class="rate-item"><span>免出勤日帆加換錢：</span><strong><span id="rate_exempt">0</span> 元/天</strong></div>
+                            
+                            <div class="rate-item"><span>特休假換錢：</span><strong><span id="rate_annual_leave">0</span> 元/天</strong></div>
+                            <div class="rate-item"><span>國定假日出勤換錢：</span><strong><span id="rate_national">0</span> 元/天</strong></div>
+                            
+                            <div class="rate-divider"></div>
+                            
+                            <div class="rate-item"><span>業加整天 (輪班10H)：</span><strong><span id="rate_owner_shift">0</span> 元/天</strong></div>
+                            <div class="rate-item"><span>業加整天 (常日8H)：</span><strong><span id="rate_owner_normal">0</span> 元/天</strong></div>
+                            
+                            <div class="rate-item rate-divider" style="border:none; padding:0; margin:0;"><span>業加延時 (非整天)：</span><strong><span id="rate_owner_hourly">0</span> 元/時</strong></div>
                         </div>
                     </div>
                 </details>
@@ -584,8 +584,8 @@
     </div>
 
     <div id="pane-info" class="main-pane">
-        <details class="ios-details" open>
-            <summary>特休假計算機</summary>
+        <details class="ios-details">
+            <summary>💡 我今年特休有幾天？</summary>
             <div class="details-content">
                 <p style="font-size: 13px; color: var(--text-secondary); margin-top:0;">系統會自動抓取您在上方填寫的到職日來進行精算。</p>
                 <div id="leaveResult" style="font-weight: bold; color: var(--apple-blue); background: var(--work-bg); padding: 12px; border-radius: 8px; font-size: 14px; text-align: center; margin-bottom: 15px;">請先在最上方填寫到職日</div>
@@ -603,8 +603,8 @@
             </div>
         </details>
 
-        <details class="ios-details" open>
-            <summary>離職預告期對照表</summary>
+        <details class="ios-details">
+            <summary>💡 想離職嗎？點我看離職預告期</summary>
             <div class="details-content">
                 <p style="font-size: 14px; font-weight: bold; color: var(--text-primary); margin-top: 0;">勞基法離職預告期對照表：</p>
                 <ul style="font-size: 13px; color: var(--text-secondary); padding-left: 20px; line-height: 1.8; margin-bottom: 0;">
@@ -654,12 +654,22 @@
 </div>
 
 <div class="feedback-modal-overlay" id="versionHistoryModal">
-    <div class="feedback-modal" style="max-width: 450px;">
+    <div class="feedback-modal" style="max-width: 500px;">
         <button class="btn-close" onclick="closeVersionHistory()">×</button>
         <h3 style="color: var(--text-primary); margin-bottom:5px; margin-top:0;">更新日誌</h3>
         <p style="font-size:12px; color:var(--text-secondary); margin-top:0;">TCM班表與薪資試算工具</p>
         
         <div class="version-list">
+            <div class="version-item">
+                <span class="v-num">V2.12</span><span class="v-date">2026-03-03</span>
+                <div class="v-desc">
+                    • 月曆假別選單改為靠左對齊，提升閱讀辨識度。<br>
+                    • 薪資結算明細與實領薪資金額整合至同一區塊。<br>
+                    • 恢復「資訊」區塊原創標題，並預設為收折狀態。<br>
+                    • 完整展開 V1.00 至今之所有歷史更新紀錄。
+                </div>
+            </div>
+
             <div class="version-item">
                 <span class="v-num">V2.11</span><span class="v-date">2026-03-03</span>
                 <div class="v-desc">
@@ -673,7 +683,7 @@
                 <span class="v-num">V2.10</span><span class="v-date">2026-03-03</span>
                 <div class="v-desc">
                     • 依據規章修正免出勤日加班為 16.04 倍，國定假日出勤為 10.68 倍。<br>
-                    • 月曆選單補齊所有規章假別，並依給薪規定(有薪/半薪/無薪)分類顯示。<br>
+                    • 月曆選單補齊所有規章假別，並依給薪規定分類顯示。<br>
                     • 系統自動依據假別判定扣款及津貼計算。
                 </div>
             </div>
@@ -713,28 +723,188 @@
             </div>
 
             <div class="version-item">
-                <span class="v-num">V2.04 ~ V2.05</span><span class="v-date">2026-03-02</span>
+                <span class="v-num">V2.05</span><span class="v-date">2026-03-02</span>
                 <div class="v-desc">
-                    • 調整排版，區分結轉與本月時數輸入區塊。<br>
+                    • 排版區分結轉與本月時數輸入區塊，移至結算面板上方。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V2.04</span><span class="v-date">2026-03-01</span>
+                <div class="v-desc">
                     • 夜班津貼調整為 300 元。<br>
                     • 月曆支援單日班別獨立設定。<br>
                     • 修正帆宣加班實領機制為上月結轉計算。
                 </div>
             </div>
-            
-            <details style="margin-top: 15px;">
-                <summary style="font-size: 13px; color: var(--apple-blue); cursor: pointer; font-weight: bold; outline: none;">展開歷史紀錄 (V1.00 ~ V2.03)</summary>
-                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--divider);">
-                    <div style="margin-bottom: 10px;">
-                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V2.00 ~ V2.03</span>
-                        <div style="font-size: 12px; margin-top: 3px;">• 內建台積電 A/B 班預設版型。自動查表帶入投保基準。區分免出勤與國定假日費率。加班費週期與輪班同步。iOS 風格介面更新。</div>
-                    </div>
-                    <div style="margin-bottom: 10px;">
-                        <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">V1.00 ~ V1.19</span>
-                        <div style="font-size: 12px; margin-top: 3px;">• 建立基礎排班月曆。實裝 18.04 倍加班費模型。支援 0.5 小時請假與加班。加入本機存檔功能。勤務津貼獨立計算。</div>
-                    </div>
+
+            <div class="version-item">
+                <span class="v-num">V2.03</span><span class="v-date">2026-02-25</span>
+                <div class="v-desc">
+                    • 內建台積電 A/B 班預設排班版型，校正 115 年行事曆基準。
                 </div>
-            </details>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V2.02</span><span class="v-date">2026-02-25</span>
+                <div class="v-desc">
+                    • 移除手動投保基準改為自動查表，區分免出勤與國定假日費率。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V2.01</span><span class="v-date">2026-02-25</span>
+                <div class="v-desc">
+                    • 加班費週期與輪班同步(上月21至本月20)，實裝自動結轉。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V2.00</span><span class="v-date">2026-02-24</span>
+                <div class="v-desc">
+                    • 介面導入 Apple iOS HIG 設計，實裝紅字判斷機制。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V1.19</span><span class="v-date">2026-02-24</span>
+                <div class="v-desc">
+                    • 自動估算勞健保時，強制排除業主款項與 KPI 獎金。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V1.18</span><span class="v-date">2026-02-24</span>
+                <div class="v-desc">
+                    • 修正請假扣薪演算法，依本薪換算日薪精準扣除。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V1.17</span><span class="v-date">2026-02-24</span>
+                <div class="v-desc">
+                    • 新增 KPI 獎金(業主)欄位，拆分業主與帆宣款項。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V1.16</span><span class="v-date">2026-02-24</span>
+                <div class="v-desc">
+                    • 新增業主加班(10hr/8hr)選項與固定費率。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V1.15</span><span class="v-date">2026-02-24</span>
+                <div class="v-desc">
+                    • 將勤務津貼自全薪中獨立，不計入加班費母數。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V1.14</span><span class="v-date">2026-02-24</span>
+                <div class="v-desc">
+                    • 勤務津貼獨立計算機制，區分常日/日/夜班。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V1.13</span><span class="v-date">2026-02-24</span>
+                <div class="v-desc">
+                    • 新增宿舍費、補充保費等手動代扣欄位。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V1.12</span><span class="v-date">2026-02-24</span>
+                <div class="v-desc">
+                    • 修正福利金計算基準為本薪之 0.5%。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V1.11</span><span class="v-date">2026-02-24</span>
+                <div class="v-desc">
+                    • 導入健保署官方健保與勞退分級表自動估算。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V1.10</span><span class="v-date">2026-02-24</span>
+                <div class="v-desc">
+                    • 導入勞動部官方勞保投保薪資分級表自動對應。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V1.09</span><span class="v-date">2026-02-24</span>
+                <div class="v-desc">
+                    • 新增當月使用換休時數統計。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V1.08</span><span class="v-date">2026-02-24</span>
+                <div class="v-desc">
+                    • 將請假邏輯細分為扣薪與換休雙軌計算。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V1.07</span><span class="v-date">2026-02-24</span>
+                <div class="v-desc">
+                    • 支援 0.5 小時為單位之請假輸入。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V1.06</span><span class="v-date">2026-02-24</span>
+                <div class="v-desc">
+                    • 支援 0.5 小時為單位之延時加班輸入。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V1.05</span><span class="v-date">2026-02-24</span>
+                <div class="v-desc">
+                    • 新增姓名綁定欄位，解決存檔覆蓋問題。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V1.04</span><span class="v-date">2026-02-24</span>
+                <div class="v-desc">
+                    • 新增單獨匯出月曆班表圖片功能。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V1.03</span><span class="v-date">2026-02-24</span>
+                <div class="v-desc">
+                    • 新增一鍵匯出完整薪資報表圖片功能。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V1.02</span><span class="v-date">2026-02-24</span>
+                <div class="v-desc">
+                    • 實裝 LocalStorage 歷史紀錄讀取功能。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V1.01</span><span class="v-date">2026-02-24</span>
+                <div class="v-desc">
+                    • 實裝 LocalStorage 瀏覽器本機端存檔功能。
+                </div>
+            </div>
+
+            <div class="version-item">
+                <span class="v-num">V1.00</span><span class="v-date">2026-02-24</span>
+                <div class="v-desc">
+                    • 建立基礎排班月曆結構與 18.04 倍加班費計算模型。
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -978,11 +1148,10 @@
         const prevOtPayHours = getSetting('prevMonthOtPayHours');
 
         let global_mult_rest = (getShiftValue() === 'normal') ? (38/3) : 18.04;
-        let global_mult_exempt = (getShiftValue() === 'normal') ? (38/3) : 16.04;
         let global_mult_national = (getShiftValue() === 'normal') ? 8 : 10.68; 
         
         let estimatedOtPay = (prevOtRest * global_mult_rest * hourlyRate) + 
-                             (prevOtExempt * global_mult_exempt * hourlyRate) + 
+                             (prevOtExempt * 16.04 * hourlyRate) + 
                              (prevOtNational * global_mult_national * hourlyRate) + 
                              (prevOtPayHours * 1.34 * hourlyRate); 
 
@@ -1520,7 +1689,6 @@
         document.getElementById('resCompLeave').innerText = compLeaveAddHours;
         document.getElementById('resUsedCompLeave').innerText = compLeaveUsedHours; 
         
-        // 💡 結轉天數與對應金額計算
         let nextShiftMoney = (nextCarryShiftDay * 100) + (nextCarryShiftNight * 300);
         let nextOtRestMoney = nextCarryOtRest * hourlyRate * global_mult_rest;
         let nextOtExemptMoney = nextCarryOtExempt * hourlyRate * global_mult_exempt;
