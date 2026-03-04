@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TCM班表與薪資試算工具 v2.14</title>
+    <title>TCM班表與薪資試算工具 v2.15</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#F2F2F7">
@@ -143,19 +143,20 @@
 
         .calendar { display: grid; grid-template-columns: repeat(7, 1fr); border-radius: 12px; overflow: hidden; background: var(--divider); gap: 1px; margin-top: 15px; border: 1px solid var(--divider);}
         .cal-header { background: var(--bg-card); color: var(--text-secondary); text-align: center; padding: 12px 0; font-size: 13px; font-weight: 600; }
-        .cal-cell { min-height: 105px; padding: 6px; display: flex; flex-direction: column; background-color: var(--bg-card); transition: background-color 0.2s;}
+        
+        /* 💡 拔除多餘文字後，調降格子高度讓畫面更緊湊 */
+        .cal-cell { min-height: 85px; padding: 6px; display: flex; flex-direction: column; background-color: var(--bg-card); transition: background-color 0.2s;}
         .cal-cell.active-work { background-color: var(--work-bg); }
         .cal-cell.empty { background-color: #FAFAFC; }
         
-        .date-num { font-size: 18px; font-weight: 600; margin-bottom: 4px; color: var(--text-primary); text-align: left; padding-left: 4px; }
-        .status-text { font-size: 11px; margin-bottom: 5px; font-weight: 600; text-align: center; }
+        .date-num { font-size: 18px; font-weight: 600; margin-bottom: 2px; color: var(--text-primary); text-align: left; padding-left: 4px; }
+        .status-text { font-size: 11px; margin-bottom: 4px; font-weight: 600; text-align: center; }
         
         select.shift-select { 
             width: 100%; margin-top: auto; margin-bottom: 3px; font-size: 11px; font-weight: 600; padding: 2px 0; 
             background-color: transparent; border: 1px solid rgba(0, 122, 255, 0.4); border-radius: 4px; color: var(--apple-blue); 
             text-align: center; text-align-last: center; appearance: none; background-image: none;
         }
-        
         select.action-select { 
             width: 100%; font-size: 11px; font-weight: 600; padding: 2px 4px; 
             background-color: rgba(0,0,0,0.04); border: none; border-radius: 4px; color: var(--text-primary); 
@@ -217,7 +218,7 @@
             .rate-divider { grid-column: span 1; } 
             .form-group label { font-size: 14px; }
             .cal-header { font-size: 12px; padding: 8px 0; }
-            .cal-cell { min-height: 90px; padding: 4px; }
+            .cal-cell { min-height: 75px; padding: 4px; }
             .date-num { font-size: 16px; margin-bottom: 2px; }
             .status-text { font-size: 10px; margin-bottom: 2px; }
             .wallet-amount { font-size: 38px; white-space: nowrap; }
@@ -742,6 +743,14 @@
         
         <div class="version-list">
             <div class="version-item">
+                <span class="v-num">V2.15</span><span class="v-date">2026-03-04</span>
+                <div class="v-desc">
+                    • 實裝「情境式動態選單」：上方班別決定下方的假別選項，徹底解決「排休 + 假別」邏輯衝突的問題。<br>
+                    • 移除月曆格子內多餘的「應出勤/排休」文字標籤，僅保留國定/例假等紅字提醒，優化版面空間。
+                </div>
+            </div>
+
+            <div class="version-item">
                 <span class="v-num">V2.14</span><span class="v-date">2026-03-04</span>
                 <div class="v-desc">
                     • 補回公司各項人事規章與常見 Q&A 資訊整合。<br>
@@ -827,7 +836,7 @@
                     • 修正帆宣加班實領機制為上月結轉計算。
                 </div>
             </div>
-
+            
             <div class="version-item">
                 <span class="v-num">V2.03</span><span class="v-date">2026-02-25</span>
                 <div class="v-desc">
@@ -1063,6 +1072,10 @@
             customDetails.style.display = 'none';
             syncTsmcOffset();
         }
+        
+        if (document.getElementById('calendar-container').innerHTML !== '') {
+            generateCalendar();
+        }
     }
 
     function updateHolidays() {
@@ -1171,6 +1184,10 @@
         } else {
             cycleContainer.style.display = 'block';
             handleModeChange();
+        }
+        
+        if (document.getElementById('calendar-container').innerHTML !== '') {
+            generateCalendar();
         }
     }
 
@@ -1376,15 +1393,27 @@
                 const shiftSel = document.getElementById(`shift-${day}`);
                 const actionSel = document.getElementById(`action-${day}`);
                 
+                let targetShift = shiftSel ? shiftSel.value : 'off';
+                let targetAction = "";
+
                 if (typeof actionObj === 'string') {
-                    if (actionSel) actionSel.value = actionMap[actionObj] || actionObj;
+                    targetAction = actionMap[actionObj] || actionObj;
                 } else {
-                    if (shiftSel && actionObj.shift) shiftSel.value = actionObj.shift;
+                    if (shiftSel && actionObj.shift) {
+                        targetShift = actionObj.shift;
+                        shiftSel.value = targetShift;
+                    }
                     if (actionSel && actionObj.action) {
-                        actionSel.value = actionMap[actionObj.action] || actionObj.action;
+                        targetAction = actionMap[actionObj.action] || actionObj.action;
                     }
                 }
-                if (actionSel) updateCellState(actionSel);
+                
+                if (shiftSel && actionSel) {
+                    actionSel.innerHTML = buildActionOptions(targetShift, targetAction);
+                    actionSel.value = targetAction;
+                    if(!actionSel.value) actionSel.value = (targetShift === 'off') ? "" : "正常出勤";
+                    updateCellState(actionSel);
+                }
             });
             document.getElementById('summaryPanel').style.display = 'none';
         } catch(e) {}
@@ -1456,16 +1485,13 @@
 
     function updateCellState(selectObj) {
         const cell = selectObj.closest('.cal-cell'); 
-        const shiftSelect = cell.querySelector('.shift-select');
-        const actionSelect = cell.querySelector('.action-select');
-        
-        const shiftVal = shiftSelect.value;
-        const actionVal = actionSelect.value;
+        const shiftVal = cell.querySelector('.shift-select').value;
+        const actionVal = selectObj.value;
 
-        if (actionVal.includes('[無薪]')) actionSelect.style.color = 'var(--apple-red)';
-        else if (actionVal.includes('[有薪]') || actionVal.includes('[半薪]')) actionSelect.style.color = 'var(--apple-orange)';
-        else if (actionVal.includes('加班') || actionVal.includes('業加') || actionVal.includes('國定假日出勤')) actionSelect.style.color = 'var(--apple-green)';
-        else actionSelect.style.color = 'var(--text-primary)';
+        if (actionVal.includes('[無薪]')) selectObj.style.color = 'var(--apple-red)';
+        else if (actionVal.includes('[有薪]') || actionVal.includes('[半薪]')) selectObj.style.color = 'var(--apple-orange)';
+        else if (actionVal.includes('加班') || actionVal.includes('業加') || actionVal.includes('國定假日出勤')) selectObj.style.color = 'var(--apple-green)';
+        else selectObj.style.color = 'var(--text-primary)';
 
         let isActuallyWorking = false;
         if (shiftVal !== 'off') {
@@ -1475,6 +1501,54 @@
         }
 
         if (isActuallyWorking) cell.classList.add('active-work'); else cell.classList.remove('active-work');
+    }
+
+    function buildActionOptions(shiftVal, selectedAction) {
+        let html = "";
+        if (shiftVal === 'off') {
+            const offOpts = ["", "帆宣加班(換休)", "帆宣加班(換錢)", "業加整天(10hr)", "業加整天(8hr)", "國定假日出勤(換休)", "[有薪] 國定假日休假"];
+            html += `<optgroup label="【休假與加班】">`;
+            offOpts.forEach(opt => {
+                let label = opt === "" ? "無出勤/無加班" : opt;
+                let sel = (opt === selectedAction) ? "selected" : "";
+                html += `<option value="${opt}" ${sel}>${label}</option>`;
+            });
+            html += `</optgroup>`;
+        } else {
+            const workGroups = [
+                { label: "【出勤與假日加班】", options: ["正常出勤", "帆宣加班(換休)", "帆宣加班(換錢)", "國定假日出勤(換休)"] },
+                { label: "【有薪假】(不扣薪)", options: ["[有薪] 特休假", "[有薪] 換休假", "[有薪] 天災假", "[有薪] 婚假", "[有薪] 喪假", "[有薪] 公假", "[有薪] 公傷假", "[有薪] 產假/小產假", "[有薪] 產檢/陪產假", "[有薪] 旅遊假", "[有薪] 防疫假", "[有薪] 原民假"] },
+                { label: "【半薪假】(扣半薪)", options: ["[半薪] 病假", "[半薪] 生理假", "[半薪] 安胎假"] },
+                { label: "【無薪假】(全扣薪)", options: ["[無薪] 事假", "[無薪] 家庭照顧假", "[無薪] 疫苗接種假", "[無薪] 撫育假", "[無薪] 公司調休"] }
+            ];
+            workGroups.forEach(group => {
+                html += `<optgroup label="${group.label}">`;
+                group.options.forEach(opt => {
+                    let sel = (opt === selectedAction) ? "selected" : "";
+                    html += `<option value="${opt}" ${sel}>${opt}</option>`;
+                });
+                html += `</optgroup>`;
+            });
+        }
+        return html;
+    }
+
+    function handleShiftChangeInCell(shiftSelect) {
+        const cell = shiftSelect.closest('.cal-cell');
+        const actionSelect = cell.querySelector('.action-select');
+        const isOff = shiftSelect.value === 'off';
+        
+        let previousAction = actionSelect.value;
+        actionSelect.innerHTML = buildActionOptions(shiftSelect.value, "");
+        
+        let validOptions = Array.from(actionSelect.options).map(o => o.value);
+        if (validOptions.includes(previousAction)) {
+            actionSelect.value = previousAction;
+        } else {
+            actionSelect.value = isOff ? "" : "正常出勤";
+        }
+        
+        updateCellState(actionSelect);
     }
 
     function generateCalendar() {
@@ -1515,14 +1589,6 @@
             if (mod < 0) mod += 4;
             startOffset = mod;
         }
-
-        const actionGroups = [
-            { label: "【出勤與加班】", options: ["正常出勤", "帆宣加班(換休)", "帆宣加班(換錢)", "業加整天(10hr)", "業加整天(8hr)", "國定假日出勤(換休)"] },
-            { label: "【有薪假】(不扣薪)", options: ["[有薪] 特休假", "[有薪] 換休假", "[有薪] 天災假", "[有薪] 婚假", "[有薪] 喪假", "[有薪] 公假", "[有薪] 公傷假", "[有薪] 產假/小產假", "[有薪] 產檢/陪產假", "[有薪] 旅遊假", "[有薪] 防疫假", "[有薪] 原民假", "[有薪] 國定假日休假"] },
-            { label: "【半薪假】(扣半薪)", options: ["[半薪] 病假", "[半薪] 生理假", "[半薪] 安胎假"] },
-            { label: "【無薪假】(全扣薪)", options: ["[無薪] 事假", "[無薪] 家庭照顧假", "[無薪] 疫苗接種假", "[無薪] 撫育假", "[無薪] 公司調休"] },
-            { label: "【其他】", options: [""] }
-        ];
 
         let html = '<div class="calendar">';
         const days = ['日', '一', '二', '三', '四', '五', '六'];
@@ -1573,16 +1639,12 @@
                 statusTextHtml = '<div class="status-text txt-red">例假日</div>';
             } else if (isUserExempt) {
                 statusTextHtml = `<div class="status-text txt-red">${exemptName}</div>`;
-            } else if (isWorkDay) {
-                statusTextHtml = '<div class="status-text" style="color:var(--apple-blue);">應出勤</div>';
-            } else {
-                statusTextHtml = '<div class="status-text" style="color:var(--text-secondary);">排休</div>';
             }
 
             let dateNumColor = (isWeekend || isStatutory || isUserExempt || isNational || isInternalHoliday) ? 'color: var(--apple-red);' : 'color: var(--text-primary);';
 
             let selectShiftHtml = `
-                <select class="shift-select" id="shift-${day}" onchange="updateCellState(this)">
+                <select class="shift-select" id="shift-${day}" onchange="handleShiftChangeInCell(this)">
                     <option value="day" ${cellShift==='day'?'selected':''}>日班10H</option>
                     <option value="night" ${cellShift==='night'?'selected':''}>夜班10H</option>
                     <option value="normal" ${cellShift==='normal'?'selected':''}>常日 8H</option>
@@ -1591,15 +1653,7 @@
             `;
 
             let selectActionHtml = `<select class="action-select" id="action-${day}" onchange="updateCellState(this)">`;
-            actionGroups.forEach(group => {
-                selectActionHtml += `<optgroup label="${group.label}">`;
-                group.options.forEach(opt => {
-                    let label = opt === "" ? "無出勤/無加班" : opt;
-                    let sel = (opt === cellAction) ? "selected" : "";
-                    selectActionHtml += `<option value="${opt}" ${sel}>${label}</option>`;
-                });
-                selectActionHtml += `</optgroup>`;
-            });
+            selectActionHtml += buildActionOptions(cellShift, cellAction);
             selectActionHtml += `</select>`;
 
             html += `<div class="cal-cell ${bgClass}" data-day="${day}">
