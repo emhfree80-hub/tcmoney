@@ -1921,3 +1921,946 @@
 </script>
 </body>
 </html>
+<script>
+    function openFeedback() { document.getElementById('feedbackModal').style.display = 'flex'; }
+    function closeFeedback() { document.getElementById('feedbackModal').style.display = 'none'; }
+    
+    function openVersionHistory() { document.getElementById('versionHistoryModal').style.display = 'flex'; }
+    function closeVersionHistory() { document.getElementById('versionHistoryModal').style.display = 'none'; }
+    
+    function openInfoModal() { document.getElementById('infoModal').style.display = 'flex'; }
+    function closeInfoModal() { document.getElementById('infoModal').style.display = 'none'; }
+
+    function switchMainTab(paneId) {
+        document.querySelectorAll('.main-pane').forEach(el => el.style.display = 'none');
+        document.getElementById(paneId).style.display = 'block';
+    }
+
+    function goToSalaryTab() {
+        document.getElementById('tab_sal').checked = true;
+        switchMainTab('pane-sal');
+        window.scrollTo(0,0);
+    }
+
+    const taiwanHolidays = {
+        2025: { 1: { 1: "元旦", 27: "除夕(補)", 28: "除夕", 29: "初一", 30: "初二", 31: "初三" }, 2: { 28: "和平紀念日" }, 4: { 3: "兒童節(補)", 4: "兒童節", 5: "清明節" }, 5: { 1: "勞動節", 31: "端午節" }, 10: { 6: "中秋節", 10: "國慶日" } },
+        2026: { 1: { 1: "元旦" }, 2: { 16: "除夕", 17: "初一", 18: "初二", 19: "初三", 20: "初四(補)", 28: "和平紀念日" }, 4: { 3: "兒童節(補)", 4: "兒童節", 5: "清明節", 6: "清明節(補)" }, 5: { 1: "勞動節" }, 6: { 19: "端午節" }, 9: { 25: "中秋節" }, 10: { 10: "國慶日" } },
+        2027: { 1: { 1: "元旦" }, 2: { 5: "除夕", 6: "初一", 7: "初二", 8: "初三", 9: "初四(補)", 28: "和平紀念日" }, 4: { 4: "兒童節", 5: "清明節" }, 5: { 1: "勞動節" }, 6: { 9: "端午節" }, 9: { 15: "中秋節" }, 10: { 10: "國慶日" } }
+    };
+
+    const laborBrackets = [27470, 27600, 28800, 30300, 31800, 33300, 34800, 36300, 38200, 40100, 42000, 43900, 45800];
+    const healthPensionBrackets = [27470, 27600, 28800, 30300, 31800, 33300, 34800, 36300, 38200, 40100, 42000, 43900, 45800, 48200, 50600, 53000, 55400, 57800, 60800, 63800, 66800, 69800, 72800, 76500, 80200, 83900, 87600, 92100, 96600, 101100, 105600, 110100, 115500];
+
+    function getLaborBracket(amount) {
+        for(let b of laborBrackets) { if(amount <= b) return b; }
+        return laborBrackets[laborBrackets.length - 1];
+    }
+    function getHealthPensionBracket(amount) {
+        for(let b of healthPensionBrackets) { if(amount <= b) return b; }
+        return healthPensionBrackets[healthPensionBrackets.length - 1];
+    }
+
+    function getSetting(id) { 
+        let el = document.getElementById(id);
+        return el ? (parseFloat(el.value) || 0) : 0; 
+    }
+
+    window.onload = () => {
+        const today = new Date();
+        document.getElementById('year').value = today.getFullYear();
+        document.getElementById('month').value = today.getMonth() + 1;
+        updateMonthLabels();
+        updateRecordDropdown();
+        handleShiftChange();
+    };
+
+    function updateMonthLabels() {
+        let m = parseInt(document.getElementById('month').value);
+        if (isNaN(m)) return;
+        let prevM = m - 1;
+        if (prevM === 0) prevM = 12;
+        let el = document.getElementById('prevMonthText');
+        if(el) el.innerText = `${prevM}月21日~${prevM}月底出勤結轉`;
+    }
+
+    function syncTsmcOffset() {
+        const modeInput = document.querySelector('input[name="scheduleMode"]:checked');
+        if (!modeInput) return;
+        const mode = modeInput.value;
+        
+        if (mode === 'Custom') return;
+
+        const y = parseInt(document.getElementById('year').value);
+        const m = parseInt(document.getElementById('month').value);
+        
+        const anchor = new Date(2026, 0, 1);
+        const target = new Date(y, m - 1, 1);
+        const diffTime = target.getTime() - anchor.getTime();
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+        
+        let baseIndex = (mode === 'A') ? 3 : 1; 
+        
+        let mod = (diffDays + baseIndex) % 4;
+        if (mod < 0) mod += 4;
+        
+        document.getElementById('workDays').value = 2;
+        document.getElementById('offDays').value = 2;
+        generateCycleDropdown(); 
+        
+        const states = ['W0', 'W1', 'O0', 'O1'];
+        document.getElementById('cycleStartOffset').value = states[mod];
+    }
+
+    function handleModeChange() {
+        const mode = document.querySelector('input[name="scheduleMode"]:checked').value;
+        const customDetails = document.getElementById('custom-cycle-details');
+        
+        if (mode === 'Custom') {
+            customDetails.style.display = 'block';
+        } else {
+            customDetails.style.display = 'none';
+            syncTsmcOffset();
+        }
+    }
+
+    function updateHolidays() {
+        updateMonthLabels(); 
+        syncTsmcOffset(); 
+        document.getElementById('calendar-container').innerHTML = '';
+        document.getElementById('summaryPanel').style.display = 'none';
+        document.getElementById('btnExportCal').style.display = 'none';
+        document.getElementById('btnGoToSalary').style.display = 'none';
+        document.getElementById('ignore-var-hours').style.display = 'none';
+        document.getElementById('ignore-salary-grid').style.display = 'none';
+    }
+
+    function manualPullCarryOver() {
+        let userName = document.getElementById('userName').value.trim();
+        if(!userName) return alert("請先填寫姓名，系統方可尋找您的紀錄。");
+        
+        let currentM = parseInt(document.getElementById('month').value);
+        let currentY = parseInt(document.getElementById('year').value);
+        let prevM = currentM - 1; let prevY = currentY;
+        if (prevM === 0) { prevM = 12; prevY--; }
+        
+        let prevKey = `${userName}_${prevY}-${prevM.toString().padStart(2, '0')}`;
+        let records = JSON.parse(localStorage.getItem('shiftAppRecords') || '{}');
+        
+        if (records[prevKey]) {
+            let pData = records[prevKey];
+            document.getElementById('prevMonthShiftDay').value = pData.carryOverShiftDay || 0;
+            document.getElementById('prevMonthShiftNight').value = pData.carryOverShiftNight || 0;
+            document.getElementById('prevMonthOtRest').value = pData.carryOverOtRest || 0;
+            document.getElementById('prevMonthOtExempt').value = pData.carryOverOtExempt || 0;
+            document.getElementById('prevMonthOtNational').value = pData.carryOverOtNational || 0;
+            document.getElementById('prevMonthOtPayHours').value = pData.curr_ot_company_pay_hours || 0;
+            if (document.getElementById('prevMonthOtCompHours')) document.getElementById('prevMonthOtCompHours').value = pData.curr_ot_company_comp_hours || 0;
+            alert(`已為您抓取 ${prevM} 月份之結轉資料。`);
+        } else {
+            alert(`查無 ${prevY}年${prevM}月 之存檔紀錄，無法自動帶入。`);
+        }
+    }
+
+    function fetchPrevMonthDeductions() {
+        let userName = document.getElementById('userName').value.trim();
+        if(!userName) return alert("請先在上方填寫姓名，系統方可尋找您的紀錄。");
+        
+        let currentM = parseInt(document.getElementById('month').value);
+        let currentY = parseInt(document.getElementById('year').value);
+        let prevM = currentM - 1; let prevY = currentY;
+        if (prevM === 0) { prevM = 12; prevY--; }
+        
+        let prevKey = `${userName}_${prevY}-${prevM.toString().padStart(2, '0')}`;
+        let records = JSON.parse(localStorage.getItem('shiftAppRecords') || '{}');
+        
+        if (records[prevKey] && records[prevKey].settings) {
+            let s = records[prevKey].settings;
+            const fields = ['d_tax', 'd_labor', 'd_health', 'd_supp', 'd_welfare', 'd_dorm', 'd_pension', 'd_other_val', 'd_subtotal_val'];
+            fields.forEach(f => { if(s[f] !== undefined) document.getElementById(f).value = s[f]; });
+            alert("已成功抓取上月之應扣代扣設定。");
+        } else {
+            alert(`查無 ${prevY}年${prevM}月 之代扣紀錄，請確認前期是否曾經存檔。`);
+        }
+    }
+
+    function calculateAnnualLeave() {
+        const hireDateStr = document.getElementById('hireDate').value;
+        const senEl = document.getElementById('seniority-text');
+        const infoEl = document.getElementById('leaveResult');
+        
+        if(!hireDateStr) { 
+            senEl.innerText = ''; 
+            if(infoEl) infoEl.innerText = '請先在上方填寫到職日';
+            return; 
+        }
+        
+        const hireDate = new Date(hireDateStr);
+        const today = new Date();
+        
+        let years = today.getFullYear() - hireDate.getFullYear();
+        let months = today.getMonth() - hireDate.getMonth();
+        if (months < 0 || (months === 0 && today.getDate() < hireDate.getDate())) { years--; months += 12; }
+        if (today.getDate() < hireDate.getDate()) months--;
+        if (months < 0) months += 12; 
+
+        let totalMonths = years * 12 + months;
+        let leaveDays = 0;
+
+        if (totalMonths >= 6 && totalMonths < 12) leaveDays = 3;
+        else if (years >= 1 && years < 2) leaveDays = 7;
+        else if (years >= 2 && years < 3) leaveDays = 10;
+        else if (years >= 3 && years < 5) leaveDays = 14;
+        else if (years >= 5 && years < 10) leaveDays = 15;
+        else if (years >= 10) leaveDays = Math.min(15 + (years - 9), 30);
+
+        senEl.innerText = `(年資：${years}年${months}個月)`;
+        if(infoEl) infoEl.innerText = `依今日計算，年資為 ${years} 年 ${months} 個月，享有 ${leaveDays} 天特休。`;
+    }
+
+    function getShiftValue() {
+        const checked = document.querySelector('input[name="shiftType"]:checked');
+        return checked ? checked.value : 'night';
+    }
+
+    function handleShiftChange() {
+        const shift = getShiftValue();
+        const cycleContainer = document.getElementById('shift-cycle-container');
+        
+        if (shift === 'normal') {
+            cycleContainer.style.display = 'none';
+        } else {
+            cycleContainer.style.display = 'block';
+            handleModeChange();
+        }
+    }
+
+    function generateCycleDropdown() {
+        const w = parseInt(document.getElementById('workDays').value) || 0;
+        const o = parseInt(document.getElementById('offDays').value) || 0;
+        const sel = document.getElementById('cycleStartOffset');
+        
+        const currentVal = sel.value;
+        sel.innerHTML = '';
+        
+        for(let i=1; i<=w; i++) { sel.innerHTML += `<option value="W${i-1}">上班 第 ${i} 天</option>`; }
+        for(let i=1; i<=o; i++) { sel.innerHTML += `<option value="O${i-1}">休假 第 ${i} 天</option>`; }
+        
+        if(currentVal) sel.value = currentVal;
+    }
+
+    function autoCalcDeductions() {
+        const v_base = getSetting('s_base');
+        const fixedSalaryBase = v_base + getSetting('s_supervisor') + getSetting('s_position') + getSetting('s_tcm') + getSetting('s_safety') + getSetting('s_transport') + getSetting('s_business') + getSetting('s_branch') + getSetting('s_meal') + getSetting('s_other_val');
+        const hourlyRate = fixedSalaryBase / 240;
+
+        const prevShiftDay = getSetting('prevMonthShiftDay');
+        const prevShiftNight = getSetting('prevMonthShiftNight');
+        const prevOtRest = getSetting('prevMonthOtRest');
+        const prevOtExempt = getSetting('prevMonthOtExempt');
+        const prevOtNational = getSetting('prevMonthOtNational');
+        const prevOtPayHours = getSetting('prevMonthOtPayHours');
+
+        let global_mult_rest = (getShiftValue() === 'normal') ? (38/3) : 18.04;
+        let global_mult_exempt = (getShiftValue() === 'normal') ? (38/3) : 16.04;
+        let global_mult_national = (getShiftValue() === 'normal') ? 8 : 10.68; 
+        
+        let estimatedOtPay = (prevOtRest * global_mult_rest * hourlyRate) + 
+                             (prevOtExempt * global_mult_exempt * hourlyRate) + 
+                             (prevOtNational * global_mult_national * hourlyRate) + 
+                             (prevOtPayHours * 1.34 * hourlyRate); 
+
+        let currentMonthShiftAllowance = 0; 
+        const cells = document.querySelectorAll('.cal-cell[data-day]');
+        cells.forEach(cell => {
+            let day = parseInt(cell.getAttribute('data-day'));
+            if (day <= 20) {
+                let shiftVal = cell.querySelector('.shift-select').value;
+                let actionVal = cell.querySelector('.action-select').value;
+                
+                let isAttended = !actionVal.includes('['); 
+                
+                if (isAttended && shiftVal !== 'off' && shiftVal !== 'normal') {
+                    currentMonthShiftAllowance += (shiftVal === 'night' ? 300 : 100);
+                }
+            }
+        });
+
+        let totalShiftAllowance = currentMonthShiftAllowance + (prevShiftDay * 100) + (prevShiftNight * 300);
+        let estimatedGross = fixedSalaryBase + getSetting('s_other_val2') + totalShiftAllowance + estimatedOtPay;
+        
+        let l_bracket = getLaborBracket(estimatedGross);
+        let hp_bracket = getHealthPensionBracket(estimatedGross);
+
+        document.getElementById('d_labor').value = Math.round(l_bracket * 0.125 * 0.2);
+        document.getElementById('d_health').value = Math.round(hp_bracket * 0.0517 * 0.3);
+        const pRate = getSetting('pension_rate');
+        document.getElementById('d_pension').value = Math.round(hp_bracket * (pRate / 100));
+        document.getElementById('d_welfare').value = Math.round(v_base * 0.005);
+
+        alert(`自動估算完成。\n系統推算本月應發總額約為：${Math.round(estimatedGross).toLocaleString()} 元\n已為您帶入官方對應級距：\n勞保判定：${l_bracket.toLocaleString()} 元\n健保/勞退判定：${hp_bracket.toLocaleString()} 元`);
+    }
+
+    function updateRecordDropdown() {
+        const selector = document.getElementById('recordSelector');
+        selector.innerHTML = '<option value="">選擇歷史紀錄</option>';
+        const records = JSON.parse(localStorage.getItem('shiftAppRecords') || '{}');
+        Object.keys(records).sort().reverse().forEach(key => {
+            const opt = document.createElement('option');
+            opt.value = key; opt.textContent = key.includes('_') ? key.replace('_', ' ') : key;
+            selector.appendChild(opt);
+        });
+    }
+
+    function saveRecord() {
+        let userName = document.getElementById('userName').value.trim();
+        if(!userName) { alert("請先於上方輸入姓名以建立存檔。"); document.getElementById('userName').focus(); return; }
+
+        const year = document.getElementById('year').value;
+        const month = document.getElementById('month').value;
+        const key = `${userName}_${year}-${month.toString().padStart(2, '0')}`;
+        
+        const currentMode = document.querySelector('input[name="scheduleMode"]:checked') ? document.querySelector('input[name="scheduleMode"]:checked').value : 'Custom';
+
+        const data = {
+            userName, year, month,
+            s_base: document.getElementById('s_base').value, s_supervisor: document.getElementById('s_supervisor').value,
+            s_position: document.getElementById('s_position').value, s_tcm: document.getElementById('s_tcm').value,
+            s_safety: document.getElementById('s_safety').value, s_transport: document.getElementById('s_transport').value,
+            s_business: document.getElementById('s_business').value, s_branch: document.getElementById('s_branch').value,
+            s_meal: document.getElementById('s_meal').value, s_other_name: document.getElementById('s_other_name').value,
+            s_other_val: document.getElementById('s_other_val').value, 
+            s_other_name2: document.getElementById('s_other_name2').value, s_other_val2: document.getElementById('s_other_val2').value, 
+            s_kpi_bonus: document.getElementById('s_kpi_bonus').value, 
+            
+            curr_ot_company_pay_hours: document.getElementById('curr_ot_company_pay_hours').value, 
+            curr_ot_company_comp_hours: document.getElementById('curr_ot_company_comp_hours').value, 
+            curr_ot_owner_hours: document.getElementById('curr_ot_owner_hours').value,     
+            
+            d_tax: document.getElementById('d_tax').value, 
+            d_labor: document.getElementById('d_labor').value, d_health: document.getElementById('d_health').value, 
+            d_supp: document.getElementById('d_supp').value, d_welfare: document.getElementById('d_welfare').value, 
+            d_dorm: document.getElementById('d_dorm').value, pension_rate: document.getElementById('pension_rate').value, 
+            d_pension: document.getElementById('d_pension').value, d_other_name: document.getElementById('d_other_name').value, 
+            d_other_val: document.getElementById('d_other_val').value, d_subtotal_name: document.getElementById('d_subtotal_name').value, 
+            d_subtotal_val: document.getElementById('d_subtotal_val').value, d_leave_deduct_hours: document.getElementById('d_leave_deduct_hours').value,
+            d_leave_comp_hours: document.getElementById('d_leave_comp_hours').value,
+            
+            shiftType: getShiftValue(), 
+            scheduleMode: currentMode,
+            
+            prevMonthShiftDay: document.getElementById('prevMonthShiftDay').value,
+            prevMonthShiftNight: document.getElementById('prevMonthShiftNight').value,
+            prevMonthOtRest: document.getElementById('prevMonthOtRest').value,
+            prevMonthOtExempt: document.getElementById('prevMonthOtExempt').value,
+            prevMonthOtNational: document.getElementById('prevMonthOtNational').value,
+            prevMonthOtPayHours: document.getElementById('prevMonthOtPayHours').value,
+            
+            carryOverShiftDay: document.getElementById('resNextShift') ? document.getElementById('resNextShift').innerText.match(/日班 (\d+)/)?.[1] || 0 : 0,
+            carryOverShiftNight: document.getElementById('resNextShift') ? document.getElementById('resNextShift').innerText.match(/夜班 (\d+)/)?.[1] || 0 : 0,
+            carryOverOtRest: document.getElementById('resNextOtRest') ? document.getElementById('resNextOtRest').innerText : 0,
+            carryOverOtExempt: document.getElementById('resNextOtExempt') ? document.getElementById('resNextOtExempt').innerText : 0,
+            carryOverOtNational: document.getElementById('resNextOtNational') ? document.getElementById('resNextOtNational').innerText : 0,
+
+            workDays: document.getElementById('workDays').value, offDays: document.getElementById('offDays').value,
+            statutoryHolidays: document.getElementById('statutoryHolidays').value, exemptDays: document.getElementById('exemptDays').value,
+            nationalHolidays: document.getElementById('nationalHolidays').value,
+            cycleStartOffset: document.getElementById('cycleStartOffset').value, 
+            hireDate: document.getElementById('hireDate').value, 
+            cellActions: {}
+        };
+        
+        const cells = document.querySelectorAll('.cal-cell[data-day]');
+        cells.forEach(cell => {
+            let day = cell.getAttribute('data-day');
+            data.cellActions[day] = {
+                shift: cell.querySelector('.shift-select').value,
+                action: cell.querySelector('.action-select').value
+            };
+        });
+
+        let records = JSON.parse(localStorage.getItem('shiftAppRecords') || '{}');
+        records[key] = data; localStorage.setItem('shiftAppRecords', JSON.stringify(records));
+        alert(`已成功儲存。`); updateRecordDropdown(); document.getElementById('recordSelector').value = key;
+    }
+
+    function loadRecord() {
+        const key = document.getElementById('recordSelector').value;
+        if(!key) return;
+        const data = JSON.parse(localStorage.getItem('shiftAppRecords') || '{}')[key];
+        if(!data) return;
+
+        Object.keys(data).forEach(k => {
+            const el = document.getElementById(k);
+            if(el && typeof data[k] !== 'object' && k !== 'shiftType' && k !== 'scheduleMode' && !k.startsWith('carryOver')) el.value = data[k];
+        });
+
+        if (data.userName) document.getElementById('userName').value = data.userName;
+        if (data.hireDate) { document.getElementById('hireDate').value = data.hireDate; calculateAnnualLeave(); }
+        
+        if (data.shiftType) {
+            let rb = document.querySelector(`input[name="shiftType"][value="${data.shiftType}"]`);
+            if(rb) rb.checked = true;
+        }
+
+        if (data.scheduleMode) {
+            let rm = document.querySelector(`input[name="scheduleMode"][value="${data.scheduleMode}"]`);
+            if(rm) rm.checked = true;
+        }
+
+        updateMonthLabels(); 
+        handleShiftChange();
+        
+        if (data.scheduleMode === 'Custom' && data.cycleStartOffset) {
+            document.getElementById('cycleStartOffset').value = data.cycleStartOffset;
+        }
+
+        const actionMap = {
+            "帆宣換休": "帆宣加班(換休)",
+            "帆宣換錢": "帆宣加班(換錢)",
+            "業主10": "業加整天(10hr)",
+            "業主8": "業加整天(8hr)",
+            "事假": "[無薪] 事假",
+            "病假": "[半薪] 病假",
+            "生理假": "[半薪] 生理假",
+            "特休假": "[有薪] 特休假",
+            "換休假": "[有薪] 換休假",
+            "國定假日出勤": "國定假日出勤(換休)",
+            "國定假日休假": "[有薪] 國定假日休假",
+            "天災假": "[有薪] 天災假"
+        };
+
+        try {
+            generateCalendar();
+            Object.keys(data.cellActions).forEach(day => {
+                const actionObj = data.cellActions[day];
+                const shiftSel = document.getElementById(`shift-${day}`);
+                const actionSel = document.getElementById(`action-${day}`);
+                
+                let targetShift = shiftSel ? shiftSel.value : 'off';
+                let targetAction = "";
+
+                if (typeof actionObj === 'string') {
+                    targetAction = actionMap[actionObj] || actionObj;
+                } else {
+                    if (shiftSel && actionObj.shift) {
+                        targetShift = actionObj.shift;
+                        shiftSel.value = targetShift;
+                    }
+                    if (actionSel && actionObj.action) {
+                        targetAction = actionMap[actionObj.action] || actionObj.action;
+                    }
+                }
+                
+                if (shiftSel && actionSel) {
+                    actionSel.innerHTML = buildActionOptions(targetShift, targetAction);
+                    actionSel.value = targetAction;
+                    if(!actionSel.value) actionSel.value = (targetShift === 'off') ? "" : "正常出勤";
+                    updateCellState(actionSel);
+                }
+            });
+            document.getElementById('summaryPanel').style.display = 'none';
+        } catch(e) {}
+    }
+
+    function newRecord() {
+        if(confirm("確定建立新月份？未儲存的資料將被清除。")) {
+            let userName = document.getElementById('userName').value.trim();
+            let m = parseInt(document.getElementById('month').value) + 1;
+            let y = parseInt(document.getElementById('year').value);
+            if(m > 12) { m = 1; y++; }
+            
+            document.getElementById('year').value = y; document.getElementById('month').value = m;
+            updateMonthLabels(); 
+            
+            document.getElementById('statutoryHolidays').value = ""; document.getElementById('exemptDays').value = ""; document.getElementById('nationalHolidays').value = "";
+            document.getElementById('s_kpi_bonus').value = "0"; document.getElementById('curr_ot_company_pay_hours').value = "0"; document.getElementById('curr_ot_company_comp_hours').value = "0";
+            document.getElementById('curr_ot_owner_hours').value = "0"; document.getElementById('d_leave_deduct_hours').value = "0";
+            document.getElementById('d_leave_comp_hours').value = "0"; 
+            
+            document.getElementById('prevMonthShiftDay').value = "0";
+            document.getElementById('prevMonthShiftNight').value = "0";
+            document.getElementById('prevMonthOtRest').value = "0";
+            document.getElementById('prevMonthOtExempt').value = "0";
+            document.getElementById('prevMonthOtNational').value = "0";
+            document.getElementById('prevMonthOtPayHours').value = "0";
+
+            if (userName) {
+                let prevM = m - 1; let prevY = y;
+                if (prevM === 0) { prevM = 12; prevY--; }
+                let prevKey = `${userName}_${prevY}-${prevM.toString().padStart(2, '0')}`;
+                let records = JSON.parse(localStorage.getItem('shiftAppRecords') || '{}');
+                
+                if (records[prevKey]) {
+                    document.getElementById('prevMonthShiftDay').value = records[prevKey].carryOverShiftDay || 0;
+                    document.getElementById('prevMonthShiftNight').value = records[prevKey].carryOverShiftNight || 0;
+                    document.getElementById('prevMonthOtRest').value = records[prevKey].carryOverOtRest || 0;
+                    document.getElementById('prevMonthOtExempt').value = records[prevKey].carryOverOtExempt || 0;
+                    document.getElementById('prevMonthOtNational').value = records[prevKey].carryOverOtNational || 0;
+                    document.getElementById('prevMonthOtPayHours').value = records[prevKey].curr_ot_company_pay_hours || 0;
+                }
+            } 
+
+            document.getElementById('calendar-container').innerHTML = ""; document.getElementById('summaryPanel').style.display = "none"; 
+            document.getElementById('btnCalc').style.display = "none"; document.getElementById('btnExportCal').style.display = "none";
+            document.getElementById('btnGoToSalary').style.display = "none";
+            document.getElementById('ignore-var-hours').style.display = "none"; 
+            document.getElementById('ignore-salary-grid').style.display = "none"; 
+            
+            document.getElementById('shift_night').checked = true;
+            document.getElementById('mode_tsmc_a').checked = true; 
+            handleShiftChange();
+            document.getElementById('recordSelector').value = "";
+        }
+    }
+
+    function parseDateString(str) {
+        if (!str || !str.trim()) return []; return str.trim().split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+    }
+
+    function parseHolidayMap(str) {
+        const map = {}; if (!str || !str.trim()) return map;
+        str.trim().split(',').forEach(s => {
+            let match = s.trim().match(/^(\d+)(?:[\-\:\=](.*))?$/);
+            if (match) { map[parseInt(match[1])] = match[2] ? match[2].trim() : ''; }
+        });
+        return map;
+    }
+
+    function updateCellState(selectObj) {
+        const cell = selectObj.closest('.cal-cell'); 
+        const shiftVal = cell.querySelector('.shift-select').value;
+        const actionVal = selectObj.value;
+
+        if (actionVal.includes('[無薪]')) selectObj.style.color = 'var(--apple-red)';
+        else if (actionVal.includes('[有薪]') || actionVal.includes('[半薪]')) selectObj.style.color = 'var(--apple-orange)';
+        else if (actionVal.includes('加班') || actionVal.includes('業加') || actionVal.includes('國定假日出勤')) selectObj.style.color = 'var(--apple-green)';
+        else selectObj.style.color = 'var(--text-primary)';
+
+        let isActuallyWorking = false;
+        if (shiftVal !== 'off') {
+            isActuallyWorking = !actionVal.includes('['); 
+        } else { 
+            isActuallyWorking = actionVal.includes('加班') || actionVal.includes('業加') || actionVal.includes('國定假日出勤'); 
+        }
+
+        if (isActuallyWorking) cell.classList.add('active-work'); else cell.classList.remove('active-work');
+    }
+
+    function buildActionOptions(shiftVal, selectedAction) {
+        let html = "";
+        if (shiftVal === 'off') {
+            const offOpts = ["", "帆宣加班(換休)", "帆宣加班(換錢)", "業加整天(10hr)", "業加整天(8hr)", "國定假日出勤(換休)", "[有薪] 國定假日休假"];
+            html += `<optgroup label="【休假與加班】">`;
+            offOpts.forEach(opt => {
+                let label = opt === "" ? "無出勤/無加班" : opt;
+                let sel = (opt === selectedAction) ? "selected" : "";
+                html += `<option value="${opt}" ${sel}>${label}</option>`;
+            });
+            html += `</optgroup>`;
+        } else {
+            const workGroups = [
+                { label: "【出勤與假日加班】", options: ["正常出勤", "帆宣加班(換休)", "帆宣加班(換錢)", "國定假日出勤(換休)"] },
+                { label: "【有薪假】(不扣薪)", options: ["[有薪] 特休假", "[有薪] 換休假", "[有薪] 天災假", "[有薪] 婚假", "[有薪] 喪假", "[有薪] 公假", "[有薪] 公傷假", "[有薪] 產假/小產假", "[有薪] 產檢/陪產假", "[有薪] 旅遊假", "[有薪] 防疫假", "[有薪] 原民假"] },
+                { label: "【半薪假】(扣半薪)", options: ["[半薪] 病假", "[半薪] 生理假", "[半薪] 安胎假"] },
+                { label: "【無薪假】(全扣薪)", options: ["[無薪] 事假", "[無薪] 家庭照顧假", "[無薪] 疫苗接種假", "[無薪] 撫育假", "[無薪] 公司調休"] }
+            ];
+            workGroups.forEach(group => {
+                html += `<optgroup label="${group.label}">`;
+                group.options.forEach(opt => {
+                    let sel = (opt === selectedAction) ? "selected" : "";
+                    html += `<option value="${opt}" ${sel}>${opt}</option>`;
+                });
+                html += `</optgroup>`;
+            });
+        }
+        return html;
+    }
+
+    function handleShiftChangeInCell(shiftSelect) {
+        const cell = shiftSelect.closest('.cal-cell');
+        const actionSelect = cell.querySelector('.action-select');
+        const isOff = shiftSelect.value === 'off';
+        
+        let previousAction = actionSelect.value;
+        actionSelect.innerHTML = buildActionOptions(shiftSelect.value, "");
+        
+        let validOptions = Array.from(actionSelect.options).map(o => o.value);
+        if (validOptions.includes(previousAction)) {
+            actionSelect.value = previousAction;
+        } else {
+            actionSelect.value = isOff ? "" : "正常出勤";
+        }
+        
+        updateCellState(actionSelect);
+    }
+
+    function generateCalendar() {
+        const year = parseInt(document.getElementById('year').value);
+        const month = parseInt(document.getElementById('month').value);
+        const shiftType = getShiftValue(); 
+        const scheduleMode = document.querySelector('input[name="scheduleMode"]:checked') ? document.querySelector('input[name="scheduleMode"]:checked').value : 'Custom';
+        
+        const statutoryHolidays = parseDateString(document.getElementById('statutoryHolidays').value);
+        const nationalHolidays = parseDateString(document.getElementById('nationalHolidays').value);
+        const internalHolidays = taiwanHolidays[year]?.[month] || {};
+        const userExemptMap = parseHolidayMap(document.getElementById('exemptDays').value);
+
+        const daysInMonth = new Date(year, month, 0).getDate();
+        const firstDayOfWeek = new Date(year, month - 1, 1).getDay(); 
+
+        let sequence = []; let cycleLength = 0; let startOffset = 0;
+
+        if (scheduleMode === 'Custom') {
+            const w = parseInt(document.getElementById('workDays').value) || 0;
+            const o = parseInt(document.getElementById('offDays').value) || 0;
+            cycleLength = w + o;
+            if (cycleLength > 0) {
+                for(let i=0; i<w; i++) sequence.push('work');
+                for(let i=0; i<o; i++) sequence.push('off');
+                const offsetVal = document.getElementById('cycleStartOffset').value; 
+                if(offsetVal.startsWith('W')) startOffset = parseInt(offsetVal.substring(1));
+                else startOffset = w + parseInt(offsetVal.substring(1));
+            }
+        } else {
+            sequence = ['work', 'work', 'off', 'off'];
+            cycleLength = 4;
+            const anchor = new Date(2026, 0, 1);
+            const target = new Date(year, month - 1, 1);
+            const diffDays = Math.round((target.getTime() - anchor.getTime()) / 86400000);
+            let baseIndex = (scheduleMode === 'A') ? 3 : 1; 
+            let mod = (diffDays + baseIndex) % 4;
+            if (mod < 0) mod += 4;
+            startOffset = mod;
+        }
+
+        let html = '<div class="calendar">';
+        const days = ['日', '一', '二', '三', '四', '五', '六'];
+        
+        days.forEach((d, idx) => {
+            let colorStyle = (idx === 0 || idx === 6) ? 'color: var(--apple-red);' : '';
+            html += `<div class="cal-header" style="${colorStyle}">${d}</div>`;
+        });
+        
+        for (let i = 0; i < firstDayOfWeek; i++) html += `<div class="cal-cell empty"></div>`;
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            let dayOfWeek = (firstDayOfWeek + day - 1) % 7;
+            let isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+            let isStatutory = statutoryHolidays.includes(day);
+            let isNational = nationalHolidays.includes(day);
+            let isInternalHoliday = !!internalHolidays[day]; 
+            let isUserExempt = userExemptMap.hasOwnProperty(day);
+            
+            let exemptName = userExemptMap[day] || '免出勤日';
+
+            let isWorkDay = false;
+            if (shiftType === 'normal') {
+                isWorkDay = !(isWeekend || isStatutory || isUserExempt || isNational);
+            } else if (cycleLength > 0) { 
+                let mod = (day - 1 + startOffset) % cycleLength; 
+                isWorkDay = (sequence[mod] === 'work'); 
+            }
+
+            let cellShift = isWorkDay ? shiftType : 'off';
+            let cellAction = isWorkDay ? '正常出勤' : '';
+
+            if (isStatutory || isUserExempt || isNational) {
+                if (isWorkDay) {
+                    cellAction = '帆宣加班(換休)'; 
+                } else {
+                    cellShift = 'off';
+                    if (isNational) cellAction = '[有薪] 國定假日休假';
+                }
+            }
+
+            let bgClass = isWorkDay ? 'active-work' : '';
+            let statusTextHtml = '';
+
+            if (isNational) {
+                statusTextHtml = '<div class="status-text txt-red">國定假日</div>';
+            } else if (isStatutory) {
+                statusTextHtml = '<div class="status-text txt-red">例假日</div>';
+            } else if (isUserExempt) {
+                statusTextHtml = `<div class="status-text txt-red">${exemptName}</div>`;
+            }
+
+            let dateNumColor = (isWeekend || isStatutory || isUserExempt || isNational || isInternalHoliday) ? 'color: var(--apple-red);' : 'color: var(--text-primary);';
+
+            let selectShiftHtml = `
+                <select class="shift-select" id="shift-${day}" onchange="handleShiftChangeInCell(this)">
+                    <option value="day" ${cellShift==='day'?'selected':''}>日班10H</option>
+                    <option value="night" ${cellShift==='night'?'selected':''}>夜班10H</option>
+                    <option value="normal" ${cellShift==='normal'?'selected':''}>常日 8H</option>
+                    <option value="off" ${cellShift==='off'?'selected':''}>排休 0H</option>
+                </select>
+            `;
+
+            let selectActionHtml = `<select class="action-select" id="action-${day}" onchange="updateCellState(this)">`;
+            selectActionHtml += buildActionOptions(cellShift, cellAction);
+            selectActionHtml += `</select>`;
+
+            html += `<div class="cal-cell ${bgClass}" data-day="${day}">
+                        <div class="date-num" style="${dateNumColor}">${day}</div>
+                        ${statusTextHtml}
+                        ${selectShiftHtml}
+                        ${selectActionHtml}
+                     </div>`;
+        }
+        html += '</div>';
+        document.getElementById('calendar-container').innerHTML = html;
+        
+        document.querySelectorAll('.action-select').forEach(sel => updateCellState(sel));
+
+        document.getElementById('ignore-grid-layout').removeAttribute('open');
+        document.getElementById('btnCalc').style.display = 'block';
+        document.getElementById('ignore-var-hours').style.display = 'grid'; 
+        document.getElementById('ignore-salary-grid').style.display = 'block'; 
+        document.getElementById('btnExportCal').style.display = 'block'; 
+        document.getElementById('btnGoToSalary').style.display = 'block'; 
+        document.getElementById('summaryPanel').style.display = 'none';
+    }
+
+    function calculateSalary() {
+        const v_base = getSetting('s_base'); const v_supervisor = getSetting('s_supervisor');
+        const v_position = getSetting('s_position'); const v_tcm = getSetting('s_tcm');
+        const v_safety = getSetting('s_safety'); const v_transport = getSetting('s_transport');
+        const v_business = getSetting('s_business'); const v_branch = getSetting('s_branch');
+        const v_meal = getSetting('s_meal'); const v_other_add = getSetting('s_other_val');
+        const v_other_add2 = getSetting('s_other_val2');
+
+        const fixedSalaryBase = v_base + v_supervisor + v_position + v_tcm + v_safety + v_transport + v_business + v_branch + v_meal + v_other_add;
+        const dailyRate = fixedSalaryBase / 30;
+        const hourlyRate = fixedSalaryBase / 240;
+
+        const totalDeductions = getSetting('d_tax') + getSetting('d_labor') + getSetting('d_health') + getSetting('d_supp') + getSetting('d_welfare') + getSetting('d_dorm') + getSetting('d_pension') + getSetting('d_other_val') + getSetting('d_subtotal_val');
+
+        const prevShiftDay = getSetting('prevMonthShiftDay');
+        const prevShiftNight = getSetting('prevMonthShiftNight');
+        const prevOtRest = getSetting('prevMonthOtRest');
+        const prevOtExempt = getSetting('prevMonthOtExempt');
+        const prevOtNational = getSetting('prevMonthOtNational');
+        const prevOtPayHours = getSetting('prevMonthOtPayHours');
+
+        const curr_ot_company_pay_hours = getSetting('curr_ot_company_pay_hours');
+        const curr_ot_company_comp_hours = getSetting('curr_ot_company_comp_hours');
+        const curr_ot_owner_hours = getSetting('curr_ot_owner_hours');
+        const d_leave_deduct_hours = getSetting('d_leave_deduct_hours');
+        const d_leave_comp_hours = getSetting('d_leave_comp_hours');
+
+        const year = parseInt(document.getElementById('year').value);
+        const month = parseInt(document.getElementById('month').value);
+        const statutoryHolidays = parseDateString(document.getElementById('statutoryHolidays').value);
+        const nationalHolidays = parseDateString(document.getElementById('nationalHolidays').value);
+        const userExemptMap = parseHolidayMap(document.getElementById('exemptDays').value);
+
+        const globalShift = getShiftValue();
+        const global_mult_rest = (globalShift === 'normal') ? (38/3) : 18.04;
+        const global_mult_exempt = (globalShift === 'normal') ? (38/3) : 16.04;
+        const global_mult_national = (globalShift === 'normal') ? 8 : 10.68;
+        
+        document.getElementById('rate_base').innerText = Math.round(fixedSalaryBase).toLocaleString();
+        document.getElementById('rate_hourly').innerText = Math.round(hourlyRate).toLocaleString();
+        document.getElementById('rate_annual_leave').innerText = Math.round(hourlyRate * 8).toLocaleString();
+        document.getElementById('rate_rest').innerText = Math.round(hourlyRate * global_mult_rest).toLocaleString();
+        document.getElementById('rate_exempt').innerText = Math.round(hourlyRate * global_mult_exempt).toLocaleString();
+        document.getElementById('rate_national').innerText = Math.round(hourlyRate * global_mult_national).toLocaleString();
+        document.getElementById('rate_owner_shift').innerText = Math.round(679 * 10 * 0.9).toLocaleString();
+        document.getElementById('rate_owner_normal').innerText = Math.round(679 * 8 * 0.9).toLocaleString();
+        document.getElementById('rate_owner_hourly').innerText = Math.round(509 * 0.9).toLocaleString();
+
+        let totalLeaveDeduction = d_leave_deduct_hours * hourlyRate; 
+        
+        let totalOtPay = (prevOtRest * global_mult_rest * hourlyRate) + 
+                         (prevOtExempt * global_mult_exempt * hourlyRate) + 
+                         (prevOtNational * global_mult_national * hourlyRate) + 
+                         (prevOtPayHours * 1.34 * hourlyRate);
+
+        let ownerOtPay = (curr_ot_owner_hours * 509 * 0.9) + getSetting('s_kpi_bonus');
+        
+        let compLeaveAddHours = 0; let compLeaveUsedHours = d_leave_comp_hours; 
+        
+        let currentMonthShiftAllowance = 0; 
+        let nextCarryShiftDay = 0; let nextCarryShiftNight = 0;
+        let nextCarryOtRest = 0; let nextCarryOtExempt = 0; let nextCarryOtNational = 0;
+        let currentMonthShiftDaysTally = 0;
+
+        const cells = document.querySelectorAll('.cal-cell[data-day]');
+        cells.forEach(cell => {
+            let day = parseInt(cell.getAttribute('data-day'));
+            let shiftVal = cell.querySelector('.shift-select').value;
+            let actionVal = cell.querySelector('.action-select').value;
+            let isCurrentCycle = (day <= 20); 
+            
+            let isStatutory = statutoryHolidays.includes(day);
+            let isNational = nationalHolidays.includes(day);
+            let isExempt = userExemptMap.hasOwnProperty(day);
+
+            let hoursPerDay = (shiftVal === 'normal') ? 8 : 10;
+            
+            let isAttended = !actionVal.includes('[');
+
+            if (actionVal.includes("[無薪]")) totalLeaveDeduction += (hourlyRate * hoursPerDay); 
+            else if (actionVal.includes("[半薪]")) totalLeaveDeduction += (hourlyRate * hoursPerDay * 0.5);
+            else if (actionVal === "[有薪] 換休假") compLeaveUsedHours += hoursPerDay;
+
+            if (isAttended && (shiftVal === 'day' || shiftVal === 'night')) {
+                let allowance = (shiftVal === 'night') ? 300 : 100;
+                if (isCurrentCycle) {
+                    currentMonthShiftAllowance += allowance;
+                    currentMonthShiftDaysTally++;
+                } else {
+                    if (shiftVal === 'night') nextCarryShiftNight++;
+                    else nextCarryShiftDay++;
+                }
+            }
+
+            if (actionVal === "帆宣加班(換休)" || actionVal === "國定假日出勤(換休)") {
+                compLeaveAddHours += hoursPerDay;
+            } else if (actionVal === "帆宣加班(換錢)") { 
+                if (isNational) nextCarryOtNational++;
+                else if (isExempt) nextCarryOtExempt++;
+                else nextCarryOtRest++; 
+            } else if (actionVal === "業加整天(10hr)") { 
+                ownerOtPay += (679 * 10 * 0.9); 
+            } else if (actionVal === "業加整天(8hr)") { 
+                ownerOtPay += (679 * 8 * 0.9); 
+            }
+        });
+
+        let totalShiftAllowance = currentMonthShiftAllowance + (prevShiftDay * 100) + (prevShiftNight * 300);
+        let finalSalary = fixedSalaryBase + v_other_add2 + totalShiftAllowance + totalOtPay - totalDeductions - totalLeaveDeduction;
+
+        document.getElementById('resFixed').innerText = Math.round(fixedSalaryBase).toLocaleString();
+        document.getElementById('resOtherAdd').innerText = Math.round(v_other_add).toLocaleString();
+        document.getElementById('resOtherAdd2').innerText = Math.round(v_other_add2).toLocaleString();
+        document.getElementById('resShift').innerText = Math.round(totalShiftAllowance).toLocaleString();
+        document.getElementById('resOtPay').innerText = Math.round(totalOtPay).toLocaleString();
+        document.getElementById('resDeduct').innerText = Math.round(totalDeductions).toLocaleString();
+        document.getElementById('resLeave').innerText = Math.round(totalLeaveDeduction).toLocaleString();
+        document.getElementById('resCompLeave').innerText = compLeaveAddHours;
+        document.getElementById('resUsedCompLeave').innerText = compLeaveUsedHours; 
+        
+        let nextShiftMoney = (nextCarryShiftDay * 100) + (nextCarryShiftNight * 300);
+        let nextOtRestMoney = nextCarryOtRest * hourlyRate * global_mult_rest;
+        let nextOtExemptMoney = nextCarryOtExempt * hourlyRate * global_mult_exempt;
+        let nextOtNationalMoney = nextCarryOtNational * hourlyRate * global_mult_national;
+        let nextOtPayHoursMoney = curr_ot_company_pay_hours * hourlyRate * 1.34;
+        let nextSubtotal = nextShiftMoney + nextOtRestMoney + nextOtExemptMoney + nextOtNationalMoney + nextOtPayHoursMoney;
+
+        document.getElementById('resNextShift').innerText = `日班 ${nextCarryShiftDay} 天 / 夜班 ${nextCarryShiftNight} 天`;
+        document.getElementById('resNextShiftMoney').innerText = `($ ${Math.round(nextShiftMoney).toLocaleString()})`;
+        
+        document.getElementById('resNextOtRest').innerText = nextCarryOtRest;
+        document.getElementById('resNextOtRestMoney').innerText = `($ ${Math.round(nextOtRestMoney).toLocaleString()})`;
+        
+        document.getElementById('resNextOtExempt').innerText = nextCarryOtExempt;
+        document.getElementById('resNextOtExemptMoney').innerText = `($ ${Math.round(nextOtExemptMoney).toLocaleString()})`;
+        
+        document.getElementById('resNextOtNational').innerText = nextCarryOtNational;
+        document.getElementById('resNextOtNationalMoney').innerText = `($ ${Math.round(nextOtNationalMoney).toLocaleString()})`;
+        
+        document.getElementById('resNextOtPayHours').innerText = curr_ot_company_pay_hours;
+        document.getElementById('resNextOtPayHoursMoney').innerText = `($ ${Math.round(nextOtPayHoursMoney).toLocaleString()})`;
+        
+        document.getElementById('resNextSubtotal').innerText = Math.round(nextSubtotal).toLocaleString();
+        
+        const addItems = [{id: 's_base', name: '本薪'}, {id: 's_supervisor', name: '主管'}, {id: 's_position', name: '職務'}, {id: 's_tcm', name: 'TCM'}, {id: 's_safety', name: '安全'}, {id: 's_transport', name: '交通'}, {id: 's_business', name: '業務'}, {id: 's_branch', name: '分公司'}, {id: 's_meal', name: '伙食'}, {id: 's_other_val', name: '其它(計全薪)'}];
+        let addDetails = [];
+        addItems.forEach(item => { const val = parseInt(document.getElementById(item.id).value) || 0; if (val > 0) addDetails.push(`${item.name}:${val.toLocaleString()}`); });
+        document.getElementById('resFixedDetail').innerText = addDetails.length > 0 ? `(${addDetails.join(' + ')})` : '';
+
+        const dedItems = [{id: 'd_tax', name: '所得稅'}, {id: 'd_labor', name: '勞保'}, {id: 'd_health', name: '健保'}, {id: 'd_supp', name: '補充保費'}, {id: 'd_welfare', name: '福利金'}, {id: 'd_dorm', name: '宿舍'}, {id: 'd_pension', name: '勞退自提'}, {id: 'd_other_val', name: '其它'}, {id: 'd_subtotal_val', name: '代扣小計'}];
+        let dedDetails = [];
+        dedItems.forEach(item => { const val = parseInt(document.getElementById(item.id).value) || 0; if (val > 0) dedDetails.push(`${item.name}:${val.toLocaleString()}`); });
+        
+        document.getElementById('row-other-add').style.display = (v_other_add > 0) ? 'flex' : 'none';
+        document.getElementById('row-other-add2').style.display = (v_other_add2 > 0) ? 'flex' : 'none';
+        document.getElementById('row-leave-deduct').style.display = totalLeaveDeduction > 0 ? 'flex' : 'none';
+
+        document.getElementById('resDeductDetail').innerText = dedDetails.length > 0 ? `(${dedDetails.join(' + ')})` : '';
+        
+        document.getElementById('resShiftDetail').innerText = `(上月結轉 [日:${prevShiftDay}/夜:${prevShiftNight}] + 本期1~20號 x${currentMonthShiftDaysTally}天)`;
+
+        let otDetailArr = [];
+        if (prevOtRest > 0) otDetailArr.push(`休假 x${prevOtRest}天`);
+        if (prevOtExempt > 0) otDetailArr.push(`免出勤 x${prevOtExempt}天`);
+        if (prevOtNational > 0) otDetailArr.push(`國定 x${prevOtNational}天`);
+        if (prevOtPayHours > 0) otDetailArr.push(`延時 x${prevOtPayHours}時`);
+        document.getElementById('resOtDetail').innerText = otDetailArr.length > 0 ? `(${otDetailArr.join(' + ')})` : '(無結轉加班)';
+
+        document.getElementById('resTotal').innerText = Math.round(finalSalary).toLocaleString();
+        document.getElementById('resOwnerOt').innerText = Math.round(ownerOtPay).toLocaleString();
+
+        document.getElementById('summaryPanel').style.display = 'block';
+        document.querySelector('.btn-export').style.display = 'block';
+        
+        document.getElementById('ignore-salary-grid').removeAttribute('open');
+        document.getElementById('ignore-var-hours').removeAttribute('open');
+        
+        setTimeout(() => { document.getElementById('summaryPanel').scrollIntoView({ behavior: 'smooth' }); }, 100);
+    }
+
+    function exportCalendarImage() {
+        let userName = document.getElementById('userName').value.trim() || '未命名';
+        const container = document.getElementById('calendar-container');
+        if(!container.innerHTML) return alert('請先產生班表。');
+
+        const textSpans = []; 
+        container.querySelectorAll('.shift-select').forEach(s => {
+            s.style.display = 'none'; 
+            const span = document.createElement('div'); span.innerText = s.options[s.selectedIndex].text; 
+            span.style.color = s.style.color || 'var(--apple-blue)'; span.style.fontSize = '10px';
+            span.style.fontWeight = 'bold'; span.style.textAlign = 'center'; span.style.marginTop = 'auto';
+            s.parentNode.insertBefore(span, s.nextSibling); textSpans.push({ select: s, span: span });
+        });
+        container.querySelectorAll('.action-select').forEach(s => {
+            s.style.display = 'none'; 
+            const span = document.createElement('div'); span.innerText = s.options[s.selectedIndex].text; 
+            span.style.color = s.style.color || 'var(--text-primary)'; span.style.fontSize = '11px';
+            span.style.fontWeight = 'bold'; span.style.textAlign = 'center'; span.style.marginTop = '2px';
+            s.parentNode.appendChild(span); textSpans.push({ select: s, span: span });
+        });
+
+        const year = document.getElementById('year').value;
+        const month = document.getElementById('month').value;
+        
+        const titleDiv = document.createElement('div'); titleDiv.id = 'export-cal-title';
+        titleDiv.innerHTML = `<h2 style="text-align: center; color: var(--text-primary); margin-bottom: 20px; font-size: 24px; padding-bottom: 10px;">${userName} - ${year} 年 ${month} 月 班表</h2>`;
+        container.insertBefore(titleDiv, container.firstChild);
+
+        const originalWidth = container.style.width; const originalPadding = container.style.padding; const originalBg = container.style.background;
+        container.style.width = '1000px'; container.style.padding = '30px'; container.style.background = '#FFFFFF';
+
+        html2canvas(container, { scale: 2, windowWidth: 1200, backgroundColor: '#ffffff' }).then(canvas => {
+            textSpans.forEach(item => { item.select.style.display = ''; item.span.remove(); }); titleDiv.remove(); 
+            container.style.width = originalWidth; container.style.padding = originalPadding; container.style.background = originalBg;
+            const link = document.createElement('a'); link.download = `${userName}-${year}-${month.padStart(2, '0')}-班表.png`;
+            link.href = canvas.toDataURL('image/png'); link.click();
+        });
+    }
+
+    function exportImage() {
+        let userName = document.getElementById('userName').value.trim() || '未命名';
+        const container = document.getElementById('pane-sal');
+        const hides = container.querySelectorAll('.export-hide');
+        hides.forEach(el => el.style.display = 'none');
+        
+        const year = document.getElementById('year').value; const month = document.getElementById('month').value;
+        
+        const titleDiv = document.createElement('div');
+        titleDiv.innerHTML = `<h2 style="text-align: center; color: var(--text-primary); margin-bottom: 20px; font-size: 26px;">${userName} - ${year} 年 ${month} 月 薪資報表</h2>`;
+        container.insertBefore(titleDiv, container.firstChild);
+
+        const originalWidth = container.style.width; const originalPadding = container.style.padding; const originalBg = container.style.background;
+        container.style.width = '1000px'; container.style.padding = '40px'; container.style.background = '#F2F2F7';
+
+        html2canvas(container, { scale: 2, windowWidth: 1200, backgroundColor: '#F2F2F7' }).then(canvas => {
+            hides.forEach(el => el.style.display = ''); 
+            titleDiv.remove(); container.style.width = originalWidth; container.style.padding = originalPadding; container.style.background = originalBg;
+            const link = document.createElement('a'); link.download = `${userName}-${year}-${month.padStart(2, '0')}-薪資報表.png`;
+            link.href = canvas.toDataURL('image/png'); link.click();
+        });
+    }
+</script>
+</body>
+</html>
