@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TCM班表與薪資試算工具 v2.18</title>
+    <title>TCM班表與薪資試算工具 v2.19</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#F2F2F7">
@@ -101,14 +101,15 @@
         .main-pane.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* 💡 質感升級：全寬主按鈕改為 Premium Dark */
         button.action-btn { 
-            background-color: var(--apple-blue); color: white; border: none; 
+            background-color: var(--text-primary); color: white; border: none; 
             padding: 14px 20px; cursor: pointer; border-radius: 12px; 
             font-size: 16px; font-weight: 600; transition: transform 0.1s, background-color 0.2s;
-            width: 100%; display: block; box-shadow: 0 4px 14px rgba(0, 122, 255, 0.3);
+            width: 100%; display: block; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
         }
         button.action-btn:active { transform: scale(0.98); }
-        button.action-btn:hover { background-color: var(--apple-blue-hover); }
+        button.action-btn:hover { background-color: #2C2C2E; }
         
         .btn-file { background: var(--bg-body); color: var(--apple-blue); border: none; padding: 8px 14px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
         .btn-file:hover { background: #E5E5EA; }
@@ -117,7 +118,7 @@
         .btn-auto { background: var(--apple-orange); color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; }
         .btn-link { background: transparent; color: var(--apple-blue); border: none; font-size: 13px; cursor: pointer; text-decoration: underline; padding: 0; font-weight: 600;}
         
-        .btn-export-sec { background-color: #F2F2F7; color: var(--apple-blue); box-shadow: none; margin-top: 10px;}
+        .btn-export-sec { background-color: #F2F2F7; color: var(--text-primary); box-shadow: none; margin-top: 10px;}
         .btn-export-sec:hover { background-color: #E5E5EA; }
 
         details.ios-details { margin-bottom: 20px; }
@@ -155,6 +156,7 @@
             background-color: transparent; border: 1px solid rgba(0, 122, 255, 0.4); border-radius: 4px; color: var(--apple-blue); 
             text-align: center; text-align-last: center; appearance: none; background-image: none;
         }
+        
         select.action-select { 
             width: 100%; font-size: 11px; font-weight: 600; padding: 2px 4px; 
             background-color: rgba(0,0,0,0.04); border: none; border-radius: 4px; color: var(--text-primary); 
@@ -178,16 +180,18 @@
         .sum-detail { font-size: 12px; color: #A1A1A6; display: block; font-weight: 400; line-height: 1.4;}
 
         .fab-feedback {
-            position: fixed; bottom: 25px; right: 25px; background-color: var(--apple-blue); color: white;
+            position: fixed; bottom: 25px; right: 25px; background-color: var(--text-primary); color: white;
             border: none; border-radius: 30px; padding: 14px 24px; font-size: 15px; font-weight: 600;
-            box-shadow: 0 10px 20px rgba(0, 122, 255, 0.3); cursor: pointer; z-index: 1000; transition: transform 0.2s;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); cursor: pointer; z-index: 1000; transition: transform 0.2s;
         }
         .fab-feedback:hover { transform: scale(1.05); }
         
         .feedback-modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:1001; align-items:center; justify-content:center; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);}
-        .feedback-modal { background:white; padding:30px; border-radius:20px; width:90%; max-width:500px; text-align:left; box-shadow:0 20px 40px rgba(0,0,0,0.2); position:relative; }
+        /* 💡 意見回饋視窗置中設定 */
+        .feedback-modal { background:white; padding:30px; border-radius:20px; width:90%; max-width:500px; text-align:center; box-shadow:0 20px 40px rgba(0,0,0,0.2); position:relative; }
+        .feedback-modal p { text-align: left; }
         .btn-close { position:absolute; top:15px; right:20px; background:none; border:none; font-size:24px; color:var(--text-secondary); cursor:pointer; }
-        .btn-go-form { display:inline-block; background-color:var(--apple-blue); color:white; padding:12px 24px; text-decoration:none; border-radius:12px; font-weight:600; font-size:15px; margin-top: 15px; text-align: center; width: calc(100% - 48px);}
+        .btn-go-form { display:block; background-color:var(--text-primary); color:white; padding:12px 24px; text-decoration:none; border-radius:12px; font-weight:600; font-size:15px; margin: 15px auto 0 auto; width: 80%;}
 
         .version-list { text-align: left; max-height: 400px; overflow-y: auto; padding-right: 10px; margin-top: 15px; border-top: 1px solid var(--divider); padding-top: 15px; }
         .version-item { margin-bottom: 15px; border-bottom: 1px dashed var(--divider); padding-bottom: 10px; }
@@ -201,7 +205,7 @@
         .txt-blue { color: var(--apple-blue); }
         .txt-orange { color: var(--apple-orange); }
 
-        .qa-list { list-style-type: none; padding-left: 0; margin: 0; }
+        .qa-list { text-align: left; list-style-type: none; padding-left: 0; margin: 0; }
         .qa-list li { margin-bottom: 15px; border-bottom: 1px dashed var(--divider); padding-bottom: 15px; }
         .qa-list li:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
         .qa-q { font-weight: bold; color: var(--text-primary); margin-bottom: 4px; display: block; }
@@ -211,7 +215,6 @@
         .picker-cell { border: 1px solid var(--divider); border-radius: 8px; padding: 8px 0; text-align: center; cursor: pointer; font-size: 14px; background: #FFFFFF; color: var(--text-primary); transition: 0.2s;}
         .picker-cell:hover { border-color: var(--apple-blue); }
         
-        /* 💡 視覺化日期挑選器：高質感色彩配置與上班日反灰 */
         .picker-cell.selected { background-color: var(--apple-blue); color: white; border-color: var(--apple-blue); font-weight: bold;}
         .picker-cell.workday { background-color: #F2F2F7; color: #8E8E93; } 
         
@@ -302,10 +305,10 @@
         <div style="width: 100%; height: 1px; background: var(--divider); margin: 5px 0;"></div>
         
         <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-            <span style="font-size:13px; color:var(--text-secondary); font-weight:600;">完整設定檔傳承 (.edc)</span>
+            <span style="font-size:13px; color:var(--text-secondary); font-weight:600;">當月班表/薪資設定檔 (.edc)</span>
             <div style="display:flex; gap:5px;">
                 <button class="btn-file" style="background:#8E8E93; color:white;" onclick="document.getElementById('edcFileInput').click()">匯入</button>
-                <button class="btn-file" style="background:var(--apple-blue); color:white;" onclick="exportConfig()">匯出</button>
+                <button class="btn-file" style="background:var(--text-primary); color:white;" onclick="exportConfig()">匯出</button>
             </div>
         </div>
     </div>
@@ -330,11 +333,11 @@
                         <div class="form-group col-layout" style="padding-top:0; padding-bottom:15px; border-bottom: 1px dashed var(--divider);">
                             <label style="margin-bottom: 4px;">當月預設班別 (決定月曆初始狀態)</label>
                             <div class="segmented-control">
-                                <input type="radio" name="shiftType" id="shift_normal" value="normal" onchange="handleShiftChange()">
+                                <input type="radio" name="shiftType" id="shift_normal" value="normal" onchange="attemptShiftChange(this)">
                                 <label for="shift_normal">常日班</label>
-                                <input type="radio" name="shiftType" id="shift_day" value="day" onchange="handleShiftChange()">
+                                <input type="radio" name="shiftType" id="shift_day" value="day" onchange="attemptShiftChange(this)">
                                 <label for="shift_day">日輪班</label>
-                                <input type="radio" name="shiftType" id="shift_night" value="night" onchange="handleShiftChange()" checked>
+                                <input type="radio" name="shiftType" id="shift_night" value="night" onchange="attemptShiftChange(this)" checked>
                                 <label for="shift_night">夜輪班</label>
                             </div>
                         </div>
@@ -343,11 +346,11 @@
                             <div class="form-group col-layout" style="padding-top:15px; padding-bottom:15px;">
                                 <label style="margin-bottom: 4px;">班表模式 (預設台積電四班二輪)</label>
                                 <div class="segmented-control">
-                                    <input type="radio" name="scheduleMode" id="mode_tsmc_a" value="A" onchange="handleModeChange()" checked>
+                                    <input type="radio" name="scheduleMode" id="mode_tsmc_a" value="A" onchange="attemptModeChange(this)" checked>
                                     <label for="mode_tsmc_a">台積 A 班</label>
-                                    <input type="radio" name="scheduleMode" id="mode_tsmc_b" value="B" onchange="handleModeChange()">
+                                    <input type="radio" name="scheduleMode" id="mode_tsmc_b" value="B" onchange="attemptModeChange(this)">
                                     <label for="mode_tsmc_b">台積 B 班</label>
-                                    <input type="radio" name="scheduleMode" id="mode_custom" value="Custom" onchange="handleModeChange()">
+                                    <input type="radio" name="scheduleMode" id="mode_custom" value="Custom" onchange="attemptModeChange(this)">
                                     <label for="mode_custom">自訂輪班</label>
                                 </div>
                             </div>
@@ -373,7 +376,7 @@
 
                     <div>
                         <div class="form-group col-layout" style="background: #FAFAFC; padding: 12px; border-radius: 12px; margin-bottom: 0; border: 1px solid var(--divider);">
-                            <label style="color: var(--apple-red); font-weight: 600; font-size: 14px;">額外休假設定 (設定後點擊下方產生)</label>
+                            <label style="color: var(--apple-red); font-weight: 600; font-size: 14px;">法規假別設定 (設定後點擊下方產生)</label>
                             
                             <div style="display:flex; justify-content:space-between; width:100%; align-items: center; margin-top:5px;">
                                 <span style="font-size:13px; color:var(--text-primary);">例假日</span>
@@ -420,7 +423,7 @@
         
         <div class="grid-2 export-hide" style="margin-top:20px;">
             <button class="action-btn btn-export-sec" id="btnExportCal" onclick="exportCalendarImage()" style="display: none;">單獨儲存班表圖片</button>
-            <button class="action-btn" id="btnGoToSalary" onclick="goToSalaryTab()" style="display: none; background-color: #333;">前往薪資結算</button>
+            <button class="action-btn" id="btnGoToSalary" onclick="goToSalaryTab()" style="display: none;">前往薪資結算</button>
         </div>
     </div>
 
@@ -530,7 +533,7 @@
                 </details>
             </div>
 
-            <button class="action-btn export-hide" onclick="calculateSalary()" style="display: none; background-color: var(--apple-green); margin-bottom: 25px;" id="btnCalc">試算本月薪資</button>
+            <button class="action-btn export-hide" onclick="calculateSalary()" style="display: none; margin-bottom: 25px;" id="btnCalc">試算本月薪資</button>
 
             <div id="summaryPanel" style="display: none; padding: 0; overflow: hidden; background: transparent; box-shadow: none;">
                 
@@ -788,7 +791,7 @@
         <h3 style="color: var(--text-primary); margin-top:0;">系統說明與聲明</h3>
         <p style="text-align: left; background: var(--bg-body); padding: 15px; border-radius: 12px; font-size: 14px; line-height: 1.6;">
             <strong>國定假日說明</strong><br>
-            本系統目前僅內建 2025 至 2027 年的國定假日以供月曆紅字顯示。若需計算其他年份之排班，或公司有另外排定之國定假日，請務必於「額外休假設定」中手動輸入該日，系統方能正確帶入國定假日費率。<br><br>
+            本系統目前僅內建 2025 至 2027 年的國定假日以供月曆紅字顯示。若需計算其他年份之排班，或公司有另外排定之國定假日，請務必於「法規假別設定」中手動輸入該日，系統方能正確帶入國定假日費率。<br><br>
             <strong>隱私與本機儲存聲明</strong><br>
             本工具為純靜態網頁，您輸入的所有參數與資料皆加密儲存於您當下設備的瀏覽器中 (LocalStorage)，絕不會上傳至任何雲端伺服器。<br><br>
             <span style="color: var(--apple-red); font-weight: bold;">公用電腦注意事項</span><br>
@@ -821,10 +824,19 @@
         
         <div class="version-list">
             <div class="version-item">
+                <span class="v-num">V2.19</span><span class="v-date">2026-03-04</span>
+                <div class="v-desc">
+                    • UI 質感重塑：淘汰全域高飽和藍色按鈕，替換為 Premium Dark 深色質感設計。<br>
+                    • 新增切換班別防呆機制：變更預設班別或輪班模式時，若已設定假別將跳出提示並自動清空舊資料，防止邏輯衝突。<br>
+                    • 修正名詞：「額外休假設定」更名為「法規假別設定」；移除產生月曆後自動收折面板的惱人設定；意見回饋視窗排版置中。
+                </div>
+            </div>
+
+            <div class="version-item">
                 <span class="v-num">V2.18</span><span class="v-date">2026-03-04</span>
                 <div class="v-desc">
                     • 擴充 `.edc` 參數檔功能，移至頂端並支援全設定匯出入(包含班別、日期及全薪資參數)。<br>
-                    • 額外休假設定新增「休息日」欄位。<br>
+                    • 法規假別設定新增「休息日」欄位。<br>
                     • 視覺化日期挑選器新增色彩標籤(例、休、免、國)，並將上班日以淺灰底色標示以防錯。
                 </div>
             </div>
@@ -840,7 +852,7 @@
             <div class="version-item">
                 <span class="v-num">V2.16</span><span class="v-date">2026-03-04</span>
                 <div class="v-desc">
-                    • 於額外休假設定新增「視覺化日期挑選器」，支援防呆防重疊機制，避免同一日被設定為多種假別。
+                    • 於法規假別設定新增「視覺化日期挑選器」，支援防呆防重疊機制，避免同一日被設定為多種假別。
                 </div>
             </div>
 
@@ -1127,6 +1139,10 @@
         return el ? (parseFloat(el.value) || 0) : 0; 
     }
 
+    // 💡 新增：紀錄上一次的班別設定，用於防呆還原
+    let lastShiftType = 'night';
+    let lastScheduleMode = 'A';
+
     window.onload = () => {
         const today = new Date();
         document.getElementById('year').value = today.getFullYear();
@@ -1173,7 +1189,68 @@
         document.getElementById('cycleStartOffset').value = states[mod];
     }
 
-    function handleModeChange() {
+    // 💡 防呆檢查：判斷是否有資料
+    function hasHolidayOrCalendarData() {
+        let h1 = document.getElementById('statutoryHolidays').value !== "";
+        let h2 = document.getElementById('restDays').value !== "";
+        let h3 = document.getElementById('exemptDays').value !== "";
+        let h4 = document.getElementById('nationalHolidays').value !== "";
+        let cal = document.getElementById('calendar-container').innerHTML !== "";
+        return h1 || h2 || h3 || h4 || cal;
+    }
+
+    function clearHolidaysAndCalendar() {
+        document.getElementById('statutoryHolidays').value = "";
+        document.getElementById('restDays').value = "";
+        document.getElementById('exemptDays').value = "";
+        document.getElementById('nationalHolidays').value = "";
+        document.getElementById('calendar-container').innerHTML = "";
+        document.getElementById('summaryPanel').style.display = 'none';
+        document.getElementById('btnCalc').style.display = 'none';
+        document.getElementById('btnExportCal').style.display = 'none';
+        document.getElementById('btnGoToSalary').style.display = 'none';
+        pickerSelectedDates = [];
+    }
+
+    // 💡 防呆攔截：班別變更
+    function attemptShiftChange(radioBtn) {
+        if (hasHolidayOrCalendarData()) {
+            if (!confirm("變更預設班別將會清空目前的「法規假別設定」與「下方月曆」，確定要繼續嗎？")) {
+                document.querySelector(`input[name="shiftType"][value="${lastShiftType}"]`).checked = true;
+                return;
+            }
+        }
+        lastShiftType = radioBtn.value;
+        clearHolidaysAndCalendar();
+        handleShiftChange();
+    }
+
+    // 💡 防呆攔截：模式變更
+    function attemptModeChange(radioBtn) {
+        if (hasHolidayOrCalendarData()) {
+            if (!confirm("變更班表模式將會清空目前的「法規假別設定」與「下方月曆」，確定要繼續嗎？")) {
+                document.querySelector(`input[name="scheduleMode"][value="${lastScheduleMode}"]`).checked = true;
+                return;
+            }
+        }
+        lastScheduleMode = radioBtn.value;
+        clearHolidaysAndCalendar();
+        handleModeChange();
+    }
+
+    function handleShiftChange() {
+        const shift = getShiftValue();
+        const cycleContainer = document.getElementById('shift-cycle-container');
+        
+        if (shift === 'normal') {
+            cycleContainer.style.display = 'none';
+        } else {
+            cycleContainer.style.display = 'block';
+            handleModeChangeCore();
+        }
+    }
+
+    function handleModeChangeCore() {
         const mode = document.querySelector('input[name="scheduleMode"]:checked').value;
         const customDetails = document.getElementById('custom-cycle-details');
         
@@ -1183,10 +1260,11 @@
             customDetails.style.display = 'none';
             syncTsmcOffset();
         }
-        
-        if (document.getElementById('calendar-container').innerHTML !== '') {
-            generateCalendar();
-        }
+    }
+
+    // 相容舊的呼叫
+    function handleModeChange() {
+        handleModeChangeCore();
     }
 
     function updateHolidays() {
@@ -1284,22 +1362,6 @@
     function getShiftValue() {
         const checked = document.querySelector('input[name="shiftType"]:checked');
         return checked ? checked.value : 'night';
-    }
-
-    function handleShiftChange() {
-        const shift = getShiftValue();
-        const cycleContainer = document.getElementById('shift-cycle-container');
-        
-        if (shift === 'normal') {
-            cycleContainer.style.display = 'none';
-        } else {
-            cycleContainer.style.display = 'block';
-            handleModeChange();
-        }
-        
-        if (document.getElementById('calendar-container').innerHTML !== '') {
-            generateCalendar();
-        }
     }
 
     function generateCycleDropdown() {
@@ -1458,10 +1520,15 @@
         const data = getFullDataObj();
         let records = JSON.parse(localStorage.getItem('shiftAppRecords') || '{}');
         records[key] = data; localStorage.setItem('shiftAppRecords', JSON.stringify(records));
+        
+        // 更新全域狀態
+        const modeInput = document.querySelector('input[name="scheduleMode"]:checked');
+        lastShiftType = getShiftValue();
+        lastScheduleMode = modeInput ? modeInput.value : 'Custom';
+
         showToast(`已成功儲存。`); updateRecordDropdown(); document.getElementById('recordSelector').value = key;
     }
 
-    // 💡 .edc 完整參數設定檔匯出功能
     function exportConfig() {
         const userName = document.getElementById('userName').value.trim() || '未命名';
         const year = document.getElementById('year').value;
@@ -1476,10 +1543,9 @@
         link.download = `${userName}-${year}${month.padStart(2, '0')}.edc`;
         link.click();
         URL.revokeObjectURL(url);
-        showToast(`完整設定檔已匯出：${link.download}`);
+        showToast(`設定檔已匯出：${link.download}`);
     }
 
-    // 💡 .edc 完整參數設定檔匯入功能
     function handleImportConfig(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -1517,16 +1583,16 @@
         
         if (data.shiftType) {
             let rb = document.querySelector(`input[name="shiftType"][value="${data.shiftType}"]`);
-            if(rb) rb.checked = true;
+            if(rb) { rb.checked = true; lastShiftType = data.shiftType; }
         }
 
         if (data.scheduleMode) {
             let rm = document.querySelector(`input[name="scheduleMode"][value="${data.scheduleMode}"]`);
-            if(rm) rm.checked = true;
+            if(rm) { rm.checked = true; lastScheduleMode = data.scheduleMode; }
         }
 
         updateMonthLabels(); 
-        handleShiftChange();
+        handleModeChangeCore();
         
         if (data.scheduleMode === 'Custom' && data.cycleStartOffset) {
             document.getElementById('cycleStartOffset').value = data.cycleStartOffset;
@@ -1627,9 +1693,12 @@
             document.getElementById('ignore-var-hours').style.display = "none"; 
             document.getElementById('ignore-salary-grid').style.display = "none"; 
             
-            document.getElementById('shift_night').checked = true;
-            document.getElementById('mode_tsmc_a').checked = true; 
-            handleShiftChange();
+            const defaultMode = document.getElementById('mode_tsmc_a');
+            const defaultShift = document.getElementById('shift_night');
+            defaultMode.checked = true; lastScheduleMode = 'A';
+            defaultShift.checked = true; lastShiftType = 'night';
+            
+            handleModeChangeCore();
             document.getElementById('recordSelector').value = "";
         }
     }
@@ -1836,13 +1905,17 @@
         
         document.querySelectorAll('.action-select').forEach(sel => updateCellState(sel));
 
-        document.getElementById('ignore-grid-layout').removeAttribute('open');
         document.getElementById('btnCalc').style.display = 'block';
         document.getElementById('ignore-var-hours').style.display = 'grid'; 
         document.getElementById('ignore-salary-grid').style.display = 'block'; 
         document.getElementById('btnExportCal').style.display = 'block'; 
         document.getElementById('btnGoToSalary').style.display = 'block'; 
         document.getElementById('summaryPanel').style.display = 'none';
+        
+        // 💡 確保產生月曆後狀態已更新為當前狀態，供防呆機制參考
+        const modeInput = document.querySelector('input[name="scheduleMode"]:checked');
+        lastShiftType = getShiftValue();
+        lastScheduleMode = modeInput ? modeInput.value : 'Custom';
     }
 
     function calculateSalary() {
@@ -2021,13 +2094,9 @@
         document.getElementById('summaryPanel').style.display = 'block';
         document.querySelector('.btn-export').style.display = 'block';
         
-        document.getElementById('ignore-salary-grid').removeAttribute('open');
-        document.getElementById('ignore-var-hours').removeAttribute('open');
-        
         setTimeout(() => { document.getElementById('summaryPanel').scrollIntoView({ behavior: 'smooth' }); }, 100);
     }
 
-    // 💡 視覺化日期挑選器核心邏輯
     function openDatePicker(targetId, title) {
         pickerTargetInput = targetId;
         const year = parseInt(document.getElementById('year').value);
@@ -2044,7 +2113,6 @@
 
         document.getElementById('picker-title').innerText = `挑選 ${title}`;
         
-        // 模擬排班邏輯以判斷上班日反灰
         const shiftType = getShiftValue(); 
         const scheduleMode = document.querySelector('input[name="scheduleMode"]:checked') ? document.querySelector('input[name="scheduleMode"]:checked').value : 'Custom';
         const firstDayOfWeek = new Date(year, month - 1, 1).getDay(); 
