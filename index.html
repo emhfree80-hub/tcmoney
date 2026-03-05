@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TCM班表與薪資試算工具 v2.17</title>
+    <title>TCM班表與薪資試算工具 v2.18</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#F2F2F7">
@@ -210,12 +210,31 @@
         .picker-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 15px; }
         .picker-cell { border: 1px solid var(--divider); border-radius: 8px; padding: 8px 0; text-align: center; cursor: pointer; font-size: 14px; background: #FFFFFF; color: var(--text-primary); transition: 0.2s;}
         .picker-cell:hover { border-color: var(--apple-blue); }
+        
+        /* 💡 視覺化日期挑選器：高質感色彩配置與上班日反灰 */
         .picker-cell.selected { background-color: var(--apple-blue); color: white; border-color: var(--apple-blue); font-weight: bold;}
-        .picker-cell.taken { background-color: #F2F2F7; border-color: transparent; cursor: not-allowed; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .picker-cell.taken span.day-num { color: var(--text-secondary); text-decoration: line-through; }
-        .picker-cell.taken span.tag { font-size: 9px; color: var(--apple-red); font-weight: bold; margin-top: 2px; line-height: 1;}
+        .picker-cell.workday { background-color: #F2F2F7; color: #8E8E93; } 
+        
+        .picker-cell.taken { border-color: transparent; cursor: not-allowed; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 0;}
+        .picker-cell.taken span.day-num { font-size: 13px; font-weight: bold; text-decoration: line-through; }
+        .picker-cell.taken span.tag { font-size: 10px; font-weight: bold; padding: 1px 4px; border-radius: 4px; margin-top: 2px; line-height: 1;}
+        
+        .taken.statutory { background-color: #FFEBEE; }
+        .taken.statutory span.tag { background-color: #D32F2F; color: #FFFFFF; }
+        .taken.statutory span.day-num { color: #D32F2F; }
 
-        /* 💡 新增：現代化 Toast 提示條樣式 */
+        .taken.rest { background-color: #FFF8E1; }
+        .taken.rest span.tag { background-color: #F57C00; color: #FFFFFF; }
+        .taken.rest span.day-num { color: #F57C00; }
+
+        .taken.exempt { background-color: #E8F5E9; }
+        .taken.exempt span.tag { background-color: #388E3C; color: #FFFFFF; }
+        .taken.exempt span.day-num { color: #388E3C; }
+
+        .taken.national { background-color: #F3E5F5; }
+        .taken.national span.tag { background-color: #7B1FA2; color: #FFFFFF; }
+        .taken.national span.day-num { color: #7B1FA2; }
+
         #toast-container { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; width: 90%; max-width: 400px; align-items: center; }
         .toast { background-color: rgba(28, 28, 30, 0.95); color: white; padding: 14px 24px; border-radius: 12px; font-size: 14px; font-weight: 500; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: fadeUp 0.3s ease, fadeOut 0.3s ease 3.7s forwards; line-height: 1.6; text-align: center; width: auto; max-width: 100%; word-break: break-word; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);}
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -277,6 +296,16 @@
                 <button class="btn-file" onclick="loadRecord()">讀取</button>
                 <button class="btn-file btn-save" onclick="saveRecord()">儲存</button>
                 <button class="btn-file" style="background:var(--divider); color:var(--text-primary);" onclick="newRecord()">新建</button>
+            </div>
+        </div>
+
+        <div style="width: 100%; height: 1px; background: var(--divider); margin: 5px 0;"></div>
+        
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <span style="font-size:13px; color:var(--text-secondary); font-weight:600;">完整設定檔傳承 (.edc)</span>
+            <div style="display:flex; gap:5px;">
+                <button class="btn-file" style="background:#8E8E93; color:white;" onclick="document.getElementById('edcFileInput').click()">匯入</button>
+                <button class="btn-file" style="background:var(--apple-blue); color:white;" onclick="exportConfig()">匯出</button>
             </div>
         </div>
     </div>
@@ -355,6 +384,14 @@
                             </div>
                             
                             <div style="display:flex; justify-content:space-between; width:100%; align-items: center; margin-top:5px;">
+                                <span style="font-size:13px; color:var(--text-primary);">休息日</span>
+                                <div style="display:flex; gap:5px;">
+                                    <input type="text" id="restDays" placeholder="例: 6,13" style="width: 80px; background: #fff;">
+                                    <button class="btn-link" style="background:#E5E5EA; padding:4px 8px; border-radius:6px; color:#333; text-decoration:none;" onclick="openDatePicker('restDays', '休息日')">挑選</button>
+                                </div>
+                            </div>
+
+                            <div style="display:flex; justify-content:space-between; width:100%; align-items: center; margin-top:5px;">
                                 <span style="font-size:13px; color:var(--text-primary);">免出勤日</span>
                                 <div style="display:flex; gap:5px;">
                                     <input type="text" id="exemptDays" placeholder="例: 1,15" style="width: 80px; background: #fff;">
@@ -370,7 +407,7 @@
                                 </div>
                             </div>
 
-                            <p style="font-size: 11px; color: var(--text-secondary); margin: 5px 0 0 0; line-height:1.4;">(月曆紅字僅供視覺參考。若有國定假日出勤需求，請務必於上方設定日期以正確計算費率)</p>
+                            <p style="font-size: 11px; color: var(--text-secondary); margin: 5px 0 0 0; line-height:1.4;">(若有特殊排定或國定假日出勤需求，請務必於上方設定日期以正確計算費率)</p>
                         </div>
                     </div>
                 </div>
@@ -393,15 +430,6 @@
             <details class="ios-details export-hide" id="ignore-salary-grid" open>
                 <summary>薪資單設定 <span style="font-size:12px; color:var(--text-secondary); margin-left:10px; font-weight:normal;">(底薪與代扣)</span></summary>
                 <div class="details-content salary-grid">
-                    
-                    <div style="grid-column: 1 / -1; background: #F9F9FB; padding: 15px; border-radius: 12px; border: 1px dashed var(--divider); display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; flex-wrap: wrap; gap: 10px;">
-                        <span style="font-size:13px; color:var(--text-secondary); line-height: 1.5; font-weight: bold;">參數傳承：將下方的薪資與代扣設定匯出，或載入他人的設定檔。</span>
-                        <div style="display:flex; gap:8px;">
-                            <button class="btn-auto" style="background:#8E8E93;" onclick="document.getElementById('edcFileInput').click()">匯入設定檔 (.edc)</button>
-                            <button class="btn-auto" style="background:var(--apple-blue);" onclick="exportConfig()">匯出設定檔 (.edc)</button>
-                        </div>
-                    </div>
-
                     <div class="salary-col">
                         <h4>應發項目 (加項)</h4>
                         <div class="form-group"><label>本薪 <span class="field-note">(計入全薪)</span></label><input type="number" id="s_base" value="27810"></div>
@@ -793,6 +821,15 @@
         
         <div class="version-list">
             <div class="version-item">
+                <span class="v-num">V2.18</span><span class="v-date">2026-03-04</span>
+                <div class="v-desc">
+                    • 擴充 `.edc` 參數檔功能，移至頂端並支援全設定匯出入(包含班別、日期及全薪資參數)。<br>
+                    • 額外休假設定新增「休息日」欄位。<br>
+                    • 視覺化日期挑選器新增色彩標籤(例、休、免、國)，並將上班日以淺灰底色標示以防錯。
+                </div>
+            </div>
+
+            <div class="version-item">
                 <span class="v-num">V2.17</span><span class="v-date">2026-03-04</span>
                 <div class="v-desc">
                     • 導入現代化 Toast 提示條，取代傳統 alert() 視窗，優化操作流暢度。<br>
@@ -1038,7 +1075,6 @@
     </div>
 </div>
 <script>
-    // 💡 現代化 Toast 提示條功能
     function showToast(msg) {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
@@ -1201,8 +1237,8 @@
         let prevKey = `${userName}_${prevY}-${prevM.toString().padStart(2, '0')}`;
         let records = JSON.parse(localStorage.getItem('shiftAppRecords') || '{}');
         
-        if (records[prevKey] && records[prevKey].settings) {
-            let s = records[prevKey].settings;
+        if (records[prevKey]) {
+            let s = records[prevKey];
             const fields = ['d_tax', 'd_labor', 'd_health', 'd_supp', 'd_welfare', 'd_dorm', 'd_pension', 'd_other_val', 'd_subtotal_val'];
             fields.forEach(f => { if(s[f] !== undefined) document.getElementById(f).value = s[f]; });
             showToast("已成功抓取上月之應扣代扣設定。");
@@ -1329,7 +1365,7 @@
         document.getElementById('d_pension').value = Math.round(hp_bracket * (pRate / 100));
         document.getElementById('d_welfare').value = Math.round(v_base * 0.005);
 
-        showToast(`自動估算完成。\n系統推算本月應發總額約為：${Math.round(estimatedGross).toLocaleString()} 元\n\n已為您帶入官方對應級距：\n勞保判定：${l_bracket.toLocaleString()} 元\n健保/勞退判定：${hp_bracket.toLocaleString()} 元`);
+        showToast(`自動估算完成。\n系統推算本月應發總額約為：${Math.round(estimatedGross).toLocaleString()} 元`);
     }
 
     function updateRecordDropdown() {
@@ -1343,14 +1379,10 @@
         });
     }
 
-    function saveRecord() {
+    function getFullDataObj() {
         let userName = document.getElementById('userName').value.trim();
-        if(!userName) { showToast("請先於上方輸入姓名以建立存檔。"); document.getElementById('userName').focus(); return; }
-
         const year = document.getElementById('year').value;
         const month = document.getElementById('month').value;
-        const key = `${userName}_${year}-${month.toString().padStart(2, '0')}`;
-        
         const currentMode = document.querySelector('input[name="scheduleMode"]:checked') ? document.querySelector('input[name="scheduleMode"]:checked').value : 'Custom';
 
         const data = {
@@ -1394,7 +1426,9 @@
             carryOverOtNational: document.getElementById('resNextOtNational') ? document.getElementById('resNextOtNational').innerText : 0,
 
             workDays: document.getElementById('workDays').value, offDays: document.getElementById('offDays').value,
-            statutoryHolidays: document.getElementById('statutoryHolidays').value, exemptDays: document.getElementById('exemptDays').value,
+            statutoryHolidays: document.getElementById('statutoryHolidays').value, 
+            restDays: document.getElementById('restDays').value, 
+            exemptDays: document.getElementById('exemptDays').value,
             nationalHolidays: document.getElementById('nationalHolidays').value,
             cycleStartOffset: document.getElementById('cycleStartOffset').value, 
             hireDate: document.getElementById('hireDate').value, 
@@ -1410,9 +1444,57 @@
             };
         });
 
+        return data;
+    }
+
+    function saveRecord() {
+        let userName = document.getElementById('userName').value.trim();
+        if(!userName) { showToast("請先於上方輸入姓名以建立存檔。"); document.getElementById('userName').focus(); return; }
+
+        const year = document.getElementById('year').value;
+        const month = document.getElementById('month').value;
+        const key = `${userName}_${year}-${month.toString().padStart(2, '0')}`;
+        
+        const data = getFullDataObj();
         let records = JSON.parse(localStorage.getItem('shiftAppRecords') || '{}');
         records[key] = data; localStorage.setItem('shiftAppRecords', JSON.stringify(records));
         showToast(`已成功儲存。`); updateRecordDropdown(); document.getElementById('recordSelector').value = key;
+    }
+
+    // 💡 .edc 完整參數設定檔匯出功能
+    function exportConfig() {
+        const userName = document.getElementById('userName').value.trim() || '未命名';
+        const year = document.getElementById('year').value;
+        const month = document.getElementById('month').value;
+        
+        const data = getFullDataObj();
+        const dataStr = JSON.stringify(data);
+        const blob = new Blob([dataStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${userName}-${year}${month.padStart(2, '0')}.edc`;
+        link.click();
+        URL.revokeObjectURL(url);
+        showToast(`完整設定檔已匯出：${link.download}`);
+    }
+
+    // 💡 .edc 完整參數設定檔匯入功能
+    function handleImportConfig(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                applyDataToDOM(data);
+                showToast("設定檔載入成功！");
+            } catch(err) {
+                showToast("檔案格式錯誤，載入失敗");
+            }
+            event.target.value = ""; 
+        };
+        reader.readAsText(file);
     }
 
     function loadRecord() {
@@ -1420,7 +1502,11 @@
         if(!key) return;
         const data = JSON.parse(localStorage.getItem('shiftAppRecords') || '{}')[key];
         if(!data) return;
+        applyDataToDOM(data);
+        showToast("歷史存檔載入成功！");
+    }
 
+    function applyDataToDOM(data) {
         Object.keys(data).forEach(k => {
             const el = document.getElementById(k);
             if(el && typeof data[k] !== 'object' && k !== 'shiftType' && k !== 'scheduleMode' && !k.startsWith('carryOver')) el.value = data[k];
@@ -1504,7 +1590,10 @@
             document.getElementById('year').value = y; document.getElementById('month').value = m;
             updateMonthLabels(); 
             
-            document.getElementById('statutoryHolidays').value = ""; document.getElementById('exemptDays').value = ""; document.getElementById('nationalHolidays').value = "";
+            document.getElementById('statutoryHolidays').value = ""; 
+            document.getElementById('restDays').value = ""; 
+            document.getElementById('exemptDays').value = ""; 
+            document.getElementById('nationalHolidays').value = "";
             document.getElementById('s_kpi_bonus').value = "0"; document.getElementById('curr_ot_company_pay_hours').value = "0"; document.getElementById('curr_ot_company_comp_hours').value = "0";
             document.getElementById('curr_ot_owner_hours').value = "0"; document.getElementById('d_leave_deduct_hours').value = "0";
             document.getElementById('d_leave_comp_hours').value = "0"; 
@@ -1633,6 +1722,7 @@
         const scheduleMode = document.querySelector('input[name="scheduleMode"]:checked') ? document.querySelector('input[name="scheduleMode"]:checked').value : 'Custom';
         
         const statutoryHolidays = parseDateString(document.getElementById('statutoryHolidays').value);
+        const restHolidays = parseDateString(document.getElementById('restDays').value);
         const nationalHolidays = parseDateString(document.getElementById('nationalHolidays').value);
         const internalHolidays = taiwanHolidays[year]?.[month] || {};
         const userExemptMap = parseHolidayMap(document.getElementById('exemptDays').value);
@@ -1679,6 +1769,7 @@
             let dayOfWeek = (firstDayOfWeek + day - 1) % 7;
             let isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
             let isStatutory = statutoryHolidays.includes(day);
+            let isRest = restHolidays.includes(day);
             let isNational = nationalHolidays.includes(day);
             let isInternalHoliday = !!internalHolidays[day]; 
             let isUserExempt = userExemptMap.hasOwnProperty(day);
@@ -1687,7 +1778,7 @@
 
             let isWorkDay = false;
             if (shiftType === 'normal') {
-                isWorkDay = !(isWeekend || isStatutory || isUserExempt || isNational);
+                isWorkDay = !(isWeekend || isStatutory || isRest || isUserExempt || isNational);
             } else if (cycleLength > 0) { 
                 let mod = (day - 1 + startOffset) % cycleLength; 
                 isWorkDay = (sequence[mod] === 'work'); 
@@ -1696,7 +1787,7 @@
             let cellShift = isWorkDay ? shiftType : 'off';
             let cellAction = isWorkDay ? '正常出勤' : '';
 
-            if (isStatutory || isUserExempt || isNational) {
+            if (isStatutory || isRest || isUserExempt || isNational) {
                 if (isWorkDay) {
                     cellAction = '帆宣加班(換休)'; 
                 } else {
@@ -1712,11 +1803,13 @@
                 statusTextHtml = '<div class="status-text txt-red">國定假日</div>';
             } else if (isStatutory) {
                 statusTextHtml = '<div class="status-text txt-red">例假日</div>';
+            } else if (isRest) {
+                statusTextHtml = '<div class="status-text txt-orange">休息日</div>';
             } else if (isUserExempt) {
                 statusTextHtml = `<div class="status-text txt-red">${exemptName}</div>`;
             }
 
-            let dateNumColor = (isWeekend || isStatutory || isUserExempt || isNational || isInternalHoliday) ? 'color: var(--apple-red);' : 'color: var(--text-primary);';
+            let dateNumColor = (isWeekend || isStatutory || isRest || isUserExempt || isNational || isInternalHoliday) ? 'color: var(--apple-red);' : 'color: var(--text-primary);';
 
             let selectShiftHtml = `
                 <select class="shift-select" id="shift-${day}" onchange="handleShiftChangeInCell(this)">
@@ -1782,6 +1875,7 @@
         const year = parseInt(document.getElementById('year').value);
         const month = parseInt(document.getElementById('month').value);
         const statutoryHolidays = parseDateString(document.getElementById('statutoryHolidays').value);
+        const restHolidays = parseDateString(document.getElementById('restDays').value);
         const nationalHolidays = parseDateString(document.getElementById('nationalHolidays').value);
         const userExemptMap = parseHolidayMap(document.getElementById('exemptDays').value);
 
@@ -1824,6 +1918,7 @@
             let isCurrentCycle = (day <= 20); 
             
             let isStatutory = statutoryHolidays.includes(day);
+            let isRest = restHolidays.includes(day);
             let isNational = nationalHolidays.includes(day);
             let isExempt = userExemptMap.hasOwnProperty(day);
 
@@ -1932,6 +2027,7 @@
         setTimeout(() => { document.getElementById('summaryPanel').scrollIntoView({ behavior: 'smooth' }); }, 100);
     }
 
+    // 💡 視覺化日期挑選器核心邏輯
     function openDatePicker(targetId, title) {
         pickerTargetInput = targetId;
         const year = parseInt(document.getElementById('year').value);
@@ -1941,27 +2037,79 @@
         const daysInMonth = new Date(year, month, 0).getDate();
         pickerSelectedDates = parseDateString(document.getElementById(targetId).value);
         
-        let takenMap = {};
-        if (targetId !== 'statutoryHolidays') {
-            parseDateString(document.getElementById('statutoryHolidays').value).forEach(d => takenMap[d] = '例假');
-        }
-        if (targetId !== 'exemptDays') {
-            parseDateString(document.getElementById('exemptDays').value).forEach(d => takenMap[d] = '免出勤');
-        }
-        if (targetId !== 'nationalHolidays') {
-            parseDateString(document.getElementById('nationalHolidays').value).forEach(d => takenMap[d] = '國定');
-        }
+        let statutoryArr = parseDateString(document.getElementById('statutoryHolidays').value);
+        let restArr = parseDateString(document.getElementById('restDays').value);
+        let exemptArr = parseDateString(document.getElementById('exemptDays').value);
+        let nationalArr = parseDateString(document.getElementById('nationalHolidays').value);
 
         document.getElementById('picker-title').innerText = `挑選 ${title}`;
         
+        // 模擬排班邏輯以判斷上班日反灰
+        const shiftType = getShiftValue(); 
+        const scheduleMode = document.querySelector('input[name="scheduleMode"]:checked') ? document.querySelector('input[name="scheduleMode"]:checked').value : 'Custom';
+        const firstDayOfWeek = new Date(year, month - 1, 1).getDay(); 
+        let sequence = []; let cycleLength = 0; let startOffset = 0;
+
+        if (scheduleMode === 'Custom') {
+            const w = parseInt(document.getElementById('workDays').value) || 0;
+            const o = parseInt(document.getElementById('offDays').value) || 0;
+            cycleLength = w + o;
+            if (cycleLength > 0) {
+                for(let i=0; i<w; i++) sequence.push('work');
+                for(let i=0; i<o; i++) sequence.push('off');
+                const offsetVal = document.getElementById('cycleStartOffset').value; 
+                if(offsetVal.startsWith('W')) startOffset = parseInt(offsetVal.substring(1));
+                else startOffset = w + parseInt(offsetVal.substring(1));
+            }
+        } else {
+            sequence = ['work', 'work', 'off', 'off'];
+            cycleLength = 4;
+            const anchor = new Date(2026, 0, 1);
+            const target = new Date(year, month - 1, 1);
+            const diffDays = Math.round((target.getTime() - anchor.getTime()) / 86400000);
+            let baseIndex = (scheduleMode === 'A') ? 3 : 1; 
+            let mod = (diffDays + baseIndex) % 4;
+            if (mod < 0) mod += 4;
+            startOffset = mod;
+        }
+
         let html = '<div class="picker-grid">';
         for (let i = 1; i <= daysInMonth; i++) {
-            if (takenMap[i]) {
-                html += `<div class="picker-cell taken"><span class="day-num">${i}</span><span class="tag">${takenMap[i]}</span></div>`;
+            
+            let takenBy = null;
+            if (targetId !== 'statutoryHolidays' && statutoryArr.includes(i)) takenBy = { type: 'statutory', label: '例' };
+            else if (targetId !== 'restDays' && restArr.includes(i)) takenBy = { type: 'rest', label: '休' };
+            else if (targetId !== 'exemptDays' && exemptArr.includes(i)) takenBy = { type: 'exempt', label: '免' };
+            else if (targetId !== 'nationalHolidays' && nationalArr.includes(i)) takenBy = { type: 'national', label: '國' };
+
+            let cellClass = "picker-cell";
+            let content = i;
+
+            if (takenBy) {
+                cellClass += " taken " + takenBy.type;
+                content = `<span class="day-num">${i}</span><span class="tag">${takenBy.label}</span>`;
             } else {
-                let isSelected = pickerSelectedDates.includes(i) ? 'selected' : '';
-                html += `<div class="picker-cell ${isSelected}" onclick="togglePickerDate(${i}, this)">${i}</div>`;
+                let dayOfWeek = (firstDayOfWeek + i - 1) % 7;
+                let isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+                let isWorkDay = false;
+                
+                if (shiftType === 'normal') {
+                    isWorkDay = !isWeekend; 
+                } else if (cycleLength > 0) { 
+                    let mod = (i - 1 + startOffset) % cycleLength; 
+                    isWorkDay = (sequence[mod] === 'work'); 
+                }
+
+                if (pickerSelectedDates.includes(i)) {
+                    cellClass += " selected";
+                } else if (isWorkDay) {
+                    cellClass += " workday"; 
+                }
+                
+                content = i;
             }
+
+            html += `<div class="${cellClass}" ${takenBy ? '' : `onclick="togglePickerDate(${i}, this)"`}>${content}</div>`;
         }
         html += '</div>';
         
@@ -1974,6 +2122,7 @@
     }
 
     function togglePickerDate(day, element) {
+        if(element.classList.contains('taken')) return;
         const index = pickerSelectedDates.indexOf(day);
         if (index > -1) {
             pickerSelectedDates.splice(index, 1);
@@ -1988,56 +2137,6 @@
         pickerSelectedDates.sort((a, b) => a - b);
         document.getElementById(pickerTargetInput).value = pickerSelectedDates.join(',');
         closeHolidayPicker();
-    }
-    
-    // 💡 新增：.edc 參數設定檔匯出功能
-    function exportConfig() {
-        const config = {
-            s_base: getSetting('s_base'), s_supervisor: getSetting('s_supervisor'),
-            s_position: getSetting('s_position'), s_tcm: getSetting('s_tcm'),
-            s_safety: getSetting('s_safety'), s_transport: getSetting('s_transport'),
-            s_business: getSetting('s_business'), s_branch: getSetting('s_branch'),
-            s_meal: getSetting('s_meal'), s_other_name: document.getElementById('s_other_name').value,
-            s_other_val: getSetting('s_other_val'),
-            s_other_name2: document.getElementById('s_other_name2').value, s_other_val2: getSetting('s_other_val2'),
-            s_kpi_bonus: getSetting('s_kpi_bonus'),
-            d_tax: getSetting('d_tax'), d_labor: getSetting('d_labor'),
-            d_health: getSetting('d_health'), d_supp: getSetting('d_supp'),
-            d_welfare: getSetting('d_welfare'), d_dorm: getSetting('d_dorm'),
-            pension_rate: getSetting('pension_rate'), d_pension: getSetting('d_pension'),
-            d_other_name: document.getElementById('d_other_name').value, d_other_val: getSetting('d_other_val'),
-            d_subtotal_name: document.getElementById('d_subtotal_name').value, d_subtotal_val: getSetting('d_subtotal_val')
-        };
-        const dataStr = JSON.stringify(config);
-        const blob = new Blob([dataStr], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = "TCM_Salary_Config.edc";
-        link.click();
-        URL.revokeObjectURL(url);
-        showToast("參數設定檔 (.edc) 已成功匯出");
-    }
-
-    // 💡 新增：.edc 參數設定檔匯入功能
-    function handleImportConfig(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const config = JSON.parse(e.target.result);
-                Object.keys(config).forEach(k => {
-                    const el = document.getElementById(k);
-                    if (el) el.value = config[k];
-                });
-                showToast("參數載入成功！");
-            } catch(err) {
-                showToast("檔案格式錯誤，載入失敗");
-            }
-            event.target.value = ""; 
-        };
-        reader.readAsText(file);
     }
 
     function exportCalendarImage() {
