@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TCM班表與薪資試算工具 v3.07</title>
+    <title>TCM班表與薪資試算工具 v3.08</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#F5F7FA">
@@ -12,8 +12,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
     <style>
         :root {
             --bg-body: #F5F7FA;
@@ -28,15 +26,14 @@
             --divider: #EAECEF;
             --input-bg: #F0F2F5;
             
-            /* 💡 高奢月曆色彩系統 (細分班別與加班) */
             --cal-border: #D1D1D6;
-            --cal-work-day: #E3F2FD;    /* 淺藍: 日班 */
-            --cal-work-night: #EDE7F6;  /* 淺紫: 夜班 */
-            --cal-work-normal: #F5F5F5; /* 淺灰: 常日 */
-            --cal-ot-company: #FCE4EC;  /* 粉紅: 帆加 */
-            --cal-ot-owner: #FFF3E0;    /* 淺橘: 業加 */
-            --cal-leave: #EAECEF;       /* 灰: 請假 */
-            --cal-off: #FFFFFF;         /* 純白: 休假 */
+            --cal-work-day: #E3F2FD;    
+            --cal-work-night: #EDE7F6;  
+            --cal-work-normal: #F5F5F5; 
+            --cal-ot-company: #FCE4EC;  
+            --cal-ot-owner: #FFF3E0;    
+            --cal-leave: #EAECEF;       
+            --cal-off: #FFFFFF;         
 
             --tag-red-bg: #FFEBEE;   --tag-red-txt: #D32F2F;
             --tag-org-bg: #FFF3E0;   --tag-org-txt: #E65100;
@@ -54,14 +51,13 @@
 
         .container { max-width: 1000px; margin: auto; position: relative; }
         
-        /* 💡 標題置中設計 */
         .header-container { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 24px; }
         .header-container h1 { font-size: 24px; font-weight: 700; color: var(--text-primary); margin: 0; letter-spacing: -0.5px;}
-        .header-badges { display: flex; gap: 8px; justify-content: center;}
+        .header-badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;}
 
-        .version-badge { background-color: var(--premium-dark); color: white; font-size: 13px; padding: 5px 12px; border-radius: 20px; cursor: pointer; transition: 0.2s; font-weight: 600; }
+        .version-badge { background-color: var(--premium-dark); color: white; font-size: 13px; padding: 6px 14px; border-radius: 20px; cursor: pointer; transition: 0.2s; font-weight: 600; }
         .version-badge:hover { background-color: var(--premium-dark-hover); transform: scale(1.03); }
-        .btn-link-top { font-size:13px; background: var(--input-bg); padding: 5px 12px; border-radius: 20px; color: var(--text-primary); text-decoration: none; cursor: pointer; border: none; font-weight: 600; transition: 0.2s; }
+        .btn-link-top { font-size:13px; background: var(--input-bg); padding: 6px 14px; border-radius: 20px; color: var(--text-primary); text-decoration: none; cursor: pointer; border: none; font-weight: 600; transition: 0.2s; }
         .btn-link-top:hover { background: #E5E5EA; }
 
         .ios-card, .file-manager { background: var(--bg-card); border-radius: 20px; padding: 20px 24px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0,0,0,0.02); }
@@ -106,8 +102,6 @@
         .btn-icon { background: var(--input-bg); border: none; cursor: pointer; padding: 6px 12px; border-radius: 8px; color: var(--text-secondary); transition: 0.2s; display: flex; align-items: center; justify-content: center;}
         .btn-icon:hover { background: #E0E0E5; color: var(--text-primary); }
 
-        .btn-export-sec { background-color: var(--input-bg); color: var(--text-primary); box-shadow: none; margin-top: 0;}
-
         details.ios-details { margin-bottom: 20px; }
         details.ios-details summary { font-size: 16px; font-weight: 600; color: var(--text-primary); cursor: pointer; list-style: none; padding: 16px 20px; background: var(--bg-card); border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.02); user-select: none; }
         details.ios-details summary::-webkit-details-marker { display: none; }
@@ -119,25 +113,23 @@
 
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: stretch; }
 
-        /* 💡 月曆容器：極簡面具設計 */
         .calendar { display: grid; grid-template-columns: repeat(7, 1fr); border-radius: 8px; overflow: hidden; background: var(--cal-border); gap: 1px; margin-top: 15px; border: 1px solid var(--cal-border);}
         .cal-header { background: #F9F9FB; color: var(--text-secondary); text-align: center; padding: 10px 0; font-size: 14px; font-weight: 600; }
         
         .cal-cell { min-height: 80px; padding: 4px; display: flex; flex-direction: column; transition: 0.1s; cursor: pointer; position: relative;}
         .cal-cell:active { filter: brightness(0.9); }
-        .cal-cell.empty { background-color: transparent; cursor: default;}
-        .cal-cell.empty:active { filter: none; }
+        .cal-cell.empty { background-color: var(--bg-body); cursor: default;}
         
         .date-num { font-size: 16px; font-weight: 700; text-align: left; padding: 2px 0 0 4px; }
         .cal-status-text { font-size: 16px; font-weight: 700; text-align: center; margin: auto 0; letter-spacing: 1px;}
-        .holiday-dot { position: absolute; top: 6px; right: 6px; width: 6px; height: 6px; border-radius: 50%; }
+        .holiday-dot { position: absolute; top: 6px; right: 6px; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700;}
 
-        /* 薪資卡視覺洗白 */
         .salary-receipt-container { background: var(--bg-card); border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.05); }
         .wallet-card-light { padding: 30px 25px; text-align: center; background: #FFFFFF; border-bottom: 1px dashed var(--divider); }
         .wallet-title { font-size: 15px; color: var(--text-secondary); margin: 0 0 8px 0; font-weight: 600;}
         .wallet-amount { font-size: 52px; font-weight: 700; margin: 0; letter-spacing: -1px; font-family: "SF Pro Display", sans-serif; color: var(--apple-blue);}
-        .wallet-sub { background: var(--input-bg); display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 13px; margin-top: 15px; font-weight: 600; color: var(--text-primary);}
+        .wallet-sub { background: var(--input-bg); display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 13px; margin-top: 15px; font-weight: 600; color: var(--text-primary); cursor: pointer; transition: 0.2s;}
+        .wallet-sub:hover { background: #E0E0E5;}
 
         .receipt-details { padding: 20px 25px; background: #FFFFFF; }
         .summary-list { font-size: 15px; line-height: 1.6; }
@@ -148,19 +140,15 @@
 
         .modal-btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px 25px; background: #FAFAFC; border-top: 1px solid var(--divider);}
 
-        /* 💡 絕對防禦：強制左右對齊且不換行 */
+        /* 強制防呆：手機版絕不換行穿插 */
         .rate-section-container { display: flex; flex-direction: column; gap: 15px; text-align: left;}
         .rate-group { background: var(--input-bg); padding: 15px; border-radius: 12px;}
         .rate-group h4 { margin: 0 0 10px 0; font-size: 13px; color: var(--text-secondary); border-bottom: 1px solid var(--divider); padding-bottom: 8px;}
-        .rate-item-flex { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #D1D1D6; font-size: 14px; white-space: nowrap;}
+        .rate-item-flex { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #D1D1D6; font-size: 14px;}
         .rate-item-flex:last-child { border-bottom: none; }
-        .rate-item-flex span { color: var(--text-primary); font-weight: 500; }
-        .rate-item-flex strong { font-family: "SF Pro Display", sans-serif; color: var(--apple-blue); margin-left: 10px;}
+        .rate-item-flex span { color: var(--text-primary); font-weight: 500; white-space: nowrap;}
+        .rate-item-flex strong { font-family: "SF Pro Display", sans-serif; color: var(--apple-blue); white-space: nowrap; margin-left: 10px;}
 
-        /* 💡 意見回饋置中 */
-        .fab-feedback { position: fixed; bottom: 25px; right: 25px; background-color: var(--premium-dark); color: white; border: none; border-radius: 30px; padding: 14px 24px; font-size: 14px; font-weight: 600; letter-spacing: 0.5px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); cursor: pointer; z-index: 1000; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        .fab-feedback:hover { transform: scale(1.05); }
-        
         .feedback-modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1001; align-items:center; justify-content:center; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);}
         .feedback-modal { background:white; padding:25px; border-radius:20px; width:90%; max-width:450px; text-align:center; box-shadow:0 20px 40px rgba(0,0,0,0.2); position:relative; max-height: 85vh; overflow-y: auto;}
         .feedback-modal p { text-align: left; }
@@ -174,10 +162,16 @@
         .v-date { font-size: 12px; color: var(--text-muted); margin-left: 8px; }
         .v-desc { font-size: 13px; color: var(--text-secondary); margin-top: 6px; line-height: 1.6; }
 
-        .txt-red { color: var(--apple-red); }
+        .txt-red { color: var(--tag-red-txt); }
         .txt-green { color: var(--tag-grn-txt); }
         .txt-orange { color: var(--tag-org-txt); }
         .txt-blue { color: var(--apple-blue); }
+
+        .qa-list { text-align: left; list-style-type: none; padding-left: 0; margin: 0; }
+        .qa-list li { margin-bottom: 20px; border-bottom: 1px dashed var(--divider); padding-bottom: 15px; }
+        .qa-list li:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
+        .qa-q { font-weight: 700; color: var(--text-primary); margin-bottom: 8px; display: block; font-size: 14px;}
+        .qa-a { color: var(--text-secondary); font-size: 14px; line-height: 1.6; display: block;}
 
         .picker-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 15px; }
         .picker-cell { border: 1px solid var(--divider); border-radius: 8px; padding: 10px 0; text-align: center; cursor: pointer; font-size: 15px; background: #FFFFFF; font-weight: 600;}
@@ -225,6 +219,7 @@
         <h1>TCM班表與薪資試算工具</h1>
         <div class="header-badges">
             <button class="btn-link-top" onclick="openInfoModal()">說明</button>
+            <button class="btn-link-top" onclick="openFeedback()">意見回饋</button>
             <span class="version-badge" onclick="openVersionHistory()">更新日誌</span>
         </div>
     </div>
@@ -252,10 +247,10 @@
         <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 10px;">
             <span style="font-size:14px; color:var(--text-primary); font-weight:600;">當月班表/薪資設定檔 (.edc)</span>
             <div style="display:flex; gap:8px; flex-wrap: wrap;">
-                <button class="btn-file" onclick="newRecord()">新建</button>
                 <button class="btn-file" onclick="document.getElementById('edcFileInput').click()">匯入</button>
-                <button class="btn-file" onclick="saveCurrentFile()">儲存</button>
-                <button class="btn-file primary" onclick="exportConfig()">另存新檔/匯出</button>
+                <button class="btn-file" onclick="loadRecordLocal()">讀取</button>
+                <button class="btn-file" onclick="saveRecordLocal()">儲存</button>
+                <button class="btn-file primary" onclick="exportConfig()">另存新檔</button>
             </div>
         </div>
     </div>
@@ -303,17 +298,17 @@
                             </div>
 
                             <div id="custom-cycle-details" style="display: none; background: var(--input-bg); border-radius: 12px; margin-bottom: 15px; padding: 12px 16px;">
-                                <div style="font-size: 14px; font-weight: 600; margin-bottom: 10px; color: var(--text-primary);">自訂輪班週期設定</div>
-                                <div class="form-group" style="padding: 8px 0;">
+                                <div style="font-size: 13px; font-weight: 700; color: var(--text-secondary); margin-bottom: 12px;">自訂輪班週期設定</div>
+                                <div class="form-group" style="padding: 0 0 10px 0;">
                                     <label>輪班週期</label>
                                     <div style="display:flex; align-items:center; gap:6px; font-weight:500;">
-                                        做 <input type="number" id="workDays" style="width: 40px; text-align:center;" value="2" onchange="syncTsmcOffset(); generateCalendar();"> 天 / 
-                                        休 <input type="number" id="offDays" style="width: 40px; text-align:center;" value="2" onchange="syncTsmcOffset(); generateCalendar();"> 天
+                                        做 <input type="number" id="workDays" style="width: 45px; text-align:center;" value="2" onchange="generateCycleDropdown()"> 天 / 
+                                        休 <input type="number" id="offDays" style="width: 45px; text-align:center;" value="2" onchange="generateCycleDropdown()"> 天
                                     </div>
                                 </div>
-                                <div class="form-group" style="border-bottom: none; padding: 8px 0 0 0;">
+                                <div class="form-group" style="border-bottom: none; padding: 0;">
                                     <label>本月 1 號狀態</label>
-                                    <select id="cycleStartOffset" style="width: 130px; font-weight: bold; color: var(--text-primary);" onchange="generateCalendar()"></select>
+                                    <select id="cycleStartOffset" style="width: 140px; font-weight: bold; color: var(--apple-blue);" onchange="generateCalendar()"></select>
                                 </div>
                             </div>
                         </div>
@@ -375,7 +370,7 @@
         <div id="calendar-container"></div>
         
         <div class="grid-2 export-hide" style="margin-top:24px;">
-            <button class="action-btn btn-export-sec" id="btnSaveCal" onclick="saveCurrentFile()" style="display: none;">儲存目前進度</button>
+            <button class="action-btn btn-export-sec" id="btnSaveCal" onclick="saveRecordLocal()" style="display: none;">儲存目前進度</button>
             <button class="action-btn" id="btnGoToSalary" onclick="goToSalaryTab()" style="display: none;">前往薪資結算</button>
         </div>
     </div>
@@ -411,18 +406,17 @@
                             </label>
                             <input type="number" id="s_other_val2" value="0" style="background:#fff;">
                         </div>
-                        <div class="form-group" style="padding-top:15px;"><label style="font-weight:600; color:var(--text-primary);">KPI獎金(業主) <span class="field-note">(不計入全薪)</span></label><input type="number" id="s_kpi_bonus" value="0"></div>
+                        <div class="form-group" style="padding-top:15px;"><label class="txt-primary" style="font-weight:600;">KPI獎金(業主) <span class="field-note">(不計入全薪)</span></label><input type="number" id="s_kpi_bonus" value="0"></div>
                     </div>
 
                     <div class="salary-col">
                         <h4 style="display:flex; justify-content:space-between; align-items:center;">應扣項目 (減項) 
                             <div style="display:flex; gap:6px;">
-                                <button class="btn-auto" onclick="document.getElementById('fetchPrevDeductionsInput').click()">抓取上月</button>
                                 <button class="btn-auto primary" onclick="autoCalcDeductions()">自動估算</button>
                             </div>
                         </h4>
                         <div style="background: var(--input-bg); padding: 14px; border-radius: 12px; margin-bottom: 16px; font-size: 12px; color: var(--text-secondary); line-height: 1.5;">
-                            點擊「自動估算」系統將以當月全薪自動查表帶入。若需帶入上次手動修改的數值，可點擊「抓取上月」上傳上個月的 .edc 檔來讀取。
+                            點擊「自動估算」系統將以當月全薪自動查表帶入勞健保級距與福利金。
                         </div>
                         
                         <div class="form-group"><label>所得稅款</label><input type="number" id="d_tax" value="0"></div>
@@ -467,7 +461,10 @@
                             <span style="font-size:14px; color:var(--text-primary); font-weight:500;">國定假日加班 (天)</span><input type="number" id="prevMonthOtNational" value="0" step="0.5" style="width: 60px;">
                         </div>
                         <div style="display:flex; justify-content:space-between; width:100%; align-items: center; margin-top:8px;">
-                            <span style="font-size:14px; color:var(--text-primary); font-weight:500;">帆宣延時 (換錢/時)</span><input type="number" id="prevMonthOtPayHours" value="0" step="0.5" style="width: 60px;">
+                            <span style="font-size:14px; color:var(--text-primary); font-weight:500;">帆宣延時 (第1-2小時 1.34倍)</span><input type="number" id="prevMonthOtPayHours134" value="0" step="0.5" style="width: 60px;">
+                        </div>
+                        <div style="display:flex; justify-content:space-between; width:100%; align-items: center; margin-top:8px;">
+                            <span style="font-size:14px; color:var(--text-primary); font-weight:500;">帆宣延時 (第3-4小時 1.67倍)</span><input type="number" id="prevMonthOtPayHours167" value="0" step="0.5" style="width: 60px;">
                         </div>
                     </div>
                 </details>
@@ -477,8 +474,9 @@
                         本月零碎請假加班時數統計
                     </summary>
                     <div class="details-content" style="padding: 0 20px 20px 20px; background: transparent; box-shadow: none;">
-                        <div class="form-group" style="width:100%; padding:10px 0; margin-top:10px;"><label style="font-weight:500;">帆宣延時 (換休/時) <span style="font-size:11px;color:var(--text-muted);">(結轉下月)</span></label><input type="number" id="curr_ot_company_comp_hours" value="0" step="0.5" style="width: 60px;"></div>
-                        <div class="form-group" style="width:100%; padding:10px 0;"><label style="font-weight:500;">帆宣延時 (換錢/時) <span style="font-size:11px;color:var(--text-muted);">(結轉下月)</span></label><input type="number" id="curr_ot_company_pay_hours" value="0" step="0.5" style="width: 60px;"></div>
+                        <div class="form-group" style="width:100%; padding:10px 0; margin-top:10px;"><label style="font-weight:500;">帆宣延時 換休/時 <span style="font-size:11px;color:var(--text-muted);">(結轉下月)</span></label><input type="number" id="curr_ot_company_comp_hours" value="0" step="0.5" style="width: 60px;"></div>
+                        <div class="form-group" style="width:100%; padding:10px 0;"><label style="font-weight:500;">帆宣延時 1.34倍 (前2小時) <span style="font-size:11px;color:var(--text-muted);">(結轉下月)</span></label><input type="number" id="curr_ot_company_pay_hours_134" value="0" step="0.5" style="width: 60px;"></div>
+                        <div class="form-group" style="width:100%; padding:10px 0;"><label style="font-weight:500;">帆宣延時 1.67倍 (第3小時起) <span style="font-size:11px;color:var(--text-muted);">(結轉下月)</span></label><input type="number" id="curr_ot_company_pay_hours_167" value="0" step="0.5" style="width: 60px;"></div>
                         <div class="form-group" style="width:100%; padding:10px 0;"><label style="font-weight:500;">業主延時 (時)</label><input type="number" id="curr_ot_owner_hours" value="0" step="0.5" style="width: 60px;"></div>
                         <div class="form-group" style="width:100%; padding:10px 0;"><label class="txt-red" style="font-weight:500;">請假扣薪 (時)</label><input type="number" id="d_leave_deduct_hours" value="0" step="0.5" style="width: 60px; background:#FFEBEE; color:#D32F2F;"></div>
                         <div class="form-group" style="width:100%; padding:10px 0; border:none;"><label class="txt-orange" style="font-weight:500;">請假換休 (時)</label><input type="number" id="d_leave_comp_hours" value="0" step="0.5" style="width: 60px; background:#FFF3E0; color:#E65100;"></div>
@@ -494,9 +492,7 @@
                     <div class="wallet-card-light">
                         <p class="wallet-title">本月實領薪資</p>
                         <h1 class="wallet-amount">$ <span id="resTotal">0</span></h1>
-                        <div class="wallet-sub">
-                            業主發放款項 (2個月後發放)：$ <span id="resOwnerOt">0</span>
-                        </div>
+                        <div class="wallet-sub" style="cursor:pointer;" onclick="document.getElementById('ownerOtModal').style.display='flex'">業主發放款項：$ <span id="resOwnerOt">0</span> ℹ️</div>
                     </div>
                     <div class="receipt-details">
                         <h3 style="font-size: 15px; margin-top: 0; margin-bottom: 15px; color: var(--text-secondary);">薪資結算明細</h3>
@@ -549,23 +545,16 @@
                         <button class="btn-auto" onclick="document.getElementById('nextMonthModal').style.display='flex'">查看下月結轉</button>
                     </div>
                 </div>
-                
-                <div class="grid-2 export-hide" style="margin-bottom: 20px;">
-                    <button class="action-btn btn-export-sec" onclick="exportImage()">匯出薪資報表圖片</button>
-                    <button class="action-btn btn-export-sec" onclick="exportCalendarImage()">匯出班表圖片</button>
-                </div>
             </div>
         </div>
     </div>
 
     <div id="pane-info" class="main-pane">
-        
         <details class="ios-details">
             <summary>我今年特休有幾天？</summary>
             <div class="details-content">
                 <p style="font-size: 13px; color: var(--text-secondary); margin-top:0;">系統會自動抓取您在上方填寫的到職日來進行精算。</p>
                 <div id="leaveResult" style="font-weight: 700; color: var(--text-primary); background: var(--input-bg); padding: 14px; border-radius: 12px; font-size: 14px; text-align: center; margin-bottom: 15px;">請先在最上方填寫到職日</div>
-                
                 <hr style="border:0; border-top:1px solid var(--divider); margin:20px 0;">
                 <p style="font-size: 14px; font-weight: 600; color: var(--text-primary); margin-top: 0;">勞基法特休天數對照表：</p>
                 <ul style="font-size: 13px; color: var(--text-secondary); padding-left: 20px; line-height: 1.8; margin-bottom: 0;">
@@ -599,11 +588,26 @@
             <summary>薪水與獎金相關 Q&A</summary>
             <div class="details-content">
                 <ul class="qa-list">
-                    <li><span class="qa-q">Q: 薪水何時發？遇到假日呢？</span><span class="qa-a">A: 每月月底發薪，遇假日則遞延上班日發放。</span></li>
-                    <li><span class="qa-q">Q: 帆宣加班費跟請假扣款，當月看的到嗎？</span><span class="qa-a">A: 當月加班請假，反應在下個月薪資裡。</span></li>
-                    <li><span class="qa-q">Q: 有沒有薪資條？</span><span class="qa-a">A: 薪資條由北部統一發放防窺視紙本薪資單，通常會在當月5號之後拿到。</span></li>
-                    <li><span class="qa-q">Q: 薪水有問題要找誰？</span><span class="qa-a">A: 薪資屬個資，必需是本人才能辦理。可透過公司人事MH單位協助處理 (06-5055666按9接總機轉MH)。</span></li>
-                    <li><span class="qa-q">Q: 有沒有保證年終？怎麼算？</span><span class="qa-a">A: 沒有保證年終。公司以人員績效計算獎金。每年9月及2月都會領到。績效=出缺勤+工作表現+工作貢獻...等。</span></li>
+                    <li>
+                        <span class="qa-q">Q: 薪水何時發？遇到假日呢？</span>
+                        <span class="qa-a">A: 每月月底發薪，遇假日則遞延上班日發放。</span>
+                    </li>
+                    <li>
+                        <span class="qa-q">Q: 帆宣加班費跟請假扣款，當月看的到嗎？</span>
+                        <span class="qa-a">A: 當月加班請假，反應在下個月薪資裡。</span>
+                    </li>
+                    <li>
+                        <span class="qa-q">Q: 有沒有薪資條？</span>
+                        <span class="qa-a">A: 薪資條由北部統一發放防窺視紙本薪資單，通常會在當月5號之後拿到。</span>
+                    </li>
+                    <li>
+                        <span class="qa-q">Q: 薪水有問題要找誰？</span>
+                        <span class="qa-a">A: 薪資屬個資，必需是本人才能辦理。可透過公司人事MH單位協助處理 (06-5055666按9接總機轉MH)。</span>
+                    </li>
+                    <li>
+                        <span class="qa-q">Q: 有沒有保證年終？怎麼算？</span>
+                        <span class="qa-a">A: 沒有保證年終。公司以人員績效計算獎金。每年9月及2月都會領到。績效=出缺勤+工作表現+工作貢獻...等。</span>
+                    </li>
                 </ul>
             </div>
         </details>
@@ -677,7 +681,6 @@
 
 <input type="file" id="edcFileInput" accept=".edc" style="display:none;" onchange="handleImportConfig(event)">
 <input type="file" id="fetchPrevHoursInput" accept=".edc" style="display:none;" onchange="handleFetchPrevData(event, 'hours')">
-<input type="file" id="fetchPrevDeductionsInput" accept=".edc" style="display:none;" onchange="handleFetchPrevData(event, 'deductions')">
 
 <div class="feedback-modal-overlay" id="cellEditorModal">
     <div class="feedback-modal" style="max-width: 320px; padding: 24px;">
@@ -753,12 +756,45 @@
                 <span class="sum-val"><span id="resNextOtNational">0</span> 天 <span style="color:var(--text-muted); font-size:13px; font-weight:normal;" id="resNextOtNationalMoney">($ 0)</span></span>
             </div>
             <div class="summary-row" style="padding: 8px 0; border: none;">
-                <span class="sum-label">本月整月 帆宣延時(換錢)</span>
-                <span class="sum-val"><span id="resNextOtPayHours">0</span> 時 <span style="color:var(--text-muted); font-size:13px; font-weight:normal;" id="resNextOtPayHoursMoney">($ 0)</span></span>
+                <span class="sum-label">本月整月 帆宣延時 (1.34倍)</span>
+                <span class="sum-val"><span id="resNextOtPayHours134">0</span> 時 <span style="color:var(--text-muted); font-size:13px; font-weight:normal;" id="resNextOtPayHoursMoney134">($ 0)</span></span>
+            </div>
+            <div class="summary-row" style="padding: 8px 0; border: none;">
+                <span class="sum-label">本月整月 帆宣延時 (1.67倍)</span>
+                <span class="sum-val"><span id="resNextOtPayHours167">0</span> 時 <span style="color:var(--text-muted); font-size:13px; font-weight:normal;" id="resNextOtPayHoursMoney167">($ 0)</span></span>
             </div>
             <div class="summary-row" style="padding: 15px 0 5px 0; border-top: 1px solid var(--divider); margin-top: 10px;">
                 <span class="sum-label" style="color: var(--text-primary); font-weight: 700;">計入下月金額小計</span>
                 <span class="sum-val" style="color: var(--apple-blue); font-size: 20px;">$ <span id="resNextSubtotal">0</span></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="feedback-modal-overlay" id="ownerOtModal">
+    <div class="feedback-modal" style="max-width: 400px; padding: 30px;">
+        <button class="btn-close" style="top: 15px; right: 20px;" onclick="document.getElementById('ownerOtModal').style.display='none'">×</button>
+        <h3 style="color: var(--text-primary); margin-top:0; margin-bottom: 15px;">業主發放款項明細</h3>
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-top:0; margin-bottom: 20px; text-align:left;">
+            本款項由業主另外發放，預計於 2 個月後匯入。<br>
+            業主整天加班費基準為 $679 (扣10%稅)；延時加班費基準為 $509 (扣10%稅)。
+        </p>
+        <div class="summary-list" style="text-align: left; background: var(--input-bg); padding: 15px 20px; border-radius: 12px;">
+            <div class="summary-row" style="padding: 6px 0; border: none;">
+                <span class="sum-label">業加整天 (輪班/常日)</span>
+                <span class="sum-val">$ <span id="resOwnerFullDay">0</span></span>
+            </div>
+            <div class="summary-row" style="padding: 6px 0; border: none;">
+                <span class="sum-label">業主延時</span>
+                <span class="sum-val">$ <span id="resOwnerHourly">0</span></span>
+            </div>
+            <div class="summary-row" style="padding: 6px 0; border: none;">
+                <span class="sum-label">KPI獎金</span>
+                <span class="sum-val">$ <span id="resOwnerKpi">0</span></span>
+            </div>
+            <div class="summary-row" style="padding: 12px 0 0 0; border-top: 1px solid var(--divider); margin-top: 8px; font-weight: bold;">
+                <span class="sum-label" style="color: var(--text-primary);">總計 (稅後)</span>
+                <span class="sum-val" style="color: var(--apple-blue); font-size: 18px;">$ <span id="resOwnerTotalModal">0</span></span>
             </div>
         </div>
     </div>
@@ -783,12 +819,10 @@
             <strong>隱私與本機儲存聲明</strong><br>
             本工具為純靜態網頁，您輸入的所有參數與資料皆加密儲存於您當下設備的瀏覽器中 (LocalStorage)，絕不會上傳至任何雲端伺服器。<br><br>
             <span style="color: var(--apple-red); font-weight: bold;">公用電腦注意事項</span><br>
-            請務必在最上方填寫專屬的「姓名」，並點擊「儲存」，以防您的參數被下一位使用者覆蓋。建議使用底部的「匯出」功能將明細備份。
+            請務必在最上方填寫專屬的「姓名」，並點擊「儲存」，以防您的參數被下一位使用者覆蓋。建議使用底部的「匯出」功能將設定檔備份。
         </p>
     </div>
 </div>
-
-<button class="fab-feedback" onclick="openFeedback()" id="ignore-in-export-fab">意見回饋</button>
 
 <div class="feedback-modal-overlay" id="feedbackModal">
     <div class="feedback-modal">
@@ -812,13 +846,13 @@
         
         <div class="version-list">
             <div class="version-item">
-                <span class="v-num">V3.06</span><span class="v-date">2026-03-07</span>
+                <span class="v-num">V3.08</span><span class="v-date">2026-03-07</span>
                 <div class="v-desc">
                     • <b>致命 Bug 徹底修復：</b>清除舊有歷史紀錄下拉選單的殘留衝突函數，完全修復產生月曆與所有按鈕失效的問題。<br>
                     • <b>存檔系統極簡化：</b>捨棄舊版混淆不清的存檔選單。頂部面板全面統合為直覺的「儲存本機」、「另存新檔」、「匯入與讀取」。<br>
                     • <b>跨月載入升級：</b>「自動抓取上月」改為透過上傳您上個月的 .edc 檔案來無縫抓取結轉時數與代扣設定。<br>
-                    • <b>手機版絕對鎖死：</b>重新撰寫薪資費率試算之 CSS 語法 (<code>white-space: nowrap</code>)，徹底解決小螢幕手機版文字換行重疊的異常。<br>
-                    • <b>視覺與排版校正：</b>月曆圖示替換為單色質感 SVG；修復自訂輪班面板隱藏問題；全域置中排版校正。
+                    • <b>薪資功能細化：</b>帆宣延時換錢依法規細分為 1.34倍與 1.67倍；業主發放款項改為點擊展開詳細試算明細 Modal。<br>
+                    • <b>排版絕對鎖死：</b>重新撰寫薪資費率試算之 CSS 語法，徹底解決小螢幕手機版文字換行重疊的異常；全域清除殘留表情符號。
                 </div>
             </div>
 
@@ -1095,14 +1129,19 @@
     </div>
 </div>
 
-<div id="toast-container"></div>
-
 <script>
     let cellData = {}; 
     let currentEditDay = null;
     let lastShiftType = 'night';
     let lastScheduleMode = 'A';
     const AUTOSAVE_KEY = 'TCM_AutoSave';
+
+    function newRecord() {
+        if(confirm("確定要清空目前所有設定，建立新紀錄嗎？")) {
+            localStorage.removeItem(AUTOSAVE_KEY);
+            location.reload();
+        }
+    }
 
     function showToast(msg) {
         const container = document.getElementById('toast-container');
@@ -1111,6 +1150,17 @@
         toast.innerText = msg;
         container.appendChild(toast);
         setTimeout(() => { toast.remove(); }, 4000);
+    }
+
+    function switchMainTab(paneId) {
+        document.querySelectorAll('.main-pane').forEach(el => el.style.display = 'none');
+        document.getElementById(paneId).style.display = 'block';
+    }
+
+    function goToSalaryTab() {
+        document.getElementById('tab_sal').checked = true;
+        switchMainTab('pane-sal');
+        window.scrollTo(0,0);
     }
 
     function animateNumber(id, endValue) {
@@ -1138,23 +1188,10 @@
 
     function openFeedback() { document.getElementById('feedbackModal').style.display = 'flex'; }
     function closeFeedback() { document.getElementById('feedbackModal').style.display = 'none'; }
-    
     function openVersionHistory() { document.getElementById('versionHistoryModal').style.display = 'flex'; }
     function closeVersionHistory() { document.getElementById('versionHistoryModal').style.display = 'none'; }
-    
     function openInfoModal() { document.getElementById('infoModal').style.display = 'flex'; }
     function closeInfoModal() { document.getElementById('infoModal').style.display = 'none'; }
-
-    function switchMainTab(paneId) {
-        document.querySelectorAll('.main-pane').forEach(el => el.style.display = 'none');
-        document.getElementById(paneId).style.display = 'block';
-    }
-
-    function goToSalaryTab() {
-        document.getElementById('tab_sal').checked = true;
-        switchMainTab('pane-sal');
-        window.scrollTo(0,0);
-    }
 
     const taiwanHolidays = {
         2025: { 1: { 1: "元旦", 27: "除夕(補)", 28: "除夕", 29: "初一", 30: "初二", 31: "初三" }, 2: { 28: "和平紀念日" }, 4: { 3: "兒童節(補)", 4: "兒童節", 5: "清明節" }, 5: { 1: "勞動節", 31: "端午節" }, 10: { 6: "中秋節", 10: "國慶日" } },
@@ -1245,9 +1282,9 @@
         document.getElementById('calendar-container').innerHTML = "";
         document.getElementById('summaryPanel').style.display = 'none';
         document.getElementById('btnCalc').style.display = 'none';
-        document.getElementById('btnExportCal').style.display = 'none';
         document.getElementById('btnSaveCal').style.display = 'none';
         document.getElementById('btnGoToSalary').style.display = 'none';
+        pickerSelectedDates = [];
         cellData = {};
     }
 
@@ -1305,14 +1342,46 @@
         clearHolidaysAndCalendar();
     }
 
+    function handleFetchPrevData(event, mode) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (mode === 'hours') {
+                    document.getElementById('prevMonthShiftDay').value = data.prevMonthShiftDay || 0;
+                    document.getElementById('prevMonthShiftNight').value = data.prevMonthShiftNight || 0;
+                    document.getElementById('prevMonthOtRest').value = data.prevMonthOtRest || 0;
+                    document.getElementById('prevMonthOtExempt').value = data.prevMonthOtExempt || 0;
+                    document.getElementById('prevMonthOtNational').value = data.prevMonthOtNational || 0;
+                    
+                    if (data.prevMonthOtPayHours134 !== undefined) document.getElementById('prevMonthOtPayHours134').value = data.prevMonthOtPayHours134;
+                    else document.getElementById('prevMonthOtPayHours134').value = data.prevMonthOtPayHours || 0;
+                    
+                    if (data.prevMonthOtPayHours167 !== undefined) document.getElementById('prevMonthOtPayHours167').value = data.prevMonthOtPayHours167;
+                    else document.getElementById('prevMonthOtPayHours167').value = 0;
+                    
+                    showToast("已成功載入上月結轉時數！");
+                } else if (mode === 'deductions') {
+                    const fields = ['d_tax', 'd_labor', 'd_health', 'd_supp', 'd_welfare', 'd_dorm', 'd_pension', 'd_other_val', 'd_subtotal_val'];
+                    fields.forEach(f => { if(data[f] !== undefined) document.getElementById(f).value = data[f]; });
+                    showToast("已成功載入上月代扣項目！");
+                }
+            } catch(err) {
+                showToast("檔案格式錯誤，無法載入。");
+            }
+            event.target.value = "";
+        };
+        reader.readAsText(file);
+    }
+
     function calculateAnnualLeave() {
         const hireDateStr = document.getElementById('hireDate').value;
         const senEl = document.getElementById('seniority-text');
-        const infoEl = document.getElementById('leaveResult');
         
         if(!hireDateStr) { 
             senEl.innerText = ''; 
-            if(infoEl) infoEl.innerText = '請先在上方填寫到職日';
             return; 
         }
         
@@ -1325,23 +1394,26 @@
         if (today.getDate() < hireDate.getDate()) months--;
         if (months < 0) months += 12; 
 
-        let totalMonths = years * 12 + months;
-        let leaveDays = 0;
-
-        if (totalMonths >= 6 && totalMonths < 12) leaveDays = 3;
-        else if (years >= 1 && years < 2) leaveDays = 7;
-        else if (years >= 2 && years < 3) leaveDays = 10;
-        else if (years >= 3 && years < 5) leaveDays = 14;
-        else if (years >= 5 && years < 10) leaveDays = 15;
-        else if (years >= 10) leaveDays = Math.min(15 + (years - 9), 30);
-
         senEl.innerText = `(年資：${years}年${months}個月)`;
-        if(infoEl) infoEl.innerText = `依今日計算，年資為 ${years} 年 ${months} 個月，享有 ${leaveDays} 天特休。`;
     }
 
     function getShiftValue() {
         const checked = document.querySelector('input[name="shiftType"]:checked');
         return checked ? checked.value : 'night';
+    }
+
+    function generateCycleDropdown() {
+        const w = parseInt(document.getElementById('workDays').value) || 0;
+        const o = parseInt(document.getElementById('offDays').value) || 0;
+        const sel = document.getElementById('cycleStartOffset');
+        
+        const currentVal = sel.value;
+        sel.innerHTML = '';
+        
+        for(let i=1; i<=w; i++) { sel.innerHTML += `<option value="W${i-1}">上班 第 ${i} 天</option>`; }
+        for(let i=1; i<=o; i++) { sel.innerHTML += `<option value="O${i-1}">休假 第 ${i} 天</option>`; }
+        
+        if(currentVal) sel.value = currentVal;
     }
 
     function autoCalcDeductions() {
@@ -1354,7 +1426,8 @@
         const prevOtRest = getSetting('prevMonthOtRest');
         const prevOtExempt = getSetting('prevMonthOtExempt');
         const prevOtNational = getSetting('prevMonthOtNational');
-        const prevOtPayHours = getSetting('prevMonthOtPayHours');
+        const prevOtPayHours134 = getSetting('prevMonthOtPayHours134');
+        const prevOtPayHours167 = getSetting('prevMonthOtPayHours167');
 
         let global_mult_rest = (getShiftValue() === 'normal') ? (38/3) : 18.04;
         let global_mult_exempt = (getShiftValue() === 'normal') ? (38/3) : 16.04;
@@ -1363,7 +1436,8 @@
         let estimatedOtPay = (prevOtRest * global_mult_rest * hourlyRate) + 
                              (prevOtExempt * global_mult_exempt * hourlyRate) + 
                              (prevOtNational * global_mult_national * hourlyRate) + 
-                             (prevOtPayHours * 1.34 * hourlyRate); 
+                             (prevOtPayHours134 * 1.34 * hourlyRate) +
+                             (prevOtPayHours167 * 1.67 * hourlyRate); 
 
         let currentMonthShiftAllowance = 0; 
         
@@ -1410,7 +1484,8 @@
             s_other_val: document.getElementById('s_other_val').value, 
             s_other_name2: document.getElementById('s_other_name2').value, s_other_val2: document.getElementById('s_other_val2').value, 
             s_kpi_bonus: document.getElementById('s_kpi_bonus').value, 
-            curr_ot_company_pay_hours: document.getElementById('curr_ot_company_pay_hours').value, 
+            curr_ot_company_pay_hours_134: document.getElementById('curr_ot_company_pay_hours_134').value, 
+            curr_ot_company_pay_hours_167: document.getElementById('curr_ot_company_pay_hours_167').value, 
             curr_ot_company_comp_hours: document.getElementById('curr_ot_company_comp_hours').value, 
             curr_ot_owner_hours: document.getElementById('curr_ot_owner_hours').value,     
             d_tax: document.getElementById('d_tax').value, 
@@ -1424,7 +1499,9 @@
             shiftType: getShiftValue(), scheduleMode: currentMode,
             prevMonthShiftDay: document.getElementById('prevMonthShiftDay').value, prevMonthShiftNight: document.getElementById('prevMonthShiftNight').value,
             prevMonthOtRest: document.getElementById('prevMonthOtRest').value, prevMonthOtExempt: document.getElementById('prevMonthOtExempt').value,
-            prevMonthOtNational: document.getElementById('prevMonthOtNational').value, prevMonthOtPayHours: document.getElementById('prevMonthOtPayHours').value,
+            prevMonthOtNational: document.getElementById('prevMonthOtNational').value, 
+            prevMonthOtPayHours134: document.getElementById('prevMonthOtPayHours134').value,
+            prevMonthOtPayHours167: document.getElementById('prevMonthOtPayHours167').value,
             workDays: document.getElementById('workDays').value, offDays: document.getElementById('offDays').value,
             statutoryHolidays: document.getElementById('statutoryHolidays').value, restDays: document.getElementById('restDays').value, 
             exemptDays: document.getElementById('exemptDays').value, nationalHolidays: document.getElementById('nationalHolidays').value,
@@ -1433,22 +1510,15 @@
         };
     }
 
-    let currentFileName = null;
-
     function saveRecordLocal() {
         const data = getFullDataObj();
         localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(data));
-        
-        const modeInput = document.querySelector('input[name="scheduleMode"]:checked');
-        lastShiftType = getShiftValue();
-        lastScheduleMode = modeInput ? modeInput.value : 'Custom';
-
-        showToast(`目前進度已暫存至瀏覽器本機。`);
+        showToast(`設定檔已儲存至瀏覽器本機。`);
     }
 
     function loadRecordLocal() {
         const dataStr = localStorage.getItem(AUTOSAVE_KEY);
-        if(!dataStr) return showToast("找不到本機暫存的紀錄。");
+        if(!dataStr) return showToast("找不到本機儲存的紀錄。");
         try {
             const data = JSON.parse(dataStr);
             applyDataToDOM(data);
@@ -1458,32 +1528,26 @@
         }
     }
 
-    function triggerDownload(filename) {
+    function exportConfig() {
+        const userName = document.getElementById('userName').value.trim() || '未命名';
+        const year = document.getElementById('year').value;
+        const month = document.getElementById('month').value;
+        
         const data = getFullDataObj();
         const dataStr = JSON.stringify(data);
         const blob = new Blob([dataStr], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = filename;
+        link.download = `${userName}-${year}${month.padStart(2, '0')}.edc`;
         link.click();
         URL.revokeObjectURL(url);
-        showToast(`檔案已下載：${filename}`);
-    }
-
-    function exportConfig() {
-        let userName = document.getElementById('userName').value.trim() || '未命名';
-        let year = document.getElementById('year').value;
-        let month = document.getElementById('month').value;
-        let newName = `${userName}-${year}${month.padStart(2, '0')}.edc`;
-        triggerDownload(newName);
-        currentFileName = newName;
+        showToast(`設定檔已下載：${link.download}`);
     }
 
     function handleImportConfig(event) {
         const file = event.target.files[0];
         if (!file) return;
-        currentFileName = file.name;
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
@@ -1498,39 +1562,18 @@
         reader.readAsText(file);
     }
 
-    function handleFetchPrevData(event, mode) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const data = JSON.parse(e.target.result);
-                if (mode === 'hours') {
-                    document.getElementById('prevMonthShiftDay').value = data.carryOverShiftDay || 0;
-                    document.getElementById('prevMonthShiftNight').value = data.carryOverShiftNight || 0;
-                    document.getElementById('prevMonthOtRest').value = data.carryOverOtRest || 0;
-                    document.getElementById('prevMonthOtExempt').value = data.carryOverOtExempt || 0;
-                    document.getElementById('prevMonthOtNational').value = data.carryOverOtNational || 0;
-                    document.getElementById('prevMonthOtPayHours').value = data.curr_ot_company_pay_hours || 0;
-                    showToast("已成功載入上月結轉時數！");
-                } else if (mode === 'deductions') {
-                    const fields = ['d_tax', 'd_labor', 'd_health', 'd_supp', 'd_welfare', 'd_dorm', 'd_pension', 'd_other_val', 'd_subtotal_val'];
-                    fields.forEach(f => { if(data[f] !== undefined) document.getElementById(f).value = data[f]; });
-                    showToast("已成功載入上月代扣項目！");
-                }
-            } catch(err) {
-                showToast("檔案格式錯誤，無法載入。");
-            }
-            event.target.value = "";
-        };
-        reader.readAsText(file);
-    }
-
     function applyDataToDOM(data) {
         Object.keys(data).forEach(k => {
             const el = document.getElementById(k);
             if(el && typeof data[k] !== 'object' && k !== 'shiftType' && k !== 'scheduleMode') el.value = data[k];
         });
+
+        if (data.prevMonthOtPayHours !== undefined && !data.prevMonthOtPayHours134) {
+            document.getElementById('prevMonthOtPayHours134').value = data.prevMonthOtPayHours;
+        }
+        if (data.curr_ot_company_pay_hours !== undefined && !data.curr_ot_company_pay_hours_134) {
+            document.getElementById('curr_ot_company_pay_hours_134').value = data.curr_ot_company_pay_hours;
+        }
 
         if (data.hireDate) calculateAnnualLeave();
         
@@ -1589,7 +1632,6 @@
                 document.getElementById('btnCalc').style.display = 'block';
                 document.getElementById('ignore-var-hours').style.display = 'grid'; 
                 document.getElementById('ignore-salary-grid').style.display = 'block'; 
-                document.getElementById('btnExportCal').style.display = 'flex'; 
                 document.getElementById('btnSaveCal').style.display = 'flex'; 
                 document.getElementById('btnGoToSalary').style.display = 'flex'; 
             }
@@ -1692,101 +1734,6 @@
         return map;
     }
 
-    function generateCalendar() {
-        try {
-            cellData = {}; 
-            
-            const year = parseInt(document.getElementById('year').value);
-            const month = parseInt(document.getElementById('month').value);
-            const shiftType = getShiftValue(); 
-            const scheduleMode = document.querySelector('input[name="scheduleMode"]:checked')?.value || 'Custom';
-            
-            const statutoryHolidays = parseDateString(document.getElementById('statutoryHolidays').value);
-            const restHolidays = parseDateString(document.getElementById('restDays').value);
-            const nationalHolidays = parseDateString(document.getElementById('nationalHolidays').value);
-            const userExemptMap = parseHolidayMap(document.getElementById('exemptDays').value);
-
-            const daysInMonth = new Date(year, month, 0).getDate();
-            const firstDayOfWeek = new Date(year, month - 1, 1).getDay(); 
-
-            let sequence = []; let cycleLength = 0; let startOffset = 0;
-
-            if (scheduleMode === 'Custom') {
-                const w = parseInt(document.getElementById('workDays').value) || 0;
-                const o = parseInt(document.getElementById('offDays').value) || 0;
-                cycleLength = w + o;
-                if (cycleLength > 0) {
-                    for(let i=0; i<w; i++) sequence.push('work');
-                    for(let i=0; i<o; i++) sequence.push('off');
-                    const offsetVal = document.getElementById('cycleStartOffset').value; 
-                    if(offsetVal?.startsWith('W')) startOffset = parseInt(offsetVal.substring(1));
-                    else if(offsetVal) startOffset = w + parseInt(offsetVal.substring(1));
-                }
-            } else {
-                sequence = ['work', 'work', 'off', 'off'];
-                cycleLength = 4;
-                const anchor = new Date(2026, 0, 1);
-                const target = new Date(year, month - 1, 1);
-                const diffDays = Math.round((target.getTime() - anchor.getTime()) / 86400000);
-                let baseIndex = (scheduleMode === 'A') ? 3 : 1; 
-                let mod = (diffDays + baseIndex) % 4;
-                if (mod < 0) mod += 4;
-                startOffset = mod;
-            }
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                let dayOfWeek = (firstDayOfWeek + day - 1) % 7;
-                let isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
-                let isStatutory = statutoryHolidays.includes(day);
-                let isRest = restHolidays.includes(day);
-                let isNational = nationalHolidays.includes(day);
-                let isUserExempt = userExemptMap.hasOwnProperty(day);
-
-                let isWorkDay = false;
-                if (shiftType === 'normal') {
-                    isWorkDay = !(isWeekend || isStatutory || isRest || isUserExempt || isNational);
-                } else if (cycleLength > 0) { 
-                    let mod = (day - 1 + startOffset) % cycleLength; 
-                    isWorkDay = (sequence[mod] === 'work'); 
-                }
-
-                let cellShift = isWorkDay ? shiftType : 'off';
-                let cellAction = isWorkDay ? '正常出勤' : '';
-
-                if (isStatutory || isRest || isUserExempt || isNational) {
-                    if (isWorkDay) {
-                        cellAction = '帆宣加班(換休)'; 
-                    } else {
-                        cellShift = 'off';
-                        if (isNational) cellAction = '[有薪] 國定假日休假';
-                    }
-                }
-                
-                cellData[day] = { shift: cellShift, action: cellAction };
-            }
-
-            renderCalendarUI();
-
-            document.getElementById('ignore-grid-layout').open = false;
-            document.getElementById('btnCalc').style.display = 'block';
-            document.getElementById('ignore-var-hours').style.display = 'grid'; 
-            document.getElementById('ignore-salary-grid').style.display = 'block'; 
-            document.getElementById('btnExportCal').style.display = 'flex'; 
-            document.getElementById('btnSaveCal').style.display = 'flex'; 
-            document.getElementById('btnGoToSalary').style.display = 'flex'; 
-            document.getElementById('summaryPanel').style.display = 'none';
-            
-            const modeInput = document.querySelector('input[name="scheduleMode"]:checked');
-            lastShiftType = getShiftValue();
-            lastScheduleMode = modeInput ? modeInput.value : 'Custom';
-            
-            showToast("月曆班表已產生！");
-        } catch (e) {
-            console.error("Calendar generation error:", e);
-            showToast("產生失敗，請檢查輸入數據。");
-        }
-    }
-
     function renderCalendarUI() {
         const year = parseInt(document.getElementById('year').value);
         const month = parseInt(document.getElementById('month').value);
@@ -1826,10 +1773,10 @@
             let bgClass = "";
             let inlineBg = "";
             let mainText = "休假";
-            let textStyle = "color: #C7C7CC; font-weight: 500;"; // 淡化休假字體
+            let textStyle = "color: #C7C7CC; font-weight: 500;"; 
 
             if (sVal !== 'off') {
-                if (aVal.includes('[')) { // 請假
+                if (aVal.includes('[')) { 
                     inlineBg = "background-color: var(--cal-leave);";
                     let match = aVal.match(/\]\s*(.+)/);
                     mainText = match ? match[1].replace('假', '') : aVal;
@@ -1884,6 +1831,100 @@
         document.getElementById('calendar-container').innerHTML = html;
     }
 
+    function generateCalendar() {
+        try {
+            const year = parseInt(document.getElementById('year').value);
+            const month = parseInt(document.getElementById('month').value);
+            const shiftType = getShiftValue(); 
+            const scheduleMode = document.querySelector('input[name="scheduleMode"]:checked')?.value || 'Custom';
+            
+            const statutoryHolidays = parseDateString(document.getElementById('statutoryHolidays').value);
+            const restHolidays = parseDateString(document.getElementById('restDays').value);
+            const nationalHolidays = parseDateString(document.getElementById('nationalHolidays').value);
+            const userExemptMap = parseHolidayMap(document.getElementById('exemptDays').value);
+
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const firstDayOfWeek = new Date(year, month - 1, 1).getDay(); 
+
+            let sequence = []; let cycleLength = 0; let startOffset = 0;
+
+            if (scheduleMode === 'Custom') {
+                const w = parseInt(document.getElementById('workDays').value) || 0;
+                const o = parseInt(document.getElementById('offDays').value) || 0;
+                cycleLength = w + o;
+                if (cycleLength > 0) {
+                    for(let i=0; i<w; i++) sequence.push('work');
+                    for(let i=0; i<o; i++) sequence.push('off');
+                    const offsetVal = document.getElementById('cycleStartOffset').value; 
+                    if(offsetVal?.startsWith('W')) startOffset = parseInt(offsetVal.substring(1));
+                    else if(offsetVal) startOffset = w + parseInt(offsetVal.substring(1));
+                }
+            } else {
+                sequence = ['work', 'work', 'off', 'off'];
+                cycleLength = 4;
+                const anchor = new Date(2026, 0, 1);
+                const target = new Date(year, month - 1, 1);
+                const diffDays = Math.round((target.getTime() - anchor.getTime()) / 86400000);
+                let baseIndex = (scheduleMode === 'A') ? 3 : 1; 
+                let mod = (diffDays + baseIndex) % 4;
+                if (mod < 0) mod += 4;
+                startOffset = mod;
+            }
+
+            cellData = {}; 
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                let dayOfWeek = (firstDayOfWeek + day - 1) % 7;
+                let isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+                let isStatutory = statutoryHolidays.includes(day);
+                let isRest = restHolidays.includes(day);
+                let isNational = nationalHolidays.includes(day);
+                let isUserExempt = userExemptMap.hasOwnProperty(day);
+
+                let isWorkDay = false;
+                if (shiftType === 'normal') {
+                    isWorkDay = !(isWeekend || isStatutory || isRest || isUserExempt || isNational);
+                } else if (cycleLength > 0) { 
+                    let mod = (day - 1 + startOffset) % cycleLength; 
+                    isWorkDay = (sequence[mod] === 'work'); 
+                }
+
+                let cellShift = isWorkDay ? shiftType : 'off';
+                let cellAction = isWorkDay ? '正常出勤' : '';
+
+                if (isStatutory || isRest || isUserExempt || isNational) {
+                    if (isWorkDay) {
+                        cellAction = '帆宣加班(換休)'; 
+                    } else {
+                        cellShift = 'off';
+                        if (isNational) cellAction = '[有薪] 國定假日休假';
+                    }
+                }
+                
+                cellData[day] = { shift: cellShift, action: cellAction };
+            }
+
+            renderCalendarUI();
+
+            document.getElementById('ignore-grid-layout').open = false;
+            document.getElementById('btnCalc').style.display = 'block';
+            document.getElementById('ignore-var-hours').style.display = 'grid'; 
+            document.getElementById('ignore-salary-grid').style.display = 'block'; 
+            document.getElementById('btnSaveCal').style.display = 'flex'; 
+            document.getElementById('btnGoToSalary').style.display = 'flex'; 
+            document.getElementById('summaryPanel').style.display = 'none';
+            
+            const modeInput = document.querySelector('input[name="scheduleMode"]:checked');
+            lastShiftType = getShiftValue();
+            lastScheduleMode = modeInput ? modeInput.value : 'Custom';
+            
+            showToast("月曆班表已產生！");
+        } catch (e) {
+            console.error("Calendar generation error:", e);
+            showToast("產生失敗，請檢查輸入數據。");
+        }
+    }
+
     function calculateSalary() {
         const v_base = getSetting('s_base'); const v_supervisor = getSetting('s_supervisor');
         const v_position = getSetting('s_position'); const v_tcm = getSetting('s_tcm');
@@ -1903,20 +1944,16 @@
         const prevOtRest = getSetting('prevMonthOtRest');
         const prevOtExempt = getSetting('prevMonthOtExempt');
         const prevOtNational = getSetting('prevMonthOtNational');
-        const prevOtPayHours = getSetting('prevMonthOtPayHours');
+        
+        const prevOtPayHours134 = getSetting('prevMonthOtPayHours134');
+        const prevOtPayHours167 = getSetting('prevMonthOtPayHours167');
 
-        const curr_ot_company_pay_hours = getSetting('curr_ot_company_pay_hours');
+        const curr_ot_company_pay_hours_134 = getSetting('curr_ot_company_pay_hours_134');
+        const curr_ot_company_pay_hours_167 = getSetting('curr_ot_company_pay_hours_167');
         const curr_ot_company_comp_hours = getSetting('curr_ot_company_comp_hours');
         const curr_ot_owner_hours = getSetting('curr_ot_owner_hours');
         const d_leave_deduct_hours = getSetting('d_leave_deduct_hours');
         const d_leave_comp_hours = getSetting('d_leave_comp_hours');
-
-        const year = parseInt(document.getElementById('year').value);
-        const month = parseInt(document.getElementById('month').value);
-        const statutoryHolidays = parseDateString(document.getElementById('statutoryHolidays').value);
-        const restHolidays = parseDateString(document.getElementById('restDays').value);
-        const nationalHolidays = parseDateString(document.getElementById('nationalHolidays').value);
-        const userExemptMap = parseHolidayMap(document.getElementById('exemptDays').value);
 
         const globalShift = getShiftValue();
         const global_mult_rest = (globalShift === 'normal') ? (38/3) : 18.04;
@@ -1935,19 +1972,22 @@
 
         let totalLeaveDeduction = d_leave_deduct_hours * hourlyRate; 
         
+        let otPay134 = prevOtPayHours134 * 1.34 * hourlyRate;
+        let otPay167 = prevOtPayHours167 * 1.67 * hourlyRate;
+        
         let totalOtPay = (prevOtRest * global_mult_rest * hourlyRate) + 
                          (prevOtExempt * global_mult_exempt * hourlyRate) + 
                          (prevOtNational * global_mult_national * hourlyRate) + 
-                         (prevOtPayHours * 1.34 * hourlyRate);
+                         otPay134 + otPay167;
 
-        let ownerOtPay = (curr_ot_owner_hours * 509 * 0.9) + getSetting('s_kpi_bonus');
-        
         let compLeaveAddHours = 0; let compLeaveUsedHours = d_leave_comp_hours; 
         
         let currentMonthShiftAllowance = 0; 
         let nextCarryShiftDay = 0; let nextCarryShiftNight = 0;
         let nextCarryOtRest = 0; let nextCarryOtExempt = 0; let nextCarryOtNational = 0;
         let currentMonthShiftDaysTally = 0;
+        
+        let ownerFullDayMoney = 0;
 
         Object.keys(cellData).forEach(day => {
             let dayInt = parseInt(day);
@@ -1980,11 +2020,15 @@
             if (actionVal === "帆宣加班(換錢)") { 
                 nextCarryOtRest++; 
             } else if (actionVal === "業加整天(10hr)") { 
-                ownerOtPay += (679 * 10 * 0.9); 
+                ownerFullDayMoney += (679 * 10 * 0.9); 
             } else if (actionVal === "業加整天(8hr)") { 
-                ownerOtPay += (679 * 8 * 0.9); 
+                ownerFullDayMoney += (679 * 8 * 0.9); 
             }
         });
+
+        let ownerHourlyMoney = curr_ot_owner_hours * 509 * 0.9;
+        let ownerKpiMoney = getSetting('s_kpi_bonus');
+        let ownerOtPay = ownerFullDayMoney + ownerHourlyMoney + ownerKpiMoney;
 
         let totalShiftAllowance = currentMonthShiftAllowance + (prevShiftDay * 100) + (prevShiftNight * 300);
         let finalSalary = fixedSalaryBase + v_other_add2 + totalShiftAllowance + totalOtPay - totalDeductions - totalLeaveDeduction;
@@ -2003,8 +2047,11 @@
         let nextOtRestMoney = nextCarryOtRest * hourlyRate * global_mult_rest;
         let nextOtExemptMoney = nextCarryOtExempt * hourlyRate * global_mult_exempt;
         let nextOtNationalMoney = nextCarryOtNational * hourlyRate * global_mult_national;
-        let nextOtPayHoursMoney = curr_ot_company_pay_hours * hourlyRate * 1.34;
-        let nextSubtotal = nextShiftMoney + nextOtRestMoney + nextOtExemptMoney + nextOtNationalMoney + nextOtPayHoursMoney;
+        
+        let nextOtPayHoursMoney134 = curr_ot_company_pay_hours_134 * hourlyRate * 1.34;
+        let nextOtPayHoursMoney167 = curr_ot_company_pay_hours_167 * hourlyRate * 1.67;
+        
+        let nextSubtotal = nextShiftMoney + nextOtRestMoney + nextOtExemptMoney + nextOtNationalMoney + nextOtPayHoursMoney134 + nextOtPayHoursMoney167;
 
         document.getElementById('resNextShift').innerText = `日班 ${nextCarryShiftDay} 天 / 夜班 ${nextCarryShiftNight} 天`;
         document.getElementById('resNextShiftMoney').innerText = `($ ${Math.round(nextShiftMoney).toLocaleString()})`;
@@ -2018,8 +2065,11 @@
         document.getElementById('resNextOtNational').innerText = nextCarryOtNational;
         document.getElementById('resNextOtNationalMoney').innerText = `($ ${Math.round(nextOtNationalMoney).toLocaleString()})`;
         
-        document.getElementById('resNextOtPayHours').innerText = curr_ot_company_pay_hours;
-        document.getElementById('resNextOtPayHoursMoney').innerText = `($ ${Math.round(nextOtPayHoursMoney).toLocaleString()})`;
+        document.getElementById('resNextOtPayHours134').innerText = curr_ot_company_pay_hours_134;
+        document.getElementById('resNextOtPayHoursMoney134').innerText = `($ ${Math.round(nextOtPayHoursMoney134).toLocaleString()})`;
+        
+        document.getElementById('resNextOtPayHours167').innerText = curr_ot_company_pay_hours_167;
+        document.getElementById('resNextOtPayHoursMoney167').innerText = `($ ${Math.round(nextOtPayHoursMoney167).toLocaleString()})`;
         
         document.getElementById('resNextSubtotal').innerText = Math.round(nextSubtotal).toLocaleString();
         
@@ -2040,6 +2090,10 @@
         
         document.getElementById('resShiftDetail').innerText = `(上月結轉 [日:${prevShiftDay}/夜:${prevShiftNight}] + 本期1~20號 x${currentMonthShiftDaysTally}天)`;
 
+        document.getElementById('resOwnerFullDay').innerText = Math.round(ownerFullDayMoney).toLocaleString();
+        document.getElementById('resOwnerHourly').innerText = Math.round(ownerHourlyMoney).toLocaleString();
+        document.getElementById('resOwnerKpi').innerText = Math.round(ownerKpiMoney).toLocaleString();
+        document.getElementById('resOwnerTotalModal').innerText = Math.round(ownerOtPay).toLocaleString();
         document.getElementById('resOwnerOt').innerText = Math.round(ownerOtPay).toLocaleString();
 
         document.getElementById('summaryPanel').style.display = 'block';
@@ -2069,7 +2123,7 @@
         document.getElementById('picker-title').innerText = `挑選 ${title}`;
         
         const shiftType = getShiftValue(); 
-        const scheduleMode = document.querySelector('input[name="scheduleMode"]:checked') ? document.querySelector('input[name="scheduleMode"]:checked').value : 'Custom';
+        const scheduleMode = document.querySelector('input[name="scheduleMode"]:checked')?.value || 'Custom';
         const firstDayOfWeek = new Date(year, month - 1, 1).getDay(); 
         let sequence = []; let cycleLength = 0; let startOffset = 0;
 
@@ -2081,7 +2135,7 @@
                 for(let i=0; i<w; i++) sequence.push('work');
                 for(let i=0; i<o; i++) sequence.push('off');
                 const offsetVal = document.getElementById('cycleStartOffset').value; 
-                if(offsetVal && offsetVal.startsWith('W')) startOffset = parseInt(offsetVal.substring(1));
+                if(offsetVal?.startsWith('W')) startOffset = parseInt(offsetVal.substring(1));
                 else if(offsetVal) startOffset = w + parseInt(offsetVal.substring(1));
             }
         } else {
@@ -2160,52 +2214,6 @@
         pickerSelectedDates.sort((a, b) => a - b);
         document.getElementById(pickerTargetInput).value = pickerSelectedDates.join(',');
         closeHolidayPicker();
-    }
-
-    function exportCalendarImage() {
-        let userName = document.getElementById('userName').value.trim() || '未命名';
-        const container = document.getElementById('calendar-container');
-        if(!container.innerHTML) return showToast('請先產生班表。');
-        
-        const year = document.getElementById('year').value;
-        const month = document.getElementById('month').value;
-        
-        const titleDiv = document.createElement('div'); titleDiv.id = 'export-cal-title';
-        titleDiv.innerHTML = `<h2 style="text-align: center; color: var(--text-primary); margin-bottom: 20px; font-size: 24px; padding-bottom: 10px;">${userName} - ${year} 年 ${month} 月 班表</h2>`;
-        container.insertBefore(titleDiv, container.firstChild);
-
-        const originalWidth = container.style.width; const originalPadding = container.style.padding; const originalBg = container.style.background;
-        container.style.width = '1000px'; container.style.padding = '30px'; container.style.background = '#FFFFFF';
-
-        html2canvas(container, { scale: 2, windowWidth: 1200, backgroundColor: '#ffffff' }).then(canvas => {
-            titleDiv.remove(); 
-            container.style.width = originalWidth; container.style.padding = originalPadding; container.style.background = originalBg;
-            const link = document.createElement('a'); link.download = `${userName}-${year}${month.padStart(2, '0')}-班表.png`;
-            link.href = canvas.toDataURL('image/png'); link.click();
-        });
-    }
-
-    function exportImage() {
-        let userName = document.getElementById('userName').value.trim() || '未命名';
-        const container = document.getElementById('pane-sal');
-        const hides = container.querySelectorAll('.export-hide');
-        hides.forEach(el => el.style.display = 'none');
-        
-        const year = document.getElementById('year').value; const month = document.getElementById('month').value;
-        
-        const titleDiv = document.createElement('div');
-        titleDiv.innerHTML = `<h2 style="text-align: center; color: var(--text-primary); margin-bottom: 20px; font-size: 26px;">${userName} - ${year} 年 ${month} 月 薪資報表</h2>`;
-        container.insertBefore(titleDiv, container.firstChild);
-
-        const originalWidth = container.style.width; const originalPadding = container.style.padding; const originalBg = container.style.background;
-        container.style.width = '1000px'; container.style.padding = '40px'; container.style.background = '#F5F7FA';
-
-        html2canvas(container, { scale: 2, windowWidth: 1200, backgroundColor: '#F5F7FA' }).then(canvas => {
-            hides.forEach(el => el.style.display = ''); 
-            titleDiv.remove(); container.style.width = originalWidth; container.style.padding = originalPadding; container.style.background = originalBg;
-            const link = document.createElement('a'); link.download = `${userName}-${year}${month.padStart(2, '0')}-薪資報表.png`;
-            link.href = canvas.toDataURL('image/png'); link.click();
-        });
     }
 </script>
 </body>
