@@ -28,11 +28,15 @@
             --divider: #EAECEF;
             --input-bg: #F0F2F5;
             
+            /* 💡 高奢月曆色彩系統 (細分班別與加班) */
             --cal-border: #D1D1D6;
-            --cal-work: #FFDDB3; 
-            --cal-off: #FFFFFF;  
-            --cal-ot: #FFB3C6;   
-            --cal-leave: #E5E5EA;
+            --cal-work-day: #E3F2FD;    /* 淺藍: 日班 */
+            --cal-work-night: #EDE7F6;  /* 淺紫: 夜班 */
+            --cal-work-normal: #F5F5F5; /* 淺灰: 常日 */
+            --cal-ot-company: #FCE4EC;  /* 粉紅: 帆加 */
+            --cal-ot-owner: #FFF3E0;    /* 淺橘: 業加 */
+            --cal-leave: #EAECEF;       /* 灰: 請假 */
+            --cal-off: #FFFFFF;         /* 純白: 休假 */
 
             --tag-red-bg: #FFEBEE;   --tag-red-txt: #D32F2F;
             --tag-org-bg: #FFF3E0;   --tag-org-txt: #E65100;
@@ -50,24 +54,19 @@
 
         .container { max-width: 1000px; margin: auto; position: relative; }
         
-        h1 { font-size: 22px; margin-bottom: 24px; color: var(--text-primary); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-weight: 700; letter-spacing: -0.5px;}
+        /* 💡 標題置中設計 */
+        .header-container { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 24px; }
+        .header-container h1 { font-size: 24px; font-weight: 700; color: var(--text-primary); margin: 0; letter-spacing: -0.5px;}
+        .header-badges { display: flex; gap: 8px; justify-content: center;}
 
-        .version-badge {
-            background-color: var(--premium-dark); color: white; font-size: 13px; 
-            padding: 5px 12px; border-radius: 20px; cursor: pointer; transition: 0.2s; font-weight: 600;
-        }
+        .version-badge { background-color: var(--premium-dark); color: white; font-size: 13px; padding: 5px 12px; border-radius: 20px; cursor: pointer; transition: 0.2s; font-weight: 600; }
+        .version-badge:hover { background-color: var(--premium-dark-hover); transform: scale(1.03); }
         .btn-link-top { font-size:13px; background: var(--input-bg); padding: 5px 12px; border-radius: 20px; color: var(--text-primary); text-decoration: none; cursor: pointer; border: none; font-weight: 600; transition: 0.2s; }
         .btn-link-top:hover { background: #E5E5EA; }
 
-        .ios-card, .file-manager {
-            background: var(--bg-card); border-radius: 20px; padding: 20px 24px; margin-bottom: 24px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0,0,0,0.02);
-        }
+        .ios-card, .file-manager { background: var(--bg-card); border-radius: 20px; padding: 20px 24px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0,0,0,0.02); }
 
-        .form-group { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 12px 0; border-bottom: 1px solid var(--divider); font-size: 15px;
-        }
+        .form-group { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--divider); font-size: 15px; }
         .form-group:last-child { border-bottom: none; }
         .form-group label { font-weight: 500; color: var(--text-primary); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; flex: 1; min-width: 120px;}
         .form-group input, .form-group select { flex: 0 0 auto; max-width: 160px; }
@@ -76,44 +75,24 @@
 
         .field-note { font-size: 12px; color: var(--text-muted); font-weight: normal; }
 
-        input[type="text"], input[type="number"], input[type="date"], select { 
-            background-color: var(--input-bg); border: 1px solid transparent; 
-            border-radius: 8px; padding: 8px 12px; font-size: 15px; 
-            color: var(--text-primary); outline: none; transition: 0.2s; text-align: right;
-            font-family: inherit; font-weight: 600; width: 100%; box-sizing: border-box;
-        }
+        input[type="text"], input[type="number"], input[type="date"], select { background-color: var(--input-bg); border: 1px solid transparent; border-radius: 8px; padding: 8px 12px; font-size: 15px; color: var(--text-primary); outline: none; transition: 0.2s; text-align: right; font-family: inherit; font-weight: 600; width: 100%; box-sizing: border-box; }
         input[type="text"], input[type="date"] { text-align: left; font-weight: 500; }
-        select { text-align: left; cursor: pointer; appearance: none; padding-right: 30px; 
-                 background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2214%22%20height%3D%2214%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238E8E93%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E");
-                 background-repeat: no-repeat; background-position: right 10px center; }
+        select { text-align: left; cursor: pointer; appearance: none; padding-right: 30px; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2214%22%20height%3D%2214%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238E8E93%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
         input:focus, select:focus { background-color: var(--bg-card); border-color: var(--premium-dark); box-shadow: 0 0 0 3px rgba(28, 28, 30, 0.1); }
 
         .remark { width: 100px !important; background: transparent !important; border: none !important; border-bottom: 1px solid var(--text-muted) !important; border-radius: 0 !important; color: var(--text-secondary) !important; text-align: left !important; font-weight: 500 !important; font-size: 14px !important; padding: 4px 2px !important;}
+        .remark:focus { background: transparent !important; box-shadow: none !important; border-bottom: 2px solid var(--premium-dark) !important;}
 
-        .segmented-control {
-            display: flex; background-color: var(--input-bg); border-radius: 12px; padding: 4px; width: 100%; box-sizing: border-box;
-        }
-        .segmented-control label {
-            flex: 1; display: flex; justify-content: center; align-items: center; 
-            padding: 10px 0; font-size: 14px; font-weight: 600;
-            color: var(--text-secondary); cursor: pointer; border-radius: 8px; transition: 0.2s; margin: 0;
-        }
+        .segmented-control { display: flex; background-color: var(--input-bg); border-radius: 12px; padding: 4px; width: 100%; box-sizing: border-box; }
+        .segmented-control label { flex: 1; display: flex; justify-content: center; align-items: center; padding: 10px 0; font-size: 14px; font-weight: 600; color: var(--text-secondary); cursor: pointer; border-radius: 8px; transition: 0.2s; margin: 0; }
         .segmented-control input { display: none; }
-        .segmented-control input:checked + label {
-            background-color: var(--bg-card); color: var(--text-primary); 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 1px 1px rgba(0,0,0,0.04);
-        }
+        .segmented-control input:checked + label { background-color: var(--bg-card); color: var(--text-primary); box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 1px 1px rgba(0,0,0,0.04); }
 
         .main-pane { display: none; animation: fadeIn 0.3s ease; }
         .main-pane.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        button.action-btn { 
-            background-color: var(--premium-dark); color: white; border: none; 
-            padding: 16px 20px; cursor: pointer; border-radius: 14px; 
-            font-size: 16px; font-weight: 600; transition: 0.1s;
-            width: 100%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
+        button.action-btn { background-color: var(--premium-dark); color: white; border: none; padding: 16px 20px; cursor: pointer; border-radius: 14px; font-size: 16px; font-weight: 600; transition: 0.1s; width: 100%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); }
         button.action-btn:active { transform: scale(0.98); }
         button.action-btn:hover { background-color: var(--premium-dark-hover); }
         
@@ -130,11 +109,7 @@
         .btn-export-sec { background-color: var(--input-bg); color: var(--text-primary); box-shadow: none; margin-top: 0;}
 
         details.ios-details { margin-bottom: 20px; }
-        details.ios-details summary { 
-            font-size: 16px; font-weight: 600; color: var(--text-primary); cursor: pointer; 
-            list-style: none; padding: 16px 20px; background: var(--bg-card); border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.02); user-select: none;
-        }
+        details.ios-details summary { font-size: 16px; font-weight: 600; color: var(--text-primary); cursor: pointer; list-style: none; padding: 16px 20px; background: var(--bg-card); border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.02); user-select: none; }
         details.ios-details summary::-webkit-details-marker { display: none; }
         details.ios-details[open] summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: 1px solid var(--divider); box-shadow: none;}
         .details-content { background: var(--bg-card); padding: 20px; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.02); border-top: none;}
@@ -144,22 +119,20 @@
 
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: stretch; }
 
+        /* 💡 月曆容器：極簡面具設計 */
         .calendar { display: grid; grid-template-columns: repeat(7, 1fr); border-radius: 8px; overflow: hidden; background: var(--cal-border); gap: 1px; margin-top: 15px; border: 1px solid var(--cal-border);}
         .cal-header { background: #F9F9FB; color: var(--text-secondary); text-align: center; padding: 10px 0; font-size: 14px; font-weight: 600; }
         
         .cal-cell { min-height: 80px; padding: 4px; display: flex; flex-direction: column; transition: 0.1s; cursor: pointer; position: relative;}
         .cal-cell:active { filter: brightness(0.9); }
-        .cal-cell.empty { background-color: var(--bg-body); cursor: default;}
+        .cal-cell.empty { background-color: transparent; cursor: default;}
+        .cal-cell.empty:active { filter: none; }
         
-        .date-num { font-size: 16px; font-weight: 700; color: var(--text-primary); text-align: left; padding: 2px 0 0 4px; }
+        .date-num { font-size: 16px; font-weight: 700; text-align: left; padding: 2px 0 0 4px; }
         .cal-status-text { font-size: 16px; font-weight: 700; text-align: center; margin: auto 0; letter-spacing: 1px;}
         .holiday-dot { position: absolute; top: 6px; right: 6px; width: 6px; height: 6px; border-radius: 50%; }
 
-        .bg-work { background-color: var(--cal-work); color: var(--text-primary); }
-        .bg-off { background-color: var(--cal-off); color: var(--text-secondary); }
-        .bg-ot { background-color: var(--cal-ot); color: var(--text-primary); }
-        .bg-leave { background-color: var(--cal-leave); color: var(--text-secondary); }
-
+        /* 薪資卡視覺洗白 */
         .salary-receipt-container { background: var(--bg-card); border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.05); }
         .wallet-card-light { padding: 30px 25px; text-align: center; background: #FFFFFF; border-bottom: 1px dashed var(--divider); }
         .wallet-title { font-size: 15px; color: var(--text-secondary); margin: 0 0 8px 0; font-weight: 600;}
@@ -175,6 +148,7 @@
 
         .modal-btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px 25px; background: #FAFAFC; border-top: 1px solid var(--divider);}
 
+        /* 💡 絕對防禦：強制左右對齊且不換行 */
         .rate-section-container { display: flex; flex-direction: column; gap: 15px; text-align: left;}
         .rate-group { background: var(--input-bg); padding: 15px; border-radius: 12px;}
         .rate-group h4 { margin: 0 0 10px 0; font-size: 13px; color: var(--text-secondary); border-bottom: 1px solid var(--divider); padding-bottom: 8px;}
@@ -183,11 +157,9 @@
         .rate-item-flex span { color: var(--text-primary); font-weight: 500; }
         .rate-item-flex strong { font-family: "SF Pro Display", sans-serif; color: var(--apple-blue); margin-left: 10px;}
 
-        .fab-feedback {
-            position: fixed; bottom: 25px; right: 25px; background-color: var(--premium-dark); color: white;
-            border: none; border-radius: 30px; padding: 14px 24px; font-size: 14px; font-weight: 600; letter-spacing: 0.5px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); cursor: pointer; z-index: 1000; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        /* 💡 意見回饋置中 */
+        .fab-feedback { position: fixed; bottom: 25px; right: 25px; background-color: var(--premium-dark); color: white; border: none; border-radius: 30px; padding: 14px 24px; font-size: 14px; font-weight: 600; letter-spacing: 0.5px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); cursor: pointer; z-index: 1000; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .fab-feedback:hover { transform: scale(1.05); }
         
         .feedback-modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1001; align-items:center; justify-content:center; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);}
         .feedback-modal { background:white; padding:25px; border-radius:20px; width:90%; max-width:450px; text-align:center; box-shadow:0 20px 40px rgba(0,0,0,0.2); position:relative; max-height: 85vh; overflow-y: auto;}
@@ -202,7 +174,7 @@
         .v-date { font-size: 12px; color: var(--text-muted); margin-left: 8px; }
         .v-desc { font-size: 13px; color: var(--text-secondary); margin-top: 6px; line-height: 1.6; }
 
-        .txt-red { color: var(--tag-red-txt); }
+        .txt-red { color: var(--apple-red); }
         .txt-green { color: var(--tag-grn-txt); }
         .txt-orange { color: var(--tag-org-txt); }
         .txt-blue { color: var(--apple-blue); }
@@ -249,13 +221,13 @@
 <body>
 <div class="container" id="app-container">
     
-    <h1>
-        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-            TCM班表與薪資試算工具
+    <div class="header-container">
+        <h1>TCM班表與薪資試算工具</h1>
+        <div class="header-badges">
             <button class="btn-link-top" onclick="openInfoModal()">說明</button>
             <span class="version-badge" onclick="openVersionHistory()">更新日誌</span>
         </div>
-    </h1>
+    </div>
 
     <div class="file-manager" id="ignore-in-export">
         <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; width: 100%;">
@@ -282,9 +254,8 @@
             <div style="display:flex; gap:8px; flex-wrap: wrap;">
                 <button class="btn-file" onclick="newRecord()">新建</button>
                 <button class="btn-file" onclick="document.getElementById('edcFileInput').click()">匯入</button>
-                <button class="btn-file" onclick="loadRecordLocal()">讀取</button>
-                <button class="btn-file" onclick="saveRecordLocal()">儲存</button>
-                <button class="btn-file primary" onclick="exportConfig()">另存新檔</button>
+                <button class="btn-file" onclick="saveCurrentFile()">儲存</button>
+                <button class="btn-file primary" onclick="exportConfig()">另存新檔/匯出</button>
             </div>
         </div>
     </div>
@@ -331,22 +302,20 @@
                                 </div>
                             </div>
 
-                            <details class="ios-details" id="custom-cycle-details" style="display: none; background: var(--input-bg); border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--divider); box-shadow:none;">
-                                <summary style="font-size: 14px; padding: 12px 16px; background: transparent; box-shadow: none;">自訂輪班週期設定</summary>
-                                <div class="details-content" style="padding: 12px 16px; background: transparent; box-shadow: none; border-top: 1px dashed var(--divider); border-radius: 0;">
-                                    <div class="form-group">
-                                        <label>輪班週期</label>
-                                        <div style="display:flex; align-items:center; gap:6px; font-weight:500;">
-                                            做 <input type="number" id="workDays" style="width: 40px; text-align:center;" value="2" onchange="generateCalendar()"> 天 / 
-                                            休 <input type="number" id="offDays" style="width: 40px; text-align:center;" value="2" onchange="generateCalendar()"> 天
-                                        </div>
-                                    </div>
-                                    <div class="form-group" style="border-bottom: none; padding-bottom: 0;">
-                                        <label>本月 1 號狀態</label>
-                                        <select id="cycleStartOffset" style="width: 130px; font-weight: bold; color: var(--text-primary);" onchange="generateCalendar()"></select>
+                            <div id="custom-cycle-details" style="display: none; background: var(--input-bg); border-radius: 12px; margin-bottom: 15px; padding: 12px 16px;">
+                                <div style="font-size: 14px; font-weight: 600; margin-bottom: 10px; color: var(--text-primary);">自訂輪班週期設定</div>
+                                <div class="form-group" style="padding: 8px 0;">
+                                    <label>輪班週期</label>
+                                    <div style="display:flex; align-items:center; gap:6px; font-weight:500;">
+                                        做 <input type="number" id="workDays" style="width: 40px; text-align:center;" value="2" onchange="syncTsmcOffset(); generateCalendar();"> 天 / 
+                                        休 <input type="number" id="offDays" style="width: 40px; text-align:center;" value="2" onchange="syncTsmcOffset(); generateCalendar();"> 天
                                     </div>
                                 </div>
-                            </details>
+                                <div class="form-group" style="border-bottom: none; padding: 8px 0 0 0;">
+                                    <label>本月 1 號狀態</label>
+                                    <select id="cycleStartOffset" style="width: 130px; font-weight: bold; color: var(--text-primary);" onchange="generateCalendar()"></select>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -406,7 +375,7 @@
         <div id="calendar-container"></div>
         
         <div class="grid-2 export-hide" style="margin-top:24px;">
-            <button class="action-btn btn-export-sec" id="btnSaveCal" onclick="saveRecordLocal()" style="display: none;">儲存</button>
+            <button class="action-btn btn-export-sec" id="btnSaveCal" onclick="saveCurrentFile()" style="display: none;">儲存目前進度</button>
             <button class="action-btn" id="btnGoToSalary" onclick="goToSalaryTab()" style="display: none;">前往薪資結算</button>
         </div>
     </div>
@@ -442,17 +411,18 @@
                             </label>
                             <input type="number" id="s_other_val2" value="0" style="background:#fff;">
                         </div>
-                        <div class="form-group" style="padding-top:15px;"><label class="txt-primary" style="font-weight:600;">KPI獎金(業主) <span class="field-note">(不計入全薪)</span></label><input type="number" id="s_kpi_bonus" value="0"></div>
+                        <div class="form-group" style="padding-top:15px;"><label style="font-weight:600; color:var(--text-primary);">KPI獎金(業主) <span class="field-note">(不計入全薪)</span></label><input type="number" id="s_kpi_bonus" value="0"></div>
                     </div>
 
                     <div class="salary-col">
                         <h4 style="display:flex; justify-content:space-between; align-items:center;">應扣項目 (減項) 
                             <div style="display:flex; gap:6px;">
+                                <button class="btn-auto" onclick="document.getElementById('fetchPrevDeductionsInput').click()">抓取上月</button>
                                 <button class="btn-auto primary" onclick="autoCalcDeductions()">自動估算</button>
                             </div>
                         </h4>
                         <div style="background: var(--input-bg); padding: 14px; border-radius: 12px; margin-bottom: 16px; font-size: 12px; color: var(--text-secondary); line-height: 1.5;">
-                            點擊「自動估算」系統將以當月全薪自動查表帶入勞健保級距與福利金。
+                            點擊「自動估算」系統將以當月全薪自動查表帶入。若需帶入上次手動修改的數值，可點擊「抓取上月」上傳上個月的 .edc 檔來讀取。
                         </div>
                         
                         <div class="form-group"><label>所得稅款</label><input type="number" id="d_tax" value="0"></div>
@@ -475,6 +445,7 @@
                 <details class="ios-details" open style="margin:0; box-shadow:none; border: 1px solid var(--divider); border-radius: 16px; background: var(--bg-card);">
                     <summary style="font-size: 15px; padding: 16px 20px; background: transparent; box-shadow: none; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--divider); border-radius: 0;">
                         <span style="color: var(--text-primary);">上月加班時數</span>
+                        <button class="btn-link" onclick="event.preventDefault(); document.getElementById('fetchPrevHoursInput').click()">點此載入上月.edc</button>
                     </summary>
                     <div class="details-content" style="padding: 0 20px 20px 20px; background: transparent; box-shadow: none;">
                         <div style="width: 100%; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-top: 15px;">【輪班津貼】 上月21號 ~ 月底 <br><span style="font-weight:normal; font-size:11px; color:var(--text-muted);">(計入本月薪資中領取)</span></div>
@@ -590,7 +561,7 @@
     <div id="pane-info" class="main-pane">
         
         <details class="ios-details">
-            <summary>💡 我今年特休有幾天？</summary>
+            <summary>我今年特休有幾天？</summary>
             <div class="details-content">
                 <p style="font-size: 13px; color: var(--text-secondary); margin-top:0;">系統會自動抓取您在上方填寫的到職日來進行精算。</p>
                 <div id="leaveResult" style="font-weight: 700; color: var(--text-primary); background: var(--input-bg); padding: 14px; border-radius: 12px; font-size: 14px; text-align: center; margin-bottom: 15px;">請先在最上方填寫到職日</div>
@@ -609,7 +580,7 @@
         </details>
 
         <details class="ios-details">
-            <summary>💡 想離職嗎？點我看離職預告期</summary>
+            <summary>想離職嗎？點我看離職預告期</summary>
             <div class="details-content">
                 <p style="font-size: 14px; font-weight: 600; color: var(--text-primary); margin-top: 0;">勞基法離職預告期對照表：</p>
                 <ul style="font-size: 13px; color: var(--text-secondary); padding-left: 20px; line-height: 1.8; margin-bottom: 0;">
@@ -704,8 +675,9 @@
 
 </div>
 
-<div id="toast-container"></div>
 <input type="file" id="edcFileInput" accept=".edc" style="display:none;" onchange="handleImportConfig(event)">
+<input type="file" id="fetchPrevHoursInput" accept=".edc" style="display:none;" onchange="handleFetchPrevData(event, 'hours')">
+<input type="file" id="fetchPrevDeductionsInput" accept=".edc" style="display:none;" onchange="handleFetchPrevData(event, 'deductions')">
 
 <div class="feedback-modal-overlay" id="cellEditorModal">
     <div class="feedback-modal" style="max-width: 320px; padding: 24px;">
@@ -840,19 +812,20 @@
         
         <div class="version-list">
             <div class="version-item">
-                <span class="v-num">V3.06</span><span class="v-date">2026-03-06</span>
+                <span class="v-num">V3.06</span><span class="v-date">2026-03-07</span>
                 <div class="v-desc">
-                    • <b>系統死機修復：</b>清除舊有歷史紀錄的殘留衝突變數，完全修復產生月曆與編輯按鈕失效的致命 Bug。<br>
-                    • <b>存檔系統進化：</b>移除容易出錯的歷史紀錄區塊，頂部全面整合為單純的「新建/讀取/儲存」與「匯入/匯出」機制。<br>
-                    • <b>排版絕對鎖死：</b>重新撰寫手機版費率試算之 CSS 語法，解決換行重疊異常。<br>
-                    • <b>視覺再淨化：</b>月曆圖示替換為單色質感 SVG；移除全域非必要之表情符號。
+                    • <b>致命 Bug 徹底修復：</b>清除舊有歷史紀錄下拉選單的殘留衝突函數，完全修復產生月曆與所有按鈕失效的問題。<br>
+                    • <b>存檔系統極簡化：</b>捨棄舊版混淆不清的存檔選單。頂部面板全面統合為直覺的「儲存本機」、「另存新檔」、「匯入與讀取」。<br>
+                    • <b>跨月載入升級：</b>「自動抓取上月」改為透過上傳您上個月的 .edc 檔案來無縫抓取結轉時數與代扣設定。<br>
+                    • <b>手機版絕對鎖死：</b>重新撰寫薪資費率試算之 CSS 語法 (<code>white-space: nowrap</code>)，徹底解決小螢幕手機版文字換行重疊的異常。<br>
+                    • <b>視覺與排版校正：</b>月曆圖示替換為單色質感 SVG；修復自訂輪班面板隱藏問題；全域置中排版校正。
                 </div>
             </div>
 
             <div class="version-item">
                 <span class="v-num">V3.01 ~ V3.05</span><span class="v-date">2026-03-06</span>
                 <div class="v-desc">
-                    • 月曆完全面具化：徹底拔除舊有下拉選單干擾，改為點擊色塊才顯示編輯彈窗。優化各種假別與班別的極簡文字顯示。<br>
+                    • 月曆完全面具化：徹底拔除格子內佔空間的選單，改為點擊色塊才顯示編輯彈窗。優化各種假別與班別的極簡文字與高辨識度色彩。<br>
                     • 視覺體驗重構：淘汰高飽和度色彩與預設藍色按鈕，升級為 Premium Dark 現代科技感設計。<br>
                     • 數位薪資卡與懸浮視窗：實領薪資與明細合併；將費率試算與下月結轉收納為 Modal，精簡頁面。<br>
                     • 去表單化設計：採用微底色無邊框輸入元件，提升資料閱讀性。
@@ -996,7 +969,7 @@
             <div class="version-item">
                 <span class="v-num">V2.02</span><span class="v-date">2026-02-25</span>
                 <div class="v-desc">
-                    • 移除手提投保基準改為自動查表，區分免出勤與國定假日費率。
+                    • 移除手動投保基準改為自動查表，區分免出勤與國定假日費率。
                 </div>
             </div>
 
@@ -1122,8 +1095,9 @@
     </div>
 </div>
 
+<div id="toast-container"></div>
+
 <script>
-    // --- 核心變數與初始化 ---
     let cellData = {}; 
     let currentEditDay = null;
     let lastShiftType = 'night';
@@ -1274,7 +1248,6 @@
         document.getElementById('btnExportCal').style.display = 'none';
         document.getElementById('btnSaveCal').style.display = 'none';
         document.getElementById('btnGoToSalary').style.display = 'none';
-        pickerSelectedDates = [];
         cellData = {};
     }
 
@@ -1330,14 +1303,6 @@
         updateMonthLabels(); 
         syncTsmcOffset(); 
         clearHolidaysAndCalendar();
-    }
-
-    function manualPullCarryOver() {
-        showToast("本功能於獨立存檔模式下，需透過匯入 .edc 檔案實現跨月參數帶入。");
-    }
-
-    function fetchPrevMonthDeductions() {
-        showToast("本功能於獨立存檔模式下，需透過匯入 .edc 檔案實現跨月參數帶入。");
     }
 
     function calculateAnnualLeave() {
@@ -1468,6 +1433,8 @@
         };
     }
 
+    let currentFileName = null;
+
     function saveRecordLocal() {
         const data = getFullDataObj();
         localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(data));
@@ -1476,12 +1443,12 @@
         lastShiftType = getShiftValue();
         lastScheduleMode = modeInput ? modeInput.value : 'Custom';
 
-        showToast(`目前進度已儲存至瀏覽器本機。`);
+        showToast(`目前進度已暫存至瀏覽器本機。`);
     }
 
     function loadRecordLocal() {
         const dataStr = localStorage.getItem(AUTOSAVE_KEY);
-        if(!dataStr) return showToast("找不到本機儲存的紀錄。");
+        if(!dataStr) return showToast("找不到本機暫存的紀錄。");
         try {
             const data = JSON.parse(dataStr);
             applyDataToDOM(data);
@@ -1491,26 +1458,32 @@
         }
     }
 
-    function exportConfig() {
-        const userName = document.getElementById('userName').value.trim() || '未命名';
-        const year = document.getElementById('year').value;
-        const month = document.getElementById('month').value;
-        
+    function triggerDownload(filename) {
         const data = getFullDataObj();
         const dataStr = JSON.stringify(data);
         const blob = new Blob([dataStr], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `${userName}-${year}${month.padStart(2, '0')}.edc`;
+        link.download = filename;
         link.click();
         URL.revokeObjectURL(url);
-        showToast(`設定檔已下載：${link.download}`);
+        showToast(`檔案已下載：${filename}`);
+    }
+
+    function exportConfig() {
+        let userName = document.getElementById('userName').value.trim() || '未命名';
+        let year = document.getElementById('year').value;
+        let month = document.getElementById('month').value;
+        let newName = `${userName}-${year}${month.padStart(2, '0')}.edc`;
+        triggerDownload(newName);
+        currentFileName = newName;
     }
 
     function handleImportConfig(event) {
         const file = event.target.files[0];
         if (!file) return;
+        currentFileName = file.name;
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
@@ -1521,6 +1494,34 @@
                 showToast("檔案格式錯誤，載入失敗。");
             }
             event.target.value = ""; 
+        };
+        reader.readAsText(file);
+    }
+
+    function handleFetchPrevData(event, mode) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (mode === 'hours') {
+                    document.getElementById('prevMonthShiftDay').value = data.carryOverShiftDay || 0;
+                    document.getElementById('prevMonthShiftNight').value = data.carryOverShiftNight || 0;
+                    document.getElementById('prevMonthOtRest').value = data.carryOverOtRest || 0;
+                    document.getElementById('prevMonthOtExempt').value = data.carryOverOtExempt || 0;
+                    document.getElementById('prevMonthOtNational').value = data.carryOverOtNational || 0;
+                    document.getElementById('prevMonthOtPayHours').value = data.curr_ot_company_pay_hours || 0;
+                    showToast("已成功載入上月結轉時數！");
+                } else if (mode === 'deductions') {
+                    const fields = ['d_tax', 'd_labor', 'd_health', 'd_supp', 'd_welfare', 'd_dorm', 'd_pension', 'd_other_val', 'd_subtotal_val'];
+                    fields.forEach(f => { if(data[f] !== undefined) document.getElementById(f).value = data[f]; });
+                    showToast("已成功載入上月代扣項目！");
+                }
+            } catch(err) {
+                showToast("檔案格式錯誤，無法載入。");
+            }
+            event.target.value = "";
         };
         reader.readAsText(file);
     }
@@ -1584,6 +1585,7 @@
             }
             if(Object.keys(cellData).length > 0) {
                 renderCalendarUI();
+                document.getElementById('ignore-grid-layout').open = false;
                 document.getElementById('btnCalc').style.display = 'block';
                 document.getElementById('ignore-var-hours').style.display = 'grid'; 
                 document.getElementById('ignore-salary-grid').style.display = 'block'; 
@@ -1690,94 +1692,14 @@
         return map;
     }
 
-    function renderCalendarUI() {
-        const year = parseInt(document.getElementById('year').value);
-        const month = parseInt(document.getElementById('month').value);
-        
-        const statutoryHolidays = parseDateString(document.getElementById('statutoryHolidays').value);
-        const restHolidays = parseDateString(document.getElementById('restDays').value);
-        const nationalHolidays = parseDateString(document.getElementById('nationalHolidays').value);
-        const internalHolidays = taiwanHolidays[year]?.[month] || {};
-        const userExemptMap = parseHolidayMap(document.getElementById('exemptDays').value);
-
-        const daysInMonth = new Date(year, month, 0).getDate();
-        const firstDayOfWeek = new Date(year, month - 1, 1).getDay(); 
-
-        let html = '<div class="calendar">';
-        const days = ['日', '一', '二', '三', '四', '五', '六'];
-        
-        days.forEach((d, idx) => {
-            let colorStyle = (idx === 0 || idx === 6) ? 'color: var(--apple-red);' : '';
-            html += `<div class="cal-header" style="${colorStyle}">${d}</div>`;
-        });
-        
-        for (let i = 0; i < firstDayOfWeek; i++) html += `<div class="cal-cell empty"></div>`;
-
-        for (let day = 1; day <= daysInMonth; day++) {
-            let isStatutory = statutoryHolidays.includes(day);
-            let isRest = restHolidays.includes(day);
-            let isNational = nationalHolidays.includes(day);
-            let isInternalHoliday = !!internalHolidays[day]; 
-            let isUserExempt = userExemptMap.hasOwnProperty(day);
-            
-            let data = cellData[day] || { shift: 'off', action: '' };
-            let sVal = data.shift;
-            let aVal = data.action;
-
-            let bgClass = "bg-off";
-            let mainText = "休假";
-            
-            if (sVal !== 'off') {
-                if (aVal.includes('[')) {
-                    bgClass = "bg-leave";
-                    let match = aVal.match(/\]\s*(.+)/);
-                    mainText = match ? match[1].replace('假', '') : aVal; 
-                } else if (aVal.includes('帆宣') || aVal.includes('業加') || aVal.includes('國定假日出勤')) {
-                    bgClass = "bg-ot";
-                    if (aVal.includes('帆宣')) mainText = "帆加";
-                    else if (aVal.includes('業加')) mainText = "業加";
-                    else mainText = "國定出勤";
-                } else {
-                    bgClass = "bg-work";
-                    if (sVal === 'day') mainText = "日班";
-                    else if (sVal === 'night') mainText = "夜班";
-                    else if (sVal === 'normal') mainText = "常日";
-                }
-            } else {
-                if (aVal.includes('帆宣') || aVal.includes('業加') || aVal.includes('國定假日出勤')) {
-                    bgClass = "bg-ot";
-                    if (aVal.includes('帆宣')) mainText = "帆加";
-                    else if (aVal.includes('業加')) mainText = "業加";
-                    else mainText = "國定出勤";
-                } else if (aVal.includes('[')) {
-                    bgClass = "bg-off";
-                    mainText = "休假";
-                }
-            }
-
-            let badgeHtml = '';
-            if (isNational) badgeHtml = `<div class="holiday-dot tag-pur"></div>`;
-            else if (isStatutory) badgeHtml = `<div class="holiday-dot tag-red"></div>`;
-            else if (isRest) badgeHtml = `<div class="holiday-dot tag-org"></div>`;
-            else if (isUserExempt) badgeHtml = `<div class="holiday-dot tag-grn"></div>`;
-            else if (isInternalHoliday) badgeHtml = `<div class="holiday-dot tag-red"></div>`;
-
-            html += `<div class="cal-cell ${bgClass}" onclick="openCellModal(${day})">
-                        <div class="date-num">${day}</div>
-                        ${badgeHtml}
-                        <div class="cal-status-text">${mainText}</div>
-                     </div>`;
-        }
-        html += '</div>';
-        document.getElementById('calendar-container').innerHTML = html;
-    }
-
     function generateCalendar() {
         try {
+            cellData = {}; 
+            
             const year = parseInt(document.getElementById('year').value);
             const month = parseInt(document.getElementById('month').value);
             const shiftType = getShiftValue(); 
-            const scheduleMode = document.querySelector('input[name="scheduleMode"]:checked') ? document.querySelector('input[name="scheduleMode"]:checked').value : 'Custom';
+            const scheduleMode = document.querySelector('input[name="scheduleMode"]:checked')?.value || 'Custom';
             
             const statutoryHolidays = parseDateString(document.getElementById('statutoryHolidays').value);
             const restHolidays = parseDateString(document.getElementById('restDays').value);
@@ -1797,7 +1719,7 @@
                     for(let i=0; i<w; i++) sequence.push('work');
                     for(let i=0; i<o; i++) sequence.push('off');
                     const offsetVal = document.getElementById('cycleStartOffset').value; 
-                    if(offsetVal && offsetVal.startsWith('W')) startOffset = parseInt(offsetVal.substring(1));
+                    if(offsetVal?.startsWith('W')) startOffset = parseInt(offsetVal.substring(1));
                     else if(offsetVal) startOffset = w + parseInt(offsetVal.substring(1));
                 }
             } else {
@@ -1811,8 +1733,6 @@
                 if (mod < 0) mod += 4;
                 startOffset = mod;
             }
-
-            cellData = {}; 
 
             for (let day = 1; day <= daysInMonth; day++) {
                 let dayOfWeek = (firstDayOfWeek + day - 1) % 7;
@@ -1847,7 +1767,7 @@
 
             renderCalendarUI();
 
-            document.getElementById('ignore-grid-layout').removeAttribute('open');
+            document.getElementById('ignore-grid-layout').open = false;
             document.getElementById('btnCalc').style.display = 'block';
             document.getElementById('ignore-var-hours').style.display = 'grid'; 
             document.getElementById('ignore-salary-grid').style.display = 'block'; 
@@ -1859,10 +1779,109 @@
             const modeInput = document.querySelector('input[name="scheduleMode"]:checked');
             lastShiftType = getShiftValue();
             lastScheduleMode = modeInput ? modeInput.value : 'Custom';
-            showToast("月曆已重新產生。");
+            
+            showToast("月曆班表已產生！");
         } catch (e) {
             console.error("Calendar generation error:", e);
+            showToast("產生失敗，請檢查輸入數據。");
         }
+    }
+
+    function renderCalendarUI() {
+        const year = parseInt(document.getElementById('year').value);
+        const month = parseInt(document.getElementById('month').value);
+        
+        const statutoryHolidays = parseDateString(document.getElementById('statutoryHolidays').value);
+        const restHolidays = parseDateString(document.getElementById('restDays').value);
+        const nationalHolidays = parseDateString(document.getElementById('nationalHolidays').value);
+        const internalHolidays = taiwanHolidays[year]?.[month] || {};
+        const userExemptMap = parseHolidayMap(document.getElementById('exemptDays').value);
+
+        const daysInMonth = new Date(year, month, 0).getDate();
+        const firstDayOfWeek = new Date(year, month - 1, 1).getDay(); 
+
+        let html = '<div class="calendar">';
+        const days = ['日', '一', '二', '三', '四', '五', '六'];
+        
+        days.forEach((d, idx) => {
+            let colorStyle = (idx === 0 || idx === 6) ? 'color: var(--apple-red);' : '';
+            html += `<div class="cal-header" style="${colorStyle}">${d}</div>`;
+        });
+        
+        for (let i = 0; i < firstDayOfWeek; i++) html += `<div class="cal-cell empty"></div>`;
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            let dayOfWeek = (firstDayOfWeek + day - 1) % 7;
+            let isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+            let isStatutory = statutoryHolidays.includes(day);
+            let isRest = restHolidays.includes(day);
+            let isNational = nationalHolidays.includes(day);
+            let isInternalHoliday = !!internalHolidays[day]; 
+            let isUserExempt = userExemptMap.hasOwnProperty(day);
+            
+            let data = cellData[day] || { shift: 'off', action: '' };
+            let sVal = data.shift;
+            let aVal = data.action;
+
+            let bgClass = "";
+            let inlineBg = "";
+            let mainText = "休假";
+            let textStyle = "color: #C7C7CC; font-weight: 500;"; // 淡化休假字體
+
+            if (sVal !== 'off') {
+                if (aVal.includes('[')) { // 請假
+                    inlineBg = "background-color: var(--cal-leave);";
+                    let match = aVal.match(/\]\s*(.+)/);
+                    mainText = match ? match[1].replace('假', '') : aVal;
+                    textStyle = "color: var(--text-secondary);";
+                } else if (aVal.includes('帆宣') || aVal.includes('國定假日出勤')) {
+                    inlineBg = "background-color: var(--cal-ot-company);";
+                    mainText = aVal.includes('帆宣') ? "帆加" : "國定出勤";
+                    textStyle = "color: var(--text-primary);";
+                } else if (aVal.includes('業加')) {
+                    inlineBg = "background-color: var(--cal-ot-owner);";
+                    mainText = "業加";
+                    textStyle = "color: var(--text-primary);";
+                } else {
+                    if (sVal === 'day') { inlineBg = "background-color: var(--cal-work-day);"; mainText = "日班"; }
+                    else if (sVal === 'night') { inlineBg = "background-color: var(--cal-work-night);"; mainText = "夜班"; }
+                    else if (sVal === 'normal') { inlineBg = "background-color: var(--cal-work-normal);"; mainText = "常日"; }
+                    textStyle = "color: var(--text-primary);";
+                }
+            } else {
+                if (aVal.includes('帆宣') || aVal.includes('國定假日出勤')) {
+                    inlineBg = "background-color: var(--cal-ot-company);";
+                    mainText = aVal.includes('帆宣') ? "帆加" : "國定出勤";
+                    textStyle = "color: var(--text-primary);";
+                } else if (aVal.includes('業加')) {
+                    inlineBg = "background-color: var(--cal-ot-owner);";
+                    mainText = "業加";
+                    textStyle = "color: var(--text-primary);";
+                } else if (aVal.includes('[')) { 
+                    inlineBg = "background-color: var(--cal-off);";
+                    mainText = "休假";
+                } else {
+                    inlineBg = "background-color: var(--cal-off);";
+                }
+            }
+
+            let badgeHtml = '';
+            if (isNational) badgeHtml = `<div class="holiday-dot tag-pur"></div>`;
+            else if (isStatutory) badgeHtml = `<div class="holiday-dot tag-red"></div>`;
+            else if (isRest) badgeHtml = `<div class="holiday-dot tag-org"></div>`;
+            else if (isUserExempt) badgeHtml = `<div class="holiday-dot tag-grn"></div>`;
+            else if (isInternalHoliday) badgeHtml = `<div class="holiday-dot tag-red"></div>`;
+
+            let dateNumColor = (isWeekend || isStatutory || isRest || isUserExempt || isNational || isInternalHoliday) ? 'color: var(--apple-red);' : 'color: var(--text-primary);';
+
+            html += `<div class="cal-cell ${bgClass}" style="${inlineBg}" onclick="openCellModal(${day})">
+                        <div class="date-num" style="${dateNumColor}">${day}</div>
+                        ${badgeHtml}
+                        <div class="cal-status-text" style="${textStyle}">${mainText}</div>
+                     </div>`;
+        }
+        html += '</div>';
+        document.getElementById('calendar-container').innerHTML = html;
     }
 
     function calculateSalary() {
@@ -1936,12 +1955,7 @@
             let actionVal = cellData[day].action;
             let isCurrentCycle = (dayInt <= 20); 
             
-            let isStatutory = statutoryHolidays.includes(dayInt);
-            let isNational = nationalHolidays.includes(dayInt);
-            let isExempt = userExemptMap.hasOwnProperty(dayInt);
-
             let hoursPerDay = (shiftVal === 'normal') ? 8 : 10;
-            
             let isAttended = !actionVal.includes('[');
 
             if (actionVal.includes("[無薪]")) totalLeaveDeduction += (hourlyRate * hoursPerDay); 
@@ -1959,12 +1973,12 @@
                 }
             }
 
-            if (actionVal === "帆宣加班(換休)" || actionVal === "國定假日出勤(換休)") {
-                compLeaveAddHours += hoursPerDay;
-            } else if (actionVal === "帆宣加班(換錢)") { 
-                if (isNational) nextCarryOtNational++;
-                else if (isExempt) nextCarryOtExempt++;
-                else nextCarryOtRest++; 
+            if (actionVal.includes("換休")) {
+                if(actionVal.includes("帆宣") || actionVal.includes("國定")) compLeaveAddHours += hoursPerDay;
+            } 
+            
+            if (actionVal === "帆宣加班(換錢)") { 
+                nextCarryOtRest++; 
             } else if (actionVal === "業加整天(10hr)") { 
                 ownerOtPay += (679 * 10 * 0.9); 
             } else if (actionVal === "業加整天(8hr)") { 
