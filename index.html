@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TCM班表與薪資試算工具 v3.09</title>
+    <title>TCM班表與薪資試算工具 v3.10</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#F5F7FA">
@@ -53,6 +53,7 @@
 
         .container { max-width: 1000px; margin: auto; position: relative; }
         
+        /* 💡 標題完美置中 */
         .header-container { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 24px; text-align: center;}
         .header-container h1 { font-size: 24px; font-weight: 700; color: var(--text-primary); margin: 0; letter-spacing: -0.5px;}
         .header-badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;}
@@ -64,10 +65,10 @@
 
         .ios-card, .file-manager { background: var(--bg-card); border-radius: 20px; padding: 20px 24px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0,0,0,0.02); }
 
-        /* 💡 終極 RWD 網格：解決手機版與電腦版輸入框對齊與切字問題 */
-        .header-inputs { display: grid; grid-template-columns: auto 1fr auto 1fr auto 1fr; gap: 15px 10px; align-items: center; }
-        .header-inputs label { font-weight: 600; color: var(--text-secondary); font-size: 14px; text-align: right; white-space: nowrap;}
-        
+        /* 💡 手機端姓名年月排版修復 */
+        .header-inputs { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; }
+        .header-input-group { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+
         .form-group { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--divider); font-size: 15px; }
         .form-group:last-child { border-bottom: none; }
         .form-group label { font-weight: 500; color: var(--text-primary); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; flex: 1; min-width: 120px;}
@@ -77,13 +78,10 @@
 
         .field-note { font-size: 12px; color: var(--text-muted); font-weight: normal; }
 
+        /* 💡 恢復原生上下箭頭，加寬欄位 */
         input[type="text"], input[type="number"], input[type="date"], select { background-color: var(--input-bg); border: 1px solid transparent; border-radius: 8px; padding: 8px 12px; font-size: 15px; color: var(--text-primary); outline: none; transition: 0.2s; text-align: right; font-family: inherit; font-weight: 600; width: 100%; box-sizing: border-box; }
         input[type="text"], input[type="date"] { text-align: left; font-weight: 500; }
         
-        /* 💡 隱藏數字輸入框預設箭頭，解決切字問題 */
-        input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type="number"] { -moz-appearance: textfield; }
-
         select { text-align: left; cursor: pointer; appearance: none; padding-right: 30px; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2214%22%20height%3D%2214%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238E8E93%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
         input:focus, select:focus { background-color: var(--bg-card); border-color: var(--premium-dark); box-shadow: 0 0 0 3px rgba(28, 28, 30, 0.1); }
 
@@ -103,7 +101,7 @@
         button.action-btn:active { transform: scale(0.98); }
         button.action-btn:hover { background-color: var(--premium-dark-hover); }
         
-        .btn-file { background: var(--input-bg); color: var(--text-primary); border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center; white-space: nowrap; font-family: inherit;}
+        .btn-file { background: var(--input-bg); color: var(--text-primary); border: none; padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center; white-space: nowrap; font-family: inherit;}
         .btn-file:hover { background: #E0E0E5; }
         .btn-file.primary { background: var(--premium-dark); color: white; }
         .btn-file.primary:hover { background: var(--premium-dark-hover); }
@@ -113,12 +111,13 @@
         .btn-auto.primary { background: var(--premium-dark); color: white;}
         .btn-auto.primary:hover { background: var(--premium-dark-hover);}
         
-        .btn-icon { background: transparent; border: none; cursor: pointer; padding: 6px 8px; border-radius: 8px; color: var(--text-secondary); transition: 0.2s; display: flex; align-items: center; justify-content: center;}
-        .btn-icon:hover { background: var(--input-bg); color: var(--text-primary); }
+        .btn-icon { background: var(--input-bg); border: none; cursor: pointer; padding: 6px 12px; border-radius: 8px; color: var(--text-secondary); transition: 0.2s; display: flex; align-items: center; justify-content: center;}
+        .btn-icon:hover { background: #E0E0E5; color: var(--text-primary); }
         .btn-link { background: transparent; border: none; color: var(--apple-blue); cursor: pointer; font-size: 13px; font-weight: 600; text-decoration: underline; padding: 0;}
 
         details.ios-details { margin-bottom: 20px; }
-        details.ios-details summary { font-size: 16px; font-weight: 600; color: var(--text-primary); cursor: pointer; list-style: none; padding: 16px 20px; background: var(--bg-card); border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.02); user-select: none; }
+        details.ios-details summary { font-size: 16px; font-weight: 600; color: var(--text-primary); cursor: pointer; list-style: none; padding: 16px 20px; background: var(--bg-card); border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.02); user-select: none; transition: 0.2s;}
+        details.ios-details summary:hover { background: #FAFAFC; }
         details.ios-details summary::-webkit-details-marker { display: none; }
         details.ios-details[open] summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: 1px solid var(--divider); box-shadow: none;}
         .details-content { background: var(--bg-card); padding: 20px; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.02); border-top: none;}
@@ -134,7 +133,7 @@
         
         .cal-cell { min-height: 85px; padding: 6px; display: flex; flex-direction: column; transition: 0.1s; cursor: pointer; position: relative;}
         .cal-cell:active { filter: brightness(0.95); }
-        .cal-cell.empty { background-color: transparent; cursor: default;}
+        .cal-cell.empty { background-color: var(--bg-card); cursor: default;}
         .cal-cell.empty:active { filter: none; }
         
         .date-num { font-size: 16px; font-weight: 700; text-align: left; padding: 0 0 0 2px; }
@@ -148,17 +147,18 @@
         .wallet-card-light { padding: 30px 25px; text-align: center; background: #FFFFFF; border-bottom: 1px dashed var(--divider); }
         .wallet-title { font-size: 15px; color: var(--text-secondary); margin: 0 0 8px 0; font-weight: 600;}
         .wallet-amount { font-size: 52px; font-weight: 700; margin: 0; letter-spacing: -1px; font-family: "SF Pro Display", sans-serif; color: var(--apple-blue);}
-        
-        /* 💡 修正按鈕為純色圖示 */
         .wallet-sub { background: var(--input-bg); display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 13px; margin-top: 15px; font-weight: 600; color: var(--text-primary); cursor: pointer; transition: 0.2s;}
         .wallet-sub:hover { background: #E0E0E5;}
 
         .receipt-details { padding: 20px 25px; background: #FFFFFF; }
-        .summary-list { font-size: 15px; line-height: 1.6; }
-        .summary-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed var(--divider); }
+        
+        /* 💡 薪資明細排版絕對防禦：保證不換行不穿插 */
+        .summary-list { font-size: 15px; line-height: 1.6; width: 100%;}
+        .summary-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 0; border-bottom: 1px dashed var(--divider); gap: 15px;}
         .summary-row:last-child { border-bottom: none; }
-        .sum-label { color: var(--text-primary); font-weight: 500; white-space: nowrap;}
-        .sum-val { font-weight: 600; text-align: right; white-space: nowrap; font-family: "SF Pro Display", sans-serif;}
+        .sum-label { color: var(--text-primary); font-weight: 500; display: flex; flex-direction: column; flex: 1;}
+        .sum-detail { font-size: 12px; color: var(--text-muted); font-weight: 400; line-height: 1.4; margin-top: 4px; white-space: normal; word-break: break-word;}
+        .sum-val { font-weight: 600; text-align: right; white-space: nowrap; font-family: "SF Pro Display", sans-serif; flex-shrink: 0; margin-top: 2px;}
 
         .modal-btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px 25px; background: #FAFAFC; border-top: 1px solid var(--divider);}
 
@@ -167,15 +167,15 @@
         .rate-group h4 { margin: 0 0 10px 0; font-size: 13px; color: var(--text-secondary); border-bottom: 1px solid var(--divider); padding-bottom: 8px;}
         .rate-item-flex { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #D1D1D6; font-size: 14px;}
         .rate-item-flex:last-child { border-bottom: none; }
-        .rate-item-flex span { color: var(--text-primary); font-weight: 500; white-space: nowrap;}
+        .rate-item-flex span { color: var(--text-primary); font-weight: 500; white-space: nowrap; font-size: 13px;}
         .rate-item-flex strong { font-family: "SF Pro Display", sans-serif; color: var(--apple-blue); white-space: nowrap; margin-left: 8px; text-align: right;}
 
         .feedback-modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1001; align-items:center; justify-content:center; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);}
-        /* 💡 修正 Modal 文字對齊，確保內文靠左 */
+        /* 💡 Modal 強制靠左對齊，防禦置中災難 */
         .feedback-modal { background:white; padding:25px; border-radius:20px; width:90%; max-width:450px; text-align:left; box-shadow:0 20px 40px rgba(0,0,0,0.2); position:relative; max-height: 85vh; overflow-y: auto;}
         .btn-close { position:absolute; top:15px; right:20px; background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer; padding:0;}
         
-        .qa-list { list-style-type: none; padding-left: 0; margin: 0; }
+        .qa-list { list-style-type: none; padding-left: 0; margin: 0; text-align: left;}
         .qa-list li { margin-bottom: 15px; border-bottom: 1px dashed var(--divider); padding-bottom: 15px; }
         .qa-list li:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
         .qa-q { font-weight: 700; color: var(--text-primary); margin-bottom: 6px; display: block; line-height: 1.5;}
@@ -188,6 +188,15 @@
         .picker-cell.taken { border-color: transparent; cursor: not-allowed; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px 0;}
         .picker-cell.taken span.day-num { font-size: 13px; font-weight: 700; text-decoration: line-through; opacity: 0.5;}
         .picker-cell.taken span.tag { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-top: 2px;}
+        
+        .taken.statutory, .tag-red { background-color: var(--tag-red-bg); color: var(--tag-red-txt) !important;}
+        .taken.statutory span.tag { background-color: var(--tag-red-txt); color: #FFFFFF; }
+        .taken.rest, .tag-org { background-color: var(--tag-org-bg); color: var(--tag-org-txt) !important;}
+        .taken.rest span.tag { background-color: var(--tag-org-txt); color: #FFFFFF; }
+        .taken.exempt, .tag-grn { background-color: var(--tag-grn-bg); color: var(--tag-grn-txt) !important;}
+        .taken.exempt span.tag { background-color: var(--tag-grn-txt); color: #FFFFFF; }
+        .taken.national, .tag-pur { background-color: var(--tag-pur-bg); color: var(--tag-pur-txt) !important;}
+        .taken.national span.tag { background-color: var(--tag-pur-txt); color: #FFFFFF; }
 
         #toast-container { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; width: 90%; max-width: 350px; align-items: center; }
         .toast { background-color: rgba(28, 28, 30, 0.95); color: white; padding: 12px 20px; border-radius: 12px; font-size: 14px; font-weight: 500; box-shadow: 0 8px 20px rgba(0,0,0,0.2); animation: fadeUp 0.3s ease, fadeOut 0.3s ease 3.7s forwards; text-align: center; }
@@ -197,10 +206,7 @@
         @media (max-width: 768px) {
             body { padding: 10px; padding-bottom: 80px; }
             .salary-grid { grid-template-columns: 1fr; gap: 20px; }
-            
-            /* 💡 手機版自動斷行的 Grid */
-            .header-inputs { grid-template-columns: auto 1fr; gap: 12px; }
-            .header-inputs label { text-align: left; }
+            .grid-2 { grid-template-columns: 1fr; }
             
             .desktop-only { display: none !important; }
             .mobile-only { display: block !important; }
@@ -232,20 +238,22 @@
 
     <div class="file-manager" id="ignore-in-export">
         <div class="header-inputs">
-            <label>姓名：</label>
-            <input type="text" id="userName" placeholder="請輸入姓名">
-            
-            <label>年月：</label>
-            <div style="display:flex; align-items:center; gap:6px;">
-                <input type="number" id="year" value="2026" style="width: 70px; text-align:center;" onchange="updateHolidays()">
-                <span style="color:var(--text-muted); font-weight:bold;">/</span>
-                <input type="number" id="month" value="3" min="1" max="12" style="width: 50px; text-align:center;" onchange="updateHolidays()">
+            <div class="header-input-group">
+                <label>姓名：</label>
+                <input type="text" id="userName" placeholder="請輸入姓名" style="width: 100px;">
             </div>
-            
-            <label>到職日：</label>
-            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                <input type="date" id="hireDate" onchange="calculateAnnualLeave()">
-                <span id="seniority-text" style="font-size:13px; color:var(--apple-blue); font-weight:bold;"></span>
+            <div class="header-input-group">
+                <label style="margin-left: 5px;">年月：</label>
+                <div style="display:flex; align-items:center; gap:4px;">
+                    <input type="number" id="year" value="2026" style="width: 80px; text-align:center;" onchange="updateHolidays()">
+                    <span style="color:var(--text-muted); font-weight:bold;">/</span>
+                    <input type="number" id="month" value="3" min="1" max="12" style="width: 60px; text-align:center;" onchange="updateHolidays()">
+                </div>
+            </div>
+            <div class="header-input-group">
+                <label style="margin-left: 5px;">到職日：</label>
+                <input type="date" id="hireDate" onchange="calculateAnnualLeave()" style="font-size:13px; width: 140px;">
+                <span id="seniority-text" style="font-size:13px; color:var(--apple-blue); font-weight:bold; margin-left:4px;"></span>
             </div>
         </div>
         
@@ -256,7 +264,7 @@
             <div style="display:flex; gap:8px; flex-wrap: wrap;">
                 <button class="btn-file" onclick="document.getElementById('edcFileInput').click()">匯入</button>
                 <button class="btn-file" onclick="handleSaveClick()">儲存</button>
-                <button class="btn-file primary" onclick="exportConfig()">另存新檔 / 匯出</button>
+                <button class="btn-file primary" onclick="exportConfig()">另存新檔</button>
             </div>
         </div>
     </div>
@@ -275,7 +283,7 @@
     <div id="pane-cal" class="main-pane active">
         <details class="ios-details export-hide" id="ignore-grid-layout" open>
             <summary>班表的設定</summary>
-            <div class="details-content grid-layout" style="margin-bottom: 0;">
+            <div class="details-content grid-layout">
                 <div class="grid-2">
                     <div>
                         <div class="form-group col-layout" style="padding-top:0; padding-bottom:15px; border-bottom: 1px dashed var(--divider);">
@@ -308,8 +316,8 @@
                                 <div class="form-group" style="padding: 0 0 10px 0;">
                                     <label>輪班週期</label>
                                     <div style="display:flex; align-items:center; gap:6px; font-weight:500;">
-                                        做 <input type="number" id="workDays" style="width: 45px; text-align:center;" value="2" onchange="syncTsmcOffset(); generateCalendar();"> 天 / 
-                                        休 <input type="number" id="offDays" style="width: 45px; text-align:center;" value="2" onchange="syncTsmcOffset(); generateCalendar();"> 天
+                                        做 <input type="number" id="workDays" style="width: 50px; text-align:center;" value="2" onchange="syncTsmcOffset(); generateCalendar();"> 天 / 
+                                        休 <input type="number" id="offDays" style="width: 50px; text-align:center;" value="2" onchange="syncTsmcOffset(); generateCalendar();"> 天
                                     </div>
                                 </div>
                                 <div class="form-group" style="border-bottom: none; padding: 0;">
@@ -380,7 +388,7 @@
         <div style="font-size: 12px; color: var(--text-muted); text-align: center; margin-top:10px;">點擊格子即可單獨修改該日班別狀態</div>
         
         <div class="grid-2 export-hide" style="margin-top:24px;">
-            <button class="action-btn" style="background-color: var(--input-bg); color: var(--text-primary); box-shadow:none;" onclick="handleSaveClick()">儲存進度</button>
+            <button class="action-btn" style="background-color: var(--input-bg); color: var(--text-primary); box-shadow:none;" onclick="handleSaveClick()">儲存目前進度</button>
             <button class="action-btn" id="btnGoToSalary" onclick="goToSalaryTab()" style="display: none;">前往薪資結算</button>
         </div>
     </div>
@@ -565,7 +573,7 @@
         </div>
     </div>
 
-    <div id="pane-info" class="main-pane" style="text-align: left;">
+    <div id="pane-info" class="main-pane">
         <details class="ios-details">
             <summary>我今年特休有幾天？</summary>
             <div class="details-content">
@@ -817,7 +825,7 @@
     <div class="feedback-modal" style="max-width: 450px; padding: 30px;">
         <button class="btn-close" onclick="document.getElementById('nextMonthModal').style.display='none'">×</button>
         <h3 style="color: var(--text-primary); margin-top:0; margin-bottom: 10px;">計入下月薪資明細</h3>
-        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-top:0; margin-bottom: 20px;">
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-top:0; margin-bottom: 20px; text-align:left;">
             帆宣加班計算週期為整月 (1號~月底)，全數計入下月薪資中。<br>
             輪班津貼為本月 21 號至月底之出勤，將遞延至下月薪資中發放。
         </p>
@@ -858,7 +866,7 @@
     <div class="feedback-modal" style="max-width: 400px; padding: 30px;">
         <button class="btn-close" onclick="document.getElementById('ownerOtModal').style.display='none'">×</button>
         <h3 style="color: var(--text-primary); margin-top:0; margin-bottom: 15px;">業主發放款項明細</h3>
-        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-top:0; margin-bottom: 20px;">
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-top:0; margin-bottom: 20px; text-align:left;">
             本款項由業主另外發放，預計於 2 個月後匯入。<br>
             業主整天加班費基準為 $679 (扣10%行政費)；延時加班費基準為 $509 (扣10%行政費)。
         </p>
@@ -883,15 +891,6 @@
     </div>
 </div>
 
-<div class="feedback-modal-overlay" id="holidayPickerModal">
-    <div class="feedback-modal" style="max-width: 340px; padding: 24px;">
-        <button class="btn-close" onclick="closeHolidayPicker()">×</button>
-        <h3 id="picker-title" style="color: var(--text-primary); margin-top:0; font-size: 18px; text-align:center;">挑選日期</h3>
-        <div id="picker-content"></div>
-        <button class="action-btn" style="margin-top: 24px;" onclick="saveHolidayPicker()">確認</button>
-    </div>
-</div>
-
 <div class="feedback-modal-overlay" id="infoModal">
     <div class="feedback-modal">
         <button class="btn-close" onclick="closeInfoModal()">×</button>
@@ -902,7 +901,7 @@
             <strong>隱私與本機儲存聲明</strong><br>
             本工具為純靜態網頁，您輸入的所有參數與資料皆加密儲存於您當下設備的瀏覽器中，絕不會上傳至任何雲端伺服器。<br><br>
             <span style="color: var(--apple-red); font-weight: bold;">公用電腦注意事項</span><br>
-            請務必在最上方點擊「匯出/另存新檔」，將您的設定檔 (.edc) 備份，以防被下一位使用者覆蓋。
+            請務必在最上方點擊「另存新檔」，將您的設定檔 (.edc) 備份，以防被下一位使用者覆蓋。
         </p>
     </div>
 </div>
@@ -915,22 +914,22 @@
         
         <div class="version-list">
             <div class="version-item">
-                <span class="v-num">V3.09 (最終定案版)</span><span class="v-date">2026-03-07</span>
+                <span class="v-num">V3.10 (實務定案版)</span><span class="v-date">2026-03-07</span>
                 <div class="v-desc">
                     • <b>防呆連動引擎：</b>常日班顯示 1.34倍與 1.67倍雙欄位；切換至輪班時，依法規上限自動隱藏 1.67倍欄位並清零，防止算錯。<br>
                     • <b>頂級月曆排版：</b>紅字節日名稱強勢回歸（電腦全名、手機兩字）；補齊前後月份淡色日期網格；月曆標題自動連動。<br>
-                    • <b>全站死機修復：</b>徹底拔除殘留導致報錯的舊歷史清單語法，自訂輪班與所有按鈕全數恢復運作。<br>
-                    • <b>極簡檔案流：</b>頂部只保留 [匯入]、[儲存]、[另存新檔]，不再有模糊的背景暫存。<br>
-                    • <b>UI/UX 校正：</b>業主加班費正名為「扣10%行政費」並改為展開 Modal；手機端排版套用防穿插；全域圖示單色化。
+                    • <b>全站死機修復：</b>徹底拔除舊歷史清單語法，自訂輪班與所有按鈕全數恢復運作。<br>
+                    • <b>極簡檔案流：</b>頂部只保留 [匯入]、[儲存]、[另存新檔]。<br>
+                    • <b>UI/UX 校正：</b>業主加班費正名為「扣10%行政費」；手機端排版套用防穿插；全域圖示單色化；修復年月切字問題。
                 </div>
             </div>
             <div class="version-item">
-                <span class="v-num">V3.01 ~ V3.08</span><span class="v-date">2026-03-06</span>
+                <span class="v-num">V3.01 ~ V3.09</span><span class="v-date">2026-03-06</span>
                 <div class="v-desc">
                     • 月曆面具化：移除格子內下拉選單，改為點擊色塊編輯。優化假別與班別極簡文字。<br>
                     • 視覺重構：淘汰高飽和度色彩與藍色按鈕，升級為 Premium Dark 現代科技感。<br>
                     • 數位薪資卡與懸浮視窗：實領薪資與明細合併；費率試算與下月結轉收納為 Modal。<br>
-                    • 去表單化設計：採用微底色無邊框輸入元件，提升資料閱讀性。
+                    • 跨月載入升級：改為上傳 .edc 檔案無縫抓取結轉時數與代扣設定。
                 </div>
             </div>
             <div class="version-item">
@@ -939,7 +938,7 @@
                     • 新增切換班別防呆機制；修正名詞為「法規假別設定」。
                 </div>
             </div>
-            <div class="version-item">
+            <div class="versionitem">
                 <span class="v-num">V1.00 ~ V2.18</span><span class="v-date">2026-02-24 ~ 03-04</span>
                 <div class="v-desc">
                     • 建立基礎排班結構、實裝 18.04 倍加班費模型、導入 .edc 參數檔匯出功能。
@@ -954,7 +953,7 @@
     let currentEditDay = null;
     let lastShiftType = 'night';
     let lastScheduleMode = 'A';
-    let currentImportedFilename = null; // 紀錄匯入的檔名
+    let currentImportedFilename = null; 
 
     function showToast(msg) {
         const container = document.getElementById('toast-container');
@@ -999,6 +998,12 @@
         document.getElementById(paneId).style.display = 'block';
     }
 
+    function goToSalaryTab() {
+        document.getElementById('tab_sal').checked = true;
+        switchMainTab('pane-sal');
+        window.scrollTo(0,0);
+    }
+
     const taiwanHolidays = {
         2025: { 1: { 1: "元旦", 27: "除夕", 28: "除夕", 29: "初一", 30: "初二", 31: "初三" }, 2: { 28: "和平紀念日" }, 4: { 3: "兒童節", 4: "兒童節", 5: "清明節" }, 5: { 1: "勞動節", 31: "端午節" }, 10: { 6: "中秋節", 10: "國慶日" } },
         2026: { 1: { 1: "元旦" }, 2: { 16: "除夕", 17: "初一", 18: "初二", 19: "初三", 20: "初四", 28: "和平紀念日" }, 4: { 3: "兒童節", 4: "兒童節", 5: "清明節", 6: "清明節" }, 5: { 1: "勞動節" }, 6: { 19: "端午節" }, 9: { 25: "中秋節" }, 10: { 10: "國慶日" } },
@@ -1026,15 +1031,23 @@
         const today = new Date();
         document.getElementById('year').value = today.getFullYear();
         document.getElementById('month').value = today.getMonth() + 1;
+        updateMonthLabels();
         handleShiftChange();
     };
 
-    function updateHolidays() {
-        syncTsmcOffset(); 
-        clearHolidaysAndCalendar();
+    function updateMonthLabels() {
+        let m = parseInt(document.getElementById('month').value);
+        if (isNaN(m)) return;
+        let prevM = m - 1;
+        if (prevM === 0) prevM = 12;
     }
 
-    // 💡 防呆：切換班別自動隱藏 1.67倍欄位
+    function newRecord() {
+        if(confirm("確定要清空目前所有設定，建立新紀錄嗎？")) {
+            location.reload();
+        }
+    }
+
     function updateOTFieldsVisibility() {
         const shift = getShiftValue();
         const row167 = document.getElementById('row-ot-167');
@@ -1110,6 +1123,7 @@
         document.getElementById('summaryPanel').style.display = 'none';
         document.getElementById('btnCalc').style.display = 'none';
         document.getElementById('btnSaveCal').style.display = 'none';
+        document.getElementById('btnGoToSalary').style.display = 'none';
         pickerSelectedDates = [];
         cellData = {};
     }
@@ -1161,6 +1175,12 @@
             customDetails.style.display = 'none';
             syncTsmcOffset();
         }
+    }
+
+    function updateHolidays() {
+        updateMonthLabels(); 
+        syncTsmcOffset(); 
+        clearHolidaysAndCalendar();
     }
 
     function handleFetchPrevData(event, mode) {
@@ -1290,7 +1310,7 @@
     }
 
     function getFullDataObj() {
-        let userName = document.getElementById('userName').value.trim() || '未命名';
+        let userName = document.getElementById('userName').value.trim();
         const year = document.getElementById('year').value;
         const month = document.getElementById('month').value;
         const currentMode = document.querySelector('input[name="scheduleMode"]:checked') ? document.querySelector('input[name="scheduleMode"]:checked').value : 'Custom';
@@ -1331,7 +1351,6 @@
         };
     }
 
-    // 💡 乾淨的存檔邏輯
     function handleSaveClick() {
         if (!currentImportedFilename) {
             alert("請先點擊「另存新檔」建立 .edc 設定檔！\n日後只需點擊「匯入」開啟該檔，即可使用儲存功能覆寫。");
@@ -1463,6 +1482,7 @@
                 document.getElementById('ignore-var-hours').style.display = 'grid'; 
                 document.getElementById('ignore-salary-grid').style.display = 'block'; 
                 document.getElementById('btnSaveCal').style.display = 'flex'; 
+                document.getElementById('btnGoToSalary').style.display = 'flex'; 
             }
             document.getElementById('summaryPanel').style.display = 'none';
         } catch(e) { console.error(e); }
@@ -1775,6 +1795,8 @@
             document.getElementById('ignore-var-hours').style.display = 'grid'; 
             document.getElementById('ignore-salary-grid').style.display = 'block'; 
             document.getElementById('btnSaveCal').style.display = 'flex'; 
+            document.getElementById('btnGoToSalary').style.display = 'flex'; 
+            document.getElementById('summaryPanel').style.display = 'none';
             
             const modeInput = document.querySelector('input[name="scheduleMode"]:checked');
             lastShiftType = getShiftValue();
